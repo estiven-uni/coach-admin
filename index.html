@@ -200,6 +200,23 @@
                     </div>
                 </section>
 
+                <!-- Alerta de pendientes -->
+                <div id="alerta-pendientes" class="hidden bg-orange-50 border-2 border-orange-300 rounded-xl p-4 mb-6">
+                    <div class="flex items-start gap-3">
+                        <div class="text-3xl">⚠️</div>
+                        <div class="flex-1">
+                            <h4 class="text-sm font-bold text-orange-900 mb-1">Tienes <span id="alerta-pendientes-cantidad" class="text-lg">0</span> clase(s) pendiente(s)</h4>
+                            <p class="text-xs text-orange-700 mb-3">El periodo actual está por terminar o ya terminó. Extiende el periodo para agregar más días y completar las clases pendientes.</p>
+                            <button 
+                                onclick="abrirModalEditarPeriodo()"
+                                class="px-4 py-2 text-sm font-medium text-white bg-orange-600 rounded-lg hover:bg-orange-700"
+                            >
+                                📅 Extender periodo para completar pendientes
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- Calendario -->
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                     <div class="flex items-center justify-between mb-4">
@@ -409,6 +426,43 @@
         </div>
     </footer>
 
+    <!-- Panel de pruebas (solo para desarrollo) -->
+    <div id="panel-pruebas" class="fixed bottom-4 right-4 bg-purple-600 text-white p-2 rounded-lg shadow-lg z-50 cursor-pointer" onclick="togglePanelPruebas()">
+        🧪 Modo Prueba
+    </div>
+    
+    <div id="contenido-panel-pruebas" class="hidden fixed bottom-16 right-4 bg-white rounded-xl shadow-2xl p-4 z-50 border-2 border-purple-300 w-80">
+        <div class="flex justify-between items-center mb-3">
+            <h3 class="font-bold text-gray-900">🧪 Panel de Pruebas</h3>
+            <button onclick="togglePanelPruebas()" class="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+        <div class="space-y-3">
+            <div>
+                <label class="block text-xs font-medium text-gray-700 mb-1">Simular fecha actual:</label>
+                <input 
+                    type="date" 
+                    id="fecha-simulada"
+                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm"
+                >
+            </div>
+            <button 
+                onclick="aplicarFechaSimulada()"
+                class="w-full px-4 py-2 text-sm font-medium text-white bg-purple-600 rounded-lg hover:bg-purple-700"
+            >
+                Aplicar fecha
+            </button>
+            <button 
+                onclick="resetearFecha()"
+                class="w-full px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+            >
+                Resetear a fecha real
+            </button>
+            <div id="fecha-actual-info" class="text-xs text-gray-600 text-center pt-2 border-t">
+                Fecha real: <span class="font-semibold"></span>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Historial de Pagos -->
     <div id="modal-historial-pagos" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden overflow-y-auto p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl my-8 flex flex-col max-h-[calc(100vh-4rem)]">
@@ -444,8 +498,9 @@
             </div>
             
             <form id="form-editar-periodo" class="space-y-4">
-                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
-                    <p class="text-xs text-yellow-800">⚠️ Solo puedes extender la fecha de fin del periodo. Las asistencias ya registradas se mantendrán.</p>
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3 mb-4">
+                    <p class="text-xs font-semibold text-blue-900 mb-1">💡 Extensión de periodo</p>
+                    <p class="text-xs text-blue-800">Las clases programadas se calculan con base en el periodo ORIGINAL. Los días extras que agregues solo sirven para completar pendientes mediante reposiciones o asistencias tardías.</p>
                 </div>
                 
                 <div class="grid grid-cols-2 gap-3">
@@ -575,6 +630,7 @@
         
         let currentCoachId = null;
         let currentPagoId = null; // ID del pago/periodo actualmente seleccionado
+        let fechaSimulada = null; // Para pruebas: simular una fecha diferente
         
         const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -935,6 +991,10 @@
                 const indicador = document.getElementById('reposiciones-disponibles');
                 if (indicador) indicador.style.display = 'none';
                 
+                // Ocultar alerta de pendientes
+                const alertaPendientes = document.getElementById('alerta-pendientes');
+                if (alertaPendientes) alertaPendientes.classList.add('hidden');
+                
                 return;
             }
             
@@ -979,8 +1039,8 @@
                 html += `<div class="border border-transparent rounded-lg p-2 h-44"></div>`;
             }
             
-            // Obtener fecha actual (solo fecha, sin hora)
-            const hoy = new Date();
+            // Obtener fecha actual (solo fecha, sin hora) - usar fecha simulada si existe
+            const hoy = fechaSimulada ? new Date(fechaSimulada) : new Date();
             const fechaActual = formatDate(hoy);
             
             // Renderizar todos los días
@@ -1134,15 +1194,22 @@
             
             if (!pago) return;
             
-            // Días laborables (para contar programadas y asistidas)
-            const daysLaborables = getDiasLaborablesPeriodo(pago.periodoInicio, pago.periodoFin, coach.diasLaborables);
+            // Usar periodoFinOriginal si existe, sino usar periodoFin
+            // Esto asegura que al extender el periodo, las programadas no aumenten
+            const fechaFinParaProgramadas = pago.periodoFinOriginal || pago.periodoFin;
+            
+            // Días laborables ORIGINALES (para contar programadas)
+            const daysLaborablesOriginales = getDiasLaborablesPeriodo(pago.periodoInicio, fechaFinParaProgramadas, coach.diasLaborables);
+            const programadas = daysLaborablesOriginales.length;
+            
+            // Días laborables TOTALES (incluyendo extensión, para contar asistidas)
+            const daysLaborablesTotales = getDiasLaborablesPeriodo(pago.periodoInicio, pago.periodoFin, coach.diasLaborables);
             const asistencias = data.asistencias[currentCoachId] || {};
             
-            const programadas = daysLaborables.length;
             let asistidas = 0;
             
-            // Contar asistencias en días laborables
-            daysLaborables.forEach(day => {
+            // Contar asistencias en TODOS los días laborables (incluyendo extensión)
+            daysLaborablesTotales.forEach(day => {
                 const asist = asistencias[day];
                 if (asist?.asistio) asistidas++;
             });
@@ -1209,6 +1276,27 @@
                     indicador.style.display = 'none';
                 }
             }
+            
+            // Mostrar alerta de pendientes si hay pendientes y el periodo está cerca de terminar o ya terminó
+            const alertaPendientes = document.getElementById('alerta-pendientes');
+            if (alertaPendientes) {
+                // Usar fecha simulada si existe, sino usar fecha real
+                const hoy = fechaSimulada ? new Date(fechaSimulada) : new Date();
+                hoy.setHours(0, 0, 0, 0);
+                const fechaFin = new Date(pago.periodoFin);
+                fechaFin.setHours(0, 0, 0, 0);
+                
+                // Calcular días restantes del periodo
+                const diasRestantes = Math.ceil((fechaFin - hoy) / (1000 * 60 * 60 * 24));
+                
+                // Mostrar alerta si hay pendientes y quedan 3 días o menos (o ya terminó)
+                if (pendientes > 0 && diasRestantes <= 3) {
+                    document.getElementById('alerta-pendientes-cantidad').textContent = pendientes;
+                    alertaPendientes.classList.remove('hidden');
+                } else {
+                    alertaPendientes.classList.add('hidden');
+                }
+            }
         }
 
         // ========================================
@@ -1230,8 +1318,8 @@
             }
             
             lista.innerHTML = pagos.map((pago, index) => {
-                // Recalcular estadísticas en tiempo real
-                const stats = calcularEstadisticasPeriodo(pago.periodoInicio, pago.periodoFin, currentCoachId, pago.montoBase);
+                // Recalcular estadísticas en tiempo real (pasar periodoFinOriginal si existe)
+                const stats = calcularEstadisticasPeriodo(pago.periodoInicio, pago.periodoFin, currentCoachId, pago.montoBase, pago.periodoFinOriginal);
                 
                 return `
                 <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
@@ -1427,35 +1515,29 @@
         // MODAL PAGO
         // ========================================
 
-        function calcularEstadisticasPeriodo(inicio, fin, coachId, montoBase) {
+        function calcularEstadisticasPeriodo(inicio, fin, coachId, montoBase, finOriginal = null) {
             const data = loadData();
             const coach = data.coaches.find(c => c.id === coachId);
             const asistencias = data.asistencias[coachId] || {};
             
-            // Obtener días laborables del periodo
-            const inicioDate = new Date(inicio + 'T00:00:00');
-            const finDate = new Date(fin + 'T00:00:00');
+            // Usar finOriginal si existe para calcular programadas
+            const fechaFinParaProgramadas = finOriginal || fin;
             
-            const diasLaborables = [];
-            let currentDate = new Date(inicioDate);
+            // Obtener días laborables ORIGINALES (para programadas)
+            const diasLaborablesOriginales = getDiasLaborablesPeriodo(inicio, fechaFinParaProgramadas, coach.diasLaborables);
+            const programadas = diasLaborablesOriginales.length;
             
-            while (currentDate <= finDate) {
-                const dayOfWeek = currentDate.getDay();
-                if (coach.diasLaborables.includes(dayOfWeek)) {
-                    diasLaborables.push(formatDate(currentDate));
-                }
-                currentDate.setDate(currentDate.getDate() + 1);
-            }
+            // Obtener días laborables TOTALES (para asistidas)
+            const diasLaborablesTotales = getDiasLaborablesPeriodo(inicio, fin, coach.diasLaborables);
             
             let asistidas = 0;
             
-            // Contar asistencias en días laborables
-            diasLaborables.forEach(day => {
+            // Contar asistencias en TODOS los días laborables (incluyendo extensión)
+            diasLaborablesTotales.forEach(day => {
                 const asist = asistencias[day];
                 if (asist?.asistio) asistidas++;
             });
             
-            const programadas = diasLaborables.length;
             const faltas = programadas - asistidas;
             
             // Contar reposiciones en TODOS los días del periodo
@@ -1694,6 +1776,7 @@
                 fecha: document.getElementById('pago-fecha').value,
                 periodoInicio,
                 periodoFin,
+                periodoFinOriginal: periodoFin, // Guardar fecha fin original
                 montoBase: monto,
                 monto: monto,
                 nota: document.getElementById('pago-nota').value.trim(),
@@ -1727,11 +1810,15 @@
             if (!pago) return;
             
             const nuevaFechaFin = document.getElementById('editar-periodo-fin').value;
-            const fechaFinOriginal = pago.periodoFin;
             
-            // Validar que la nueva fecha sea posterior o igual a la original
-            if (new Date(nuevaFechaFin) < new Date(fechaFinOriginal)) {
-                alert('La nueva fecha de fin debe ser posterior o igual a la fecha original');
+            // Si no existe periodoFinOriginal, guardarlo ahora (para periodos antiguos)
+            if (!pago.periodoFinOriginal) {
+                pago.periodoFinOriginal = pago.periodoFin;
+            }
+            
+            // Validar que la nueva fecha sea posterior o igual a la ORIGINAL
+            if (new Date(nuevaFechaFin) < new Date(pago.periodoFinOriginal)) {
+                alert('La nueva fecha de fin debe ser posterior o igual a la fecha original del periodo');
                 return;
             }
             
@@ -1739,7 +1826,7 @@
             const montoFormateado = document.getElementById('editar-monto').value;
             const monto = parseInt(montoFormateado.replace(/\D/g, '') || '0');
             
-            // Actualizar todos los campos
+            // Actualizar todos los campos (EXCEPTO periodoFinOriginal que se mantiene)
             pago.periodoFin = nuevaFechaFin;
             pago.fecha = document.getElementById('editar-fecha-pago').value;
             pago.monto = monto;
@@ -1904,8 +1991,67 @@
             }
         });
         
+        // ========================================
+        // PANEL DE PRUEBAS (DESARROLLO)
+        // ========================================
+        
+        function togglePanelPruebas() {
+            const panel = document.getElementById('contenido-panel-pruebas');
+            panel.classList.toggle('hidden');
+            
+            // Actualizar fecha real
+            const fechaRealSpan = document.querySelector('#fecha-actual-info span');
+            if (fechaRealSpan) {
+                const hoy = new Date();
+                fechaRealSpan.textContent = formatDate(hoy);
+            }
+            
+            // Si hay fecha simulada, mostrarla en el input
+            if (fechaSimulada) {
+                document.getElementById('fecha-simulada').value = fechaSimulada;
+            }
+        }
+        
+        function aplicarFechaSimulada() {
+            const fecha = document.getElementById('fecha-simulada').value;
+            if (!fecha) {
+                alert('Por favor selecciona una fecha');
+                return;
+            }
+            
+            fechaSimulada = fecha;
+            alert(`Fecha simulada aplicada: ${formatDateDisplay(fecha)}\n\nEl sistema ahora actúa como si fuera ese día.`);
+            
+            // Actualizar la vista si estamos en un dashboard
+            if (currentCoachId && currentPagoId) {
+                renderCalendarioPeriodo();
+            }
+        }
+        
+        function resetearFecha() {
+            fechaSimulada = null;
+            document.getElementById('fecha-simulada').value = '';
+            alert('Fecha reseteada. El sistema ahora usa la fecha real.');
+            
+            // Actualizar la vista si estamos en un dashboard
+            if (currentCoachId && currentPagoId) {
+                renderCalendarioPeriodo();
+            }
+        }
+
+        // ========================================
+        // INICIALIZACIÓN
+        // ========================================
+        
         document.addEventListener('DOMContentLoaded', () => {
             mostrarVistaLista();
+            
+            // Actualizar info de fecha real en panel de pruebas
+            const fechaRealSpan = document.querySelector('#fecha-actual-info span');
+            if (fechaRealSpan) {
+                const hoy = new Date();
+                fechaRealSpan.textContent = formatDate(hoy);
+            }
         });
     </script>
 </body>
