@@ -123,23 +123,16 @@
                     </div>
                     <div class="flex gap-2">
                         <button 
-                            id="btn-ver-historial"
-                            onclick="toggleHistorialPagos()"
-                            class="px-3 py-2 text-sm font-medium text-green-600 border border-green-300 rounded-lg hover:bg-green-50"
-                        >
-                            📋 Ver pagos
-                        </button>
-                        <button 
                             id="btn-editar-coach"
                             class="px-3 py-2 text-sm font-medium text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50"
                         >
-                            Editar
+                            Editar Coach
                         </button>
                         <button 
                             id="btn-eliminar-coach"
                             class="px-3 py-2 text-sm font-medium text-red-600 border border-red-300 rounded-lg hover:bg-red-50"
                         >
-                            Eliminar
+                            Eliminar Coach
                         </button>
                     </div>
                 </div>
@@ -169,8 +162,8 @@
                 <!-- Selector de periodo -->
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-6">
                     <div class="flex items-center justify-between">
-                        <div>
-                            <label for="select-periodo-pago" class="text-sm font-medium text-gray-700 mr-3">Ver periodo:</label>
+                        <div class="flex items-center gap-3">
+                            <label for="select-periodo-pago" class="text-sm font-medium text-gray-700">Seleccionar periodo:</label>
                             <select 
                                 id="select-periodo-pago"
                                 class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -178,19 +171,28 @@
                                 <!-- Se llena dinámicamente -->
                             </select>
                         </div>
-                        <button 
-                            id="btn-registrar-pago"
-                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-                        >
-                            + Nuevo periodo
-                        </button>
+                        <div class="flex gap-2">
+                            <button 
+                                id="btn-ver-historial"
+                                onclick="toggleHistorialPagos()"
+                                class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"
+                            >
+                                📋 Ver periodos
+                            </button>
+                            <button 
+                                id="btn-registrar-pago"
+                                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                            >
+                                + Nuevo periodo
+                            </button>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Métricas del periodo seleccionado -->
                 <section class="mb-6">
                     <h3 class="text-sm font-medium text-gray-600 mb-3">Estadísticas del periodo seleccionado</h3>
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                    <div class="grid grid-cols-2 sm:grid-cols-5 gap-4">
                         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                             <h3 class="text-xs font-medium text-gray-500">Programadas</h3>
                             <p id="metric-programadas" class="text-2xl font-bold text-gray-900 mt-2">0</p>
@@ -206,6 +208,10 @@
                         <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                             <h3 class="text-xs font-medium text-gray-500">Reposiciones</h3>
                             <p id="metric-reposiciones" class="text-2xl font-bold text-blue-600 mt-2">0</p>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                            <h3 class="text-xs font-medium text-gray-500">Pendientes</h3>
+                            <p id="metric-pendientes" class="text-2xl font-bold text-orange-600 mt-2">0</p>
                         </div>
                     </div>
                 </section>
@@ -423,7 +429,7 @@
     <div id="modal-historial-pagos" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden overflow-y-auto p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl my-8 flex flex-col max-h-[calc(100vh-4rem)]">
             <div class="flex justify-between items-center p-6 border-b border-gray-200 flex-shrink-0">
-                <h2 class="text-xl font-bold text-gray-900">📋 Todos los pagos</h2>
+                <h2 class="text-xl font-bold text-gray-900">📋 Todos los periodos</h2>
                 <button onclick="cerrarModalHistorialPagos()" class="text-gray-400 hover:text-gray-600">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
@@ -435,6 +441,98 @@
                     <!-- Se llena dinámicamente -->
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- Modal: Editar Periodo -->
+    <div id="modal-editar-periodo" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
+        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900">Editar Periodo</h2>
+                    <p class="text-sm text-gray-600 mt-1">Modifica las fechas del periodo de entrenamiento</p>
+                </div>
+                <button onclick="cerrarModalEditarPeriodo()" class="text-gray-400 hover:text-gray-600 flex-shrink-0 ml-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <form id="form-editar-periodo" class="space-y-4">
+                <div class="bg-yellow-50 border border-yellow-200 rounded-lg p-3 mb-4">
+                    <p class="text-xs text-yellow-800">⚠️ Solo puedes extender la fecha de fin del periodo. Las asistencias ya registradas se mantendrán.</p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="editar-periodo-inicio" class="block text-sm font-medium text-gray-700 mb-1">Inicio del periodo *</label>
+                        <input 
+                            type="date" 
+                            id="editar-periodo-inicio"
+                            disabled
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg bg-gray-100 cursor-not-allowed"
+                        >
+                        <p class="text-xs text-gray-500 mt-1">No se puede cambiar</p>
+                    </div>
+                    <div>
+                        <label for="editar-periodo-fin" class="block text-sm font-medium text-gray-700 mb-1">Fin del periodo *</label>
+                        <input 
+                            type="date" 
+                            id="editar-periodo-fin"
+                            required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                    </div>
+                </div>
+
+                <div>
+                    <label for="editar-fecha-pago" class="block text-sm font-medium text-gray-700 mb-1">Fecha de pago *</label>
+                    <input 
+                        type="date" 
+                        id="editar-fecha-pago"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                </div>
+
+                <div>
+                    <label for="editar-monto" class="block text-sm font-medium text-gray-700 mb-1">Monto pagado (COP) *</label>
+                    <input 
+                        type="text" 
+                        id="editar-monto"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-lg"
+                        placeholder="450.000"
+                    >
+                </div>
+
+                <div>
+                    <label for="editar-nota" class="block text-sm font-medium text-gray-700 mb-1">Nota (opcional)</label>
+                    <textarea 
+                        id="editar-nota" 
+                        rows="2"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="Observaciones sobre el periodo o el pago..."
+                    ></textarea>
+                </div>
+
+                <div class="flex gap-3 pt-4">
+                    <button 
+                        type="button"
+                        onclick="cerrarModalEditarPeriodo()"
+                        class="flex-1 px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                        Cancelar
+                    </button>
+                    <button 
+                        type="submit"
+                        class="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                    >
+                        Guardar Cambios
+                    </button>
+                </div>
+            </form>
         </div>
     </div>
 
@@ -670,7 +768,7 @@
             }
 
             // Info del coach
-            document.getElementById('coach-nombre').textContent = coach.nombre;
+            document.getElementById('coach-nombre').textContent = `Coach ${coach.nombre}`;
             document.getElementById('coach-dias').textContent = getDiasTexto(coach.diasLaborables);
             
             // Mostrar estado con colores
@@ -816,6 +914,7 @@
                 document.getElementById('metric-asistidas').textContent = '0';
                 document.getElementById('metric-faltas').textContent = '0';
                 document.getElementById('metric-reposiciones').textContent = '0';
+                document.getElementById('metric-pendientes').textContent = '0';
                 
                 const indicador = document.getElementById('reposiciones-disponibles');
                 if (indicador) indicador.style.display = 'none';
@@ -864,16 +963,34 @@
                 html += `<div class="border border-transparent rounded-lg p-2 h-44"></div>`;
             }
             
+            // Obtener fecha actual (solo fecha, sin hora)
+            const hoy = new Date();
+            const fechaActual = formatDate(hoy);
+            
             // Renderizar todos los días
             days.forEach(({fecha: dateStr, diaSemana}) => {
                 const asist = asistencias[dateStr] || { asistio: false, reposicion: false, nota: '' };
                 const esLaborable = coach.diasLaborables.includes(diaSemana);
+                const esDiaActual = dateStr === fechaActual;
+                
+                // Determinar clases de borde
+                let borderClasses = '';
+                if (esDiaActual) {
+                    borderClasses = 'border-4 border-blue-500 shadow-lg';
+                } else if (esLaborable) {
+                    borderClasses = 'border border-gray-300';
+                } else {
+                    borderClasses = 'border border-gray-200';
+                }
                 
                 html += `
-                    <div class="border ${esLaborable ? 'border-gray-300' : 'border-gray-200'} rounded-lg p-2 ${asist.asistio ? 'bg-green-50' : (esLaborable ? 'bg-white' : 'bg-gray-100')} ${esLaborable ? '' : 'opacity-60'} h-44 flex flex-col overflow-hidden">
+                    <div class="${borderClasses} rounded-lg p-2 ${asist.asistio ? 'bg-green-50' : (esLaborable ? 'bg-white' : 'bg-gray-100')} ${esLaborable ? '' : 'opacity-60'} h-44 flex flex-col overflow-hidden ${esDiaActual ? 'relative' : ''}">
                         <div class="flex justify-between items-start mb-1 flex-shrink-0">
                             <div class="flex-1 min-w-0">
-                                <p class="text-xs ${esLaborable ? 'text-gray-700 font-semibold' : 'text-gray-400'}">${formatDateDisplay(dateStr).split(' ').slice(0,2).join(' ')}</p>
+                                <div class="flex items-center gap-1">
+                                    <p class="text-xs ${esLaborable ? 'text-gray-700 font-semibold' : 'text-gray-400'}">${formatDateDisplay(dateStr).split(' ').slice(0,2).join(' ')}</p>
+                                    ${esDiaActual ? '<span class="px-1.5 py-0.5 text-xs font-bold bg-blue-500 text-white rounded">HOY</span>' : ''}
+                                </div>
                                 ${!esLaborable ? '<p class="text-xs text-gray-400 leading-tight">No laboral</p>' : ''}
                             </div>
                             <button 
@@ -1045,10 +1162,14 @@
                 reposiciones = 0;
             }
             
+            // Calcular pendientes (clases que faltan por completar)
+            const pendientes = Math.max(0, faltas - reposiciones);
+            
             document.getElementById('metric-programadas').textContent = programadas;
             document.getElementById('metric-asistidas').textContent = asistidas;
             document.getElementById('metric-faltas').textContent = faltas;
             document.getElementById('metric-reposiciones').textContent = reposiciones;
+            document.getElementById('metric-pendientes').textContent = pendientes;
             
             // Actualizar indicador de reposiciones disponibles
             const indicador = document.getElementById('reposiciones-disponibles');
@@ -1088,7 +1209,7 @@
             const lista = document.getElementById('lista-pagos');
             
             if (pagos.length === 0) {
-                lista.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No hay pagos registrados</p>';
+                lista.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No hay periodos registrados</p>';
                 return;
             }
             
@@ -1115,15 +1236,24 @@
                                 ${pago.montoBase ? `<p class="text-xs text-gray-500 mt-1">💵 Base: ${formatCurrency(pago.montoBase)}</p>` : ''}
                             </div>
                         </div>
-                        <button 
-                            onclick="eliminarPago('${pago.id}')"
-                            class="text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded px-2 py-1 transition-colors"
-                            title="Eliminar pago"
-                        >
-                            ✕
-                        </button>
+                        <div class="flex flex-col gap-2">
+                            <button 
+                                onclick="editarPeriodoDesdeModal('${pago.id}')"
+                                class="text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded px-3 py-1 transition-colors border border-blue-300 font-medium"
+                                title="Editar periodo"
+                            >
+                                ✏️ Editar
+                            </button>
+                            <button 
+                                onclick="eliminarPago('${pago.id}')"
+                                class="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded px-3 py-1 transition-colors border border-red-300 font-medium"
+                                title="Eliminar periodo"
+                            >
+                                🗑️ Eliminar
+                            </button>
+                        </div>
                     </div>
-                    <div class="grid grid-cols-2 gap-3 text-xs mt-3 pt-3 border-t border-gray-200">
+                    <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 text-xs mt-3 pt-3 border-t border-gray-200">
                         <div class="flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-gray-500"></span>
                             <span class="text-gray-600">Prog:</span>
@@ -1144,6 +1274,11 @@
                             <span class="text-blue-600">Repos:</span>
                             <span class="font-bold text-blue-900">${stats.reposiciones}</span>
                         </div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-orange-500"></span>
+                            <span class="text-orange-600">Pend:</span>
+                            <span class="font-bold text-orange-900">${stats.pendientes}</span>
+                        </div>
                     </div>
                     ${pago.nota ? `<p class="text-xs text-gray-600 mt-3 p-2 bg-gray-50 rounded italic">"${pago.nota}"</p>` : ''}
                 </div>
@@ -1151,8 +1286,26 @@
             }).join('');
         }
 
+        function editarPeriodoDesdeModal(pagoId) {
+            // Cambiar al periodo seleccionado
+            currentPagoId = pagoId;
+            
+            // Cerrar modal de historial
+            cerrarModalHistorialPagos();
+            
+            // Actualizar el selector
+            const selector = document.getElementById('select-periodo-pago');
+            selector.value = currentPagoId;
+            
+            // Renderizar calendario con el periodo seleccionado
+            renderCalendarioPeriodo();
+            
+            // Abrir modal de editar
+            abrirModalEditarPeriodo();
+        }
+        
         function eliminarPago(pagoId) {
-            if (!confirm('¿Eliminar este pago?')) return;
+            if (!confirm('¿Estás seguro de eliminar este periodo? Se perderán todas las asistencias registradas en él.')) return;
             
             const data = loadData();
             data.pagos[currentCoachId] = data.pagos[currentCoachId].filter(p => p.id !== pagoId);
@@ -1162,6 +1315,9 @@
             if (currentPagoId === pagoId) {
                 currentPagoId = null;
             }
+            
+            // Cerrar modal de historial si está abierto
+            cerrarModalHistorialPagos();
             
             renderDashboard(); // Recargar todo
         }
@@ -1257,11 +1413,15 @@
             const porcentajeAsistencia = programadas > 0 ? asistidas / programadas : 1;
             const montoSugerido = montoBase ? Math.round(montoBase * porcentajeAsistencia) : 0;
             
+            // Calcular pendientes
+            const pendientes = Math.max(0, faltas - reposiciones);
+            
             return {
                 programadas,
                 asistidas,
                 faltas,
                 reposiciones,
+                pendientes,
                 montoSugerido
             };
         }
@@ -1299,6 +1459,33 @@
 
         function cerrarModalPago() {
             document.getElementById('modal-pago').classList.add('hidden');
+        }
+
+        // ========================================
+        // MODAL EDITAR PERIODO
+        // ========================================
+        
+        function abrirModalEditarPeriodo() {
+            if (!currentPagoId) {
+                alert('Selecciona un periodo primero');
+                return;
+            }
+            
+            const data = loadData();
+            const pago = (data.pagos[currentCoachId] || []).find(p => p.id === currentPagoId);
+            
+            if (!pago) return;
+            
+            document.getElementById('editar-periodo-inicio').value = pago.periodoInicio;
+            document.getElementById('editar-periodo-fin').value = pago.periodoFin;
+            document.getElementById('editar-fecha-pago').value = pago.fecha;
+            document.getElementById('editar-monto').value = formatearMontoInput(pago.monto.toString());
+            document.getElementById('editar-nota').value = pago.nota || '';
+            document.getElementById('modal-editar-periodo').classList.remove('hidden');
+        }
+        
+        function cerrarModalEditarPeriodo() {
+            document.getElementById('modal-editar-periodo').classList.add('hidden');
         }
 
         // ========================================
@@ -1431,6 +1618,7 @@
         document.getElementById('select-periodo-pago').addEventListener('change', (e) => {
             currentPagoId = e.target.value || null;
             console.log('Periodo cambiado a:', currentPagoId);
+            
             renderCalendarioPeriodo();
             if (currentPagoId) {
                 renderHistorialPagos();
@@ -1484,6 +1672,44 @@
             renderDashboard(); // Recargar todo el dashboard
         });
         
+        // Guardar cambios del periodo editado
+        document.getElementById('form-editar-periodo').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (!currentPagoId) return;
+            
+            const data = loadData();
+            const pago = (data.pagos[currentCoachId] || []).find(p => p.id === currentPagoId);
+            
+            if (!pago) return;
+            
+            const nuevaFechaFin = document.getElementById('editar-periodo-fin').value;
+            const fechaFinOriginal = pago.periodoFin;
+            
+            // Validar que la nueva fecha sea posterior o igual a la original
+            if (new Date(nuevaFechaFin) < new Date(fechaFinOriginal)) {
+                alert('La nueva fecha de fin debe ser posterior o igual a la fecha original');
+                return;
+            }
+            
+            // Obtener monto sin formato
+            const montoFormateado = document.getElementById('editar-monto').value;
+            const monto = parseInt(montoFormateado.replace(/\D/g, '') || '0');
+            
+            // Actualizar todos los campos
+            pago.periodoFin = nuevaFechaFin;
+            pago.fecha = document.getElementById('editar-fecha-pago').value;
+            pago.monto = monto;
+            pago.montoBase = monto;
+            pago.nota = document.getElementById('editar-nota').value.trim();
+            
+            saveData(data);
+            
+            // Recargar el dashboard
+            cerrarModalEditarPeriodo();
+            renderDashboard();
+        });
+        
         // Guardar nota del día
         document.getElementById('form-nota-dia').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -1535,8 +1761,21 @@
             }
         });
         
-        // Formatear monto mientras se escribe
+        // Formatear monto mientras se escribe (modal crear periodo)
         document.getElementById('pago-monto').addEventListener('input', function(e) {
+            const cursorPos = e.target.selectionStart;
+            const valorAnterior = e.target.value;
+            const valorFormateado = formatearMontoInput(valorAnterior);
+            
+            e.target.value = valorFormateado;
+            
+            // Ajustar posición del cursor
+            const diff = valorFormateado.length - valorAnterior.length;
+            e.target.setSelectionRange(cursorPos + diff, cursorPos + diff);
+        });
+        
+        // Formatear monto mientras se escribe (modal editar periodo)
+        document.getElementById('editar-monto').addEventListener('input', function(e) {
             const cursorPos = e.target.selectionStart;
             const valorAnterior = e.target.value;
             const valorFormateado = formatearMontoInput(valorAnterior);
@@ -1580,6 +1819,13 @@
             }
         });
         
+        // Cerrar modal de editar periodo al hacer clic fuera de él
+        document.getElementById('modal-editar-periodo')?.addEventListener('click', (e) => {
+            if (e.target.id === 'modal-editar-periodo') {
+                cerrarModalEditarPeriodo();
+            }
+        });
+        
         // Cerrar modales con la tecla ESC
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
@@ -1605,6 +1851,12 @@
                 const modalCoach = document.getElementById('modal-coach');
                 if (modalCoach && !modalCoach.classList.contains('hidden')) {
                     cerrarModalCoach();
+                }
+                
+                // Cerrar modal de editar periodo si está abierto
+                const modalEditarPeriodo = document.getElementById('modal-editar-periodo');
+                if (modalEditarPeriodo && !modalEditarPeriodo.classList.contains('hidden')) {
+                    cerrarModalEditarPeriodo();
                 }
             }
         });
