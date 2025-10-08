@@ -81,22 +81,14 @@
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
                         <h2 id="coach-nombre" class="text-2xl font-bold text-gray-900"></h2>
-                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-4">
-                            <div>
-                                <p class="text-xs text-gray-500">Monto mensual</p>
-                                <p id="coach-monto" class="text-lg font-semibold text-gray-900"></p>
-                            </div>
-                            <div>
-                                <p class="text-xs text-gray-500">Periodo actual</p>
-                                <p id="coach-periodo" class="text-sm font-medium text-gray-900"></p>
-                            </div>
+                        <div class="flex items-center gap-6 mt-3">
                             <div>
                                 <p class="text-xs text-gray-500">Días laborables</p>
-                                <p id="coach-dias" class="text-sm font-medium text-gray-900"></p>
+                                <p id="coach-dias" class="text-sm font-medium text-gray-900 mt-1"></p>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-500">Estado</p>
-                                <span id="coach-estado" class="inline-block px-2 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded">Activo</span>
+                                <p class="text-xs text-gray-500">Total de pagos</p>
+                                <p id="coach-total-pagos" class="text-sm font-semibold text-blue-600 mt-1">0</p>
                             </div>
                         </div>
                     </div>
@@ -117,9 +109,10 @@
                 </div>
             </div>
 
-            <!-- Métricas -->
+            <!-- Métricas del mes actual -->
             <section class="mb-6">
-                <div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+                <h3 class="text-sm font-medium text-gray-600 mb-3">Estadísticas del mes actual</h3>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
                     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                         <h3 class="text-xs font-medium text-gray-500">Programadas</h3>
                         <p id="metric-programadas" class="text-2xl font-bold text-gray-900 mt-2">0</p>
@@ -135,10 +128,6 @@
                     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
                         <h3 class="text-xs font-medium text-gray-500">Reposiciones</h3>
                         <p id="metric-reposiciones" class="text-2xl font-bold text-blue-600 mt-2">0</p>
-                    </div>
-                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-                        <h3 class="text-xs font-medium text-gray-500">Por cobrar</h3>
-                        <p id="metric-por-cobrar" class="text-2xl font-bold text-amber-600 mt-2">$0</p>
                     </div>
                 </div>
             </section>
@@ -217,40 +206,7 @@
                 </div>
 
                 <div>
-                    <label for="coach-monto-input" class="block text-sm font-medium text-gray-700 mb-1">Monto mensual (COP) *</label>
-                    <input 
-                        type="number" 
-                        id="coach-monto-input"
-                        required
-                        min="0"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="450000"
-                    >
-                </div>
-
-                <div class="grid grid-cols-2 gap-3">
-                    <div>
-                        <label for="coach-inicio-input" class="block text-sm font-medium text-gray-700 mb-1">Periodo inicio *</label>
-                        <input 
-                            type="date" 
-                            id="coach-inicio-input"
-                            required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                    </div>
-                    <div>
-                        <label for="coach-fin-input" class="block text-sm font-medium text-gray-700 mb-1">Periodo fin *</label>
-                        <input 
-                            type="date" 
-                            id="coach-fin-input"
-                            required
-                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        >
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2">Días laborables</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-2">Días laborables *</label>
                     <div class="flex flex-wrap gap-3">
                         <label class="flex items-center gap-2 text-sm">
                             <input type="checkbox" value="1" class="dia-checkbox rounded" checked>
@@ -281,7 +237,7 @@
                             <span>Domingo</span>
                         </label>
                     </div>
-                    <p class="text-xs text-gray-500 mt-2">Puedes habilitar sábado/domingo para reposiciones</p>
+                    <p class="text-xs text-gray-500 mt-2">Selecciona los días en que el coach entrena. Puedes incluir sábado/domingo para reposiciones.</p>
                 </div>
 
                 <input type="hidden" id="coach-id-input">
@@ -307,10 +263,58 @@
 
     <!-- Modal: Registrar Pago -->
     <div id="modal-pago" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-        <div class="bg-white rounded-xl shadow-xl max-w-md w-full p-6">
+        <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
             <h2 class="text-xl font-bold text-gray-900 mb-4">Registrar Pago</h2>
             
             <form id="form-pago" class="space-y-4">
+                <div class="grid grid-cols-2 gap-3">
+                    <div>
+                        <label for="pago-periodo-inicio" class="block text-sm font-medium text-gray-700 mb-1">Periodo inicio *</label>
+                        <input 
+                            type="date" 
+                            id="pago-periodo-inicio"
+                            required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                    </div>
+                    <div>
+                        <label for="pago-periodo-fin" class="block text-sm font-medium text-gray-700 mb-1">Periodo fin *</label>
+                        <input 
+                            type="date" 
+                            id="pago-periodo-fin"
+                            required
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                    </div>
+                </div>
+
+                <!-- Resumen del periodo -->
+                <div id="resumen-periodo" class="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
+                    <p class="text-sm font-semibold text-blue-900 mb-2">Resumen del periodo:</p>
+                    <div class="grid grid-cols-2 gap-2 text-sm">
+                        <div>
+                            <span class="text-blue-700">Clases programadas:</span>
+                            <span id="resumen-programadas" class="font-semibold text-blue-900">0</span>
+                        </div>
+                        <div>
+                            <span class="text-green-700">Asistidas:</span>
+                            <span id="resumen-asistidas" class="font-semibold text-green-900">0</span>
+                        </div>
+                        <div>
+                            <span class="text-red-700">Faltas:</span>
+                            <span id="resumen-faltas" class="font-semibold text-red-900">0</span>
+                        </div>
+                        <div>
+                            <span class="text-blue-700">Reposiciones:</span>
+                            <span id="resumen-reposiciones-pago" class="font-semibold text-blue-900">0</span>
+                        </div>
+                    </div>
+                    <div class="pt-2 border-t border-blue-300">
+                        <span class="text-sm text-blue-700">Monto sugerido:</span>
+                        <span id="resumen-monto" class="text-lg font-bold text-blue-900">$0</span>
+                    </div>
+                </div>
+
                 <div>
                     <label for="pago-fecha" class="block text-sm font-medium text-gray-700 mb-1">Fecha de pago *</label>
                     <input 
@@ -322,7 +326,20 @@
                 </div>
 
                 <div>
-                    <label for="pago-monto" class="block text-sm font-medium text-gray-700 mb-1">Monto (COP) *</label>
+                    <label for="pago-monto-base" class="block text-sm font-medium text-gray-700 mb-1">Monto base del periodo (COP) *</label>
+                    <input 
+                        type="number" 
+                        id="pago-monto-base"
+                        required
+                        min="0"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        placeholder="450000"
+                    >
+                    <p class="text-xs text-gray-500 mt-1">Monto acordado para el periodo completo</p>
+                </div>
+
+                <div>
+                    <label for="pago-monto" class="block text-sm font-medium text-gray-700 mb-1">Monto real pagado (COP) *</label>
                     <input 
                         type="number" 
                         id="pago-monto"
@@ -330,6 +347,7 @@
                         min="0"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                     >
+                    <p class="text-xs text-gray-500 mt-1">El sistema calcula el monto proporcional según asistencias</p>
                 </div>
 
                 <div>
@@ -354,7 +372,7 @@
                         type="submit"
                         class="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                     >
-                        Guardar
+                        Guardar Pago
                     </button>
                 </div>
             </form>
@@ -474,6 +492,9 @@
             
             grid.innerHTML = coaches.map(coach => {
                 const diasTexto = getDiasTexto(coach.diasLaborables);
+                const pagos = data.pagos[coach.id] || [];
+                const totalPagos = pagos.length;
+                
                 return `
                     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow cursor-pointer"
                          onclick="mostrarVistaDashboard('${coach.id}')">
@@ -483,16 +504,12 @@
                         </div>
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
-                                <span class="text-gray-500">Monto:</span>
-                                <span class="font-semibold">${formatCurrency(coach.monto)}</span>
+                                <span class="text-gray-500">Días laborables:</span>
+                                <span class="text-xs font-medium">${diasTexto}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-500">Periodo:</span>
-                                <span class="text-xs">${formatDateDisplay(coach.periodoInicio)} - ${formatDateDisplay(coach.periodoFin)}</span>
-                            </div>
-                            <div class="flex justify-between">
-                                <span class="text-gray-500">Días:</span>
-                                <span class="text-xs">${diasTexto}</span>
+                                <span class="text-gray-500">Pagos registrados:</span>
+                                <span class="text-xs font-semibold text-blue-600">${totalPagos}</span>
                             </div>
                         </div>
                     </div>
@@ -520,9 +537,10 @@
 
             // Info del coach
             document.getElementById('coach-nombre').textContent = coach.nombre;
-            document.getElementById('coach-monto').textContent = formatCurrency(coach.monto);
-            document.getElementById('coach-periodo').textContent = `${formatDateDisplay(coach.periodoInicio)} - ${formatDateDisplay(coach.periodoFin)}`;
             document.getElementById('coach-dias').textContent = getDiasTexto(coach.diasLaborables);
+            
+            const pagos = data.pagos[currentCoachId] || [];
+            document.getElementById('coach-total-pagos').textContent = pagos.length;
 
             // Renderizar calendario y métricas
             renderCalendar();
@@ -671,13 +689,11 @@
             });
             
             const faltas = programadas - asistidas;
-            const porCobrar = (faltas / programadas) * coach.monto;
             
             document.getElementById('metric-programadas').textContent = programadas;
             document.getElementById('metric-asistidas').textContent = asistidas;
             document.getElementById('metric-faltas').textContent = faltas;
             document.getElementById('metric-reposiciones').textContent = reposiciones;
-            document.getElementById('metric-por-cobrar').textContent = formatCurrency(porCobrar);
         }
 
         // ========================================
@@ -698,20 +714,42 @@
             }
             
             lista.innerHTML = pagos.map(pago => `
-                <div class="border border-gray-200 rounded-lg p-3">
+                <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50">
                     <div class="flex justify-between items-start mb-2">
-                        <div>
-                            <p class="text-sm font-semibold text-gray-900">${formatCurrency(pago.monto)}</p>
-                            <p class="text-xs text-gray-500">${formatDateDisplay(pago.fecha)}</p>
+                        <div class="flex-1">
+                            <p class="text-lg font-bold text-gray-900">${formatCurrency(pago.monto)}</p>
+                            <p class="text-xs text-gray-500">Pagado: ${formatDateDisplay(pago.fecha)}</p>
+                            <p class="text-xs text-blue-600 font-medium mt-1">
+                                Periodo: ${formatDateDisplay(pago.periodoInicio)} - ${formatDateDisplay(pago.periodoFin)}
+                            </p>
+                            ${pago.montoBase ? `<p class="text-xs text-gray-400">Base: ${formatCurrency(pago.montoBase)}</p>` : ''}
                         </div>
                         <button 
                             onclick="eliminarPago('${pago.id}')"
-                            class="text-xs text-red-600 hover:text-red-700"
+                            class="text-xs text-red-600 hover:text-red-700 ml-2"
                         >
-                            Eliminar
+                            ✕
                         </button>
                     </div>
-                    ${pago.nota ? `<p class="text-xs text-gray-600">${pago.nota}</p>` : ''}
+                    <div class="grid grid-cols-4 gap-2 text-xs mt-2 pt-2 border-t border-gray-200">
+                        <div>
+                            <span class="text-gray-500">Prog:</span>
+                            <span class="font-semibold text-gray-900">${pago.stats.programadas}</span>
+                        </div>
+                        <div>
+                            <span class="text-green-600">Asist:</span>
+                            <span class="font-semibold text-green-900">${pago.stats.asistidas}</span>
+                        </div>
+                        <div>
+                            <span class="text-red-600">Faltas:</span>
+                            <span class="font-semibold text-red-900">${pago.stats.faltas}</span>
+                        </div>
+                        <div>
+                            <span class="text-blue-600">Repos:</span>
+                            <span class="font-semibold text-blue-900">${pago.stats.reposiciones}</span>
+                        </div>
+                    </div>
+                    ${pago.nota ? `<p class="text-xs text-gray-600 mt-2 italic">"${pago.nota}"</p>` : ''}
                 </div>
             `).join('');
         }
@@ -741,9 +779,6 @@
                 titulo.textContent = 'Editar Coach';
                 document.getElementById('coach-id-input').value = coach.id;
                 document.getElementById('coach-nombre-input').value = coach.nombre;
-                document.getElementById('coach-monto-input').value = coach.monto;
-                document.getElementById('coach-inicio-input').value = coach.periodoInicio;
-                document.getElementById('coach-fin-input').value = coach.periodoFin;
                 
                 // Marcar días
                 document.querySelectorAll('.dia-checkbox').forEach(cb => {
@@ -754,11 +789,6 @@
                 titulo.textContent = 'Agregar Coach';
                 document.getElementById('form-coach').reset();
                 document.getElementById('coach-id-input').value = '';
-                
-                // Por defecto: hoy y fin de mes
-                const hoy = new Date();
-                document.getElementById('coach-inicio-input').value = formatDate(hoy);
-                document.getElementById('coach-fin-input').value = calcularFinDeMes(formatDate(hoy));
                 
                 // Días por defecto: L-V
                 document.querySelectorAll('.dia-checkbox').forEach(cb => {
@@ -778,14 +808,83 @@
         // MODAL PAGO
         // ========================================
 
+        function calcularEstadisticasPeriodo(inicio, fin, coachId, montoBase) {
+            const data = loadData();
+            const coach = data.coaches.find(c => c.id === coachId);
+            const asistencias = data.asistencias[coachId] || {};
+            
+            // Obtener días laborables del periodo
+            const inicioDate = new Date(inicio + 'T00:00:00');
+            const finDate = new Date(fin + 'T00:00:00');
+            
+            const dias = [];
+            let currentDate = new Date(inicioDate);
+            
+            while (currentDate <= finDate) {
+                const dayOfWeek = currentDate.getDay();
+                if (coach.diasLaborables.includes(dayOfWeek)) {
+                    dias.push(formatDate(currentDate));
+                }
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            let asistidas = 0;
+            let reposiciones = 0;
+            
+            dias.forEach(day => {
+                const asist = asistencias[day];
+                if (asist?.asistio) asistidas++;
+                if (asist?.reposicion) reposiciones++;
+            });
+            
+            const programadas = dias.length;
+            const faltas = programadas - asistidas;
+            
+            // Calcular monto proporcional basado en asistencias
+            const porcentajeAsistencia = programadas > 0 ? asistidas / programadas : 1;
+            const montoSugerido = montoBase ? Math.round(montoBase * porcentajeAsistencia) : 0;
+            
+            return {
+                programadas,
+                asistidas,
+                faltas,
+                reposiciones,
+                montoSugerido
+            };
+        }
+
+        function actualizarResumenPago() {
+            const inicio = document.getElementById('pago-periodo-inicio').value;
+            const fin = document.getElementById('pago-periodo-fin').value;
+            const montoBase = parseFloat(document.getElementById('pago-monto-base').value) || 0;
+            
+            if (!inicio || !fin || !montoBase) return;
+            
+            const stats = calcularEstadisticasPeriodo(inicio, fin, currentCoachId, montoBase);
+            
+            document.getElementById('resumen-programadas').textContent = stats.programadas;
+            document.getElementById('resumen-asistidas').textContent = stats.asistidas;
+            document.getElementById('resumen-faltas').textContent = stats.faltas;
+            document.getElementById('resumen-reposiciones-pago').textContent = stats.reposiciones;
+            document.getElementById('resumen-monto').textContent = formatCurrency(stats.montoSugerido);
+            
+            // Sugerir el monto calculado
+            document.getElementById('pago-monto').value = stats.montoSugerido;
+        }
+
         function abrirModalPago() {
             const modal = document.getElementById('modal-pago');
-            const data = loadData();
-            const coach = data.coaches.find(c => c.id === currentCoachId);
             
             document.getElementById('form-pago').reset();
+            
+            // Valores por defecto: mes actual
+            const hoy = new Date();
+            const primerDia = new Date(hoy.getFullYear(), hoy.getMonth(), 1);
+            const ultimoDia = new Date(hoy.getFullYear(), hoy.getMonth() + 1, 0);
+            
+            document.getElementById('pago-periodo-inicio').value = formatDate(primerDia);
+            document.getElementById('pago-periodo-fin').value = formatDate(ultimoDia);
             document.getElementById('pago-fecha').value = formatDate(new Date());
-            document.getElementById('pago-monto').value = coach.monto;
             
             modal.classList.remove('hidden');
         }
@@ -822,9 +921,6 @@
             
             const coachData = {
                 nombre: document.getElementById('coach-nombre-input').value.trim(),
-                monto: parseFloat(document.getElementById('coach-monto-input').value),
-                periodoInicio: document.getElementById('coach-inicio-input').value,
-                periodoFin: document.getElementById('coach-fin-input').value,
                 diasLaborables
             };
             
@@ -905,11 +1001,25 @@
                 data.pagos[currentCoachId] = [];
             }
             
+            const periodoInicio = document.getElementById('pago-periodo-inicio').value;
+            const periodoFin = document.getElementById('pago-periodo-fin').value;
+            const montoBase = parseFloat(document.getElementById('pago-monto-base').value);
+            const stats = calcularEstadisticasPeriodo(periodoInicio, periodoFin, currentCoachId, montoBase);
+            
             const pago = {
                 id: generateId(),
                 fecha: document.getElementById('pago-fecha').value,
+                periodoInicio,
+                periodoFin,
+                montoBase,
                 monto: parseFloat(document.getElementById('pago-monto').value),
-                nota: document.getElementById('pago-nota').value.trim()
+                nota: document.getElementById('pago-nota').value.trim(),
+                stats: {
+                    programadas: stats.programadas,
+                    asistidas: stats.asistidas,
+                    faltas: stats.faltas,
+                    reposiciones: stats.reposiciones
+                }
             };
             
             data.pagos[currentCoachId].push(pago);
@@ -919,11 +1029,17 @@
             renderHistorialPagos();
         });
         
-        // Auto-calcular fin de periodo
-        document.getElementById('coach-inicio-input').addEventListener('change', (e) => {
+        // Auto-calcular resumen al cambiar valores en modal de pago
+        document.getElementById('pago-periodo-inicio').addEventListener('change', actualizarResumenPago);
+        document.getElementById('pago-periodo-fin').addEventListener('change', actualizarResumenPago);
+        document.getElementById('pago-monto-base').addEventListener('input', actualizarResumenPago);
+        
+        // Auto-calcular fin de periodo en pago
+        document.getElementById('pago-periodo-inicio').addEventListener('change', (e) => {
             const inicio = e.target.value;
-            if (inicio) {
-                document.getElementById('coach-fin-input').value = calcularFinDeMes(inicio);
+            if (inicio && !document.getElementById('pago-periodo-fin').value) {
+                document.getElementById('pago-periodo-fin').value = calcularFinDeMes(inicio);
+                actualizarResumenPago();
             }
         });
         
