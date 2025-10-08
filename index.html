@@ -109,77 +109,97 @@
                 </div>
             </div>
 
-            <!-- Métricas del mes actual -->
-            <section class="mb-6">
-                <h3 class="text-sm font-medium text-gray-600 mb-3">Estadísticas del mes actual</h3>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-                        <h3 class="text-xs font-medium text-gray-500">Programadas</h3>
-                        <p id="metric-programadas" class="text-2xl font-bold text-gray-900 mt-2">0</p>
-                    </div>
-                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-                        <h3 class="text-xs font-medium text-gray-500">Asistidas</h3>
-                        <p id="metric-asistidas" class="text-2xl font-bold text-green-600 mt-2">0</p>
-                    </div>
-                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-                        <h3 class="text-xs font-medium text-gray-500">Faltas</h3>
-                        <p id="metric-faltas" class="text-2xl font-bold text-red-600 mt-2">0</p>
-                    </div>
-                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
-                        <h3 class="text-xs font-medium text-gray-500">Reposiciones</h3>
-                        <p id="metric-reposiciones" class="text-2xl font-bold text-blue-600 mt-2">0</p>
+            <!-- Mensaje: Sin pagos -->
+            <div id="mensaje-sin-pagos" class="bg-blue-50 border border-blue-200 rounded-xl p-8 text-center">
+                <div class="text-blue-400 text-5xl mb-4">💰</div>
+                <h3 class="text-lg font-semibold text-blue-900 mb-2">No hay pagos registrados</h3>
+                <p class="text-sm text-blue-700 mb-4">Registra el primer pago para comenzar a marcar asistencias</p>
+                <button 
+                    onclick="document.getElementById('btn-registrar-pago-inicio').click()"
+                    class="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                >
+                    + Registrar primer pago
+                </button>
+                <button 
+                    id="btn-registrar-pago-inicio"
+                    class="hidden"
+                ></button>
+            </div>
+
+            <!-- Contenido con pagos -->
+            <div id="contenido-con-pagos" class="hidden">
+                
+                <!-- Selector de periodo -->
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4 mb-6">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <label for="select-periodo-pago" class="text-sm font-medium text-gray-700 mr-3">Ver periodo:</label>
+                            <select 
+                                id="select-periodo-pago"
+                                class="px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            >
+                                <!-- Se llena dinámicamente -->
+                            </select>
+                        </div>
+                        <button 
+                            id="btn-registrar-pago"
+                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                        >
+                            + Nuevo pago
+                        </button>
                     </div>
                 </div>
-            </section>
 
-            <!-- Grid: Calendario + Historial -->
-            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                
-                <!-- Calendario -->
-                <div class="lg:col-span-2">
-                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-bold text-gray-900">Calendario de asistencia</h3>
-                            <div class="flex items-center gap-2">
-                                <button 
-                                    id="btn-prev-month"
-                                    class="px-3 py-1 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                                >
-                                    «
-                                </button>
-                                <span id="current-month-label" class="px-3 py-1 text-sm font-semibold text-gray-900"></span>
-                                <button 
-                                    id="btn-next-month"
-                                    class="px-3 py-1 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                                >
-                                    »
-                                </button>
+                <!-- Métricas del periodo seleccionado -->
+                <section class="mb-6">
+                    <h3 class="text-sm font-medium text-gray-600 mb-3">Estadísticas del periodo seleccionado</h3>
+                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                            <h3 class="text-xs font-medium text-gray-500">Programadas</h3>
+                            <p id="metric-programadas" class="text-2xl font-bold text-gray-900 mt-2">0</p>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                            <h3 class="text-xs font-medium text-gray-500">Asistidas</h3>
+                            <p id="metric-asistidas" class="text-2xl font-bold text-green-600 mt-2">0</p>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                            <h3 class="text-xs font-medium text-gray-500">Faltas</h3>
+                            <p id="metric-faltas" class="text-2xl font-bold text-red-600 mt-2">0</p>
+                        </div>
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-4">
+                            <h3 class="text-xs font-medium text-gray-500">Reposiciones</h3>
+                            <p id="metric-reposiciones" class="text-2xl font-bold text-blue-600 mt-2">0</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Grid: Calendario + Historial -->
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                    
+                    <!-- Calendario -->
+                    <div class="lg:col-span-2">
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                            <div class="flex items-center justify-between mb-4">
+                                <h3 class="text-lg font-bold text-gray-900">Calendario del periodo</h3>
+                                <span id="periodo-label" class="text-sm text-blue-600 font-medium"></span>
+                            </div>
+                            
+                            <p class="text-xs text-gray-500 mb-4">Click derecho para marcar reposición</p>
+                            
+                            <div id="calendar-grid" class="overflow-x-auto">
+                                <!-- Se genera dinámicamente -->
                             </div>
                         </div>
-                        
-                        <p class="text-xs text-gray-500 mb-4">Click derecho para marcar reposición</p>
-                        
-                        <div id="calendar-grid" class="overflow-x-auto">
-                            <!-- Se genera dinámicamente -->
-                        </div>
                     </div>
-                </div>
 
-                <!-- Historial de pagos -->
-                <div class="lg:col-span-1">
-                    <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                        <div class="flex items-center justify-between mb-4">
-                            <h3 class="text-lg font-bold text-gray-900">Historial de pagos</h3>
-                            <button 
-                                id="btn-registrar-pago"
-                                class="text-sm font-medium text-blue-600 hover:text-blue-700"
-                            >
-                                + Agregar
-                            </button>
-                        </div>
-                        
-                        <div id="lista-pagos" class="space-y-3 max-h-96 overflow-y-auto">
-                            <!-- Se llena dinámicamente -->
+                    <!-- Historial de pagos -->
+                    <div class="lg:col-span-1">
+                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                            <h3 class="text-lg font-bold text-gray-900 mb-4">Todos los pagos</h3>
+                            
+                            <div id="lista-pagos" class="space-y-3 max-h-96 overflow-y-auto">
+                                <!-- Se llena dinámicamente -->
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -394,8 +414,7 @@
         const STORAGE_KEY = 'coaches_data';
         
         let currentCoachId = null;
-        let currentYear = new Date().getFullYear();
-        let currentMonth = new Date().getMonth();
+        let currentPagoId = null; // ID del pago/periodo actualmente seleccionado
         
         const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -457,11 +476,13 @@
             document.getElementById('vista-dashboard-coach').classList.add('hidden');
             document.getElementById('btn-volver-lista').classList.add('hidden');
             currentCoachId = null;
+            currentPagoId = null; // Limpiar periodo seleccionado
             renderCoachesList();
         }
 
         function mostrarVistaDashboard(coachId) {
             currentCoachId = coachId;
+            currentPagoId = null; // Limpiar para que se seleccione el más reciente
             document.getElementById('vista-lista-coaches').classList.add('hidden');
             document.getElementById('vista-dashboard-coach').classList.remove('hidden');
             document.getElementById('btn-volver-lista').classList.remove('hidden');
@@ -542,43 +563,84 @@
             const pagos = data.pagos[currentCoachId] || [];
             document.getElementById('coach-total-pagos').textContent = pagos.length;
 
-            // Renderizar calendario y métricas
-            renderCalendar();
-            renderHistorialPagos();
+            // Verificar si hay pagos
+            if (pagos.length === 0) {
+                // Sin pagos: mostrar mensaje
+                document.getElementById('mensaje-sin-pagos').classList.remove('hidden');
+                document.getElementById('contenido-con-pagos').classList.add('hidden');
+            } else {
+                // Con pagos: mostrar contenido
+                document.getElementById('mensaje-sin-pagos').classList.add('hidden');
+                document.getElementById('contenido-con-pagos').classList.remove('hidden');
+                
+                // Cargar selector de periodos
+                cargarSelectorPeriodos();
+                
+                // Si no hay periodo seleccionado, seleccionar el más reciente
+                if (!currentPagoId) {
+                    currentPagoId = pagos[pagos.length - 1].id;
+                }
+                
+                // Renderizar calendario y métricas del periodo
+                renderCalendarioPeriodo();
+                renderHistorialPagos();
+            }
+        }
+
+        function cargarSelectorPeriodos() {
+            const data = loadData();
+            const pagos = (data.pagos[currentCoachId] || []).sort((a, b) => 
+                new Date(a.periodoInicio) - new Date(b.periodoInicio)
+            );
+            
+            const selector = document.getElementById('select-periodo-pago');
+            
+            selector.innerHTML = pagos.map(pago => `
+                <option value="${pago.id}" ${pago.id === currentPagoId ? 'selected' : ''}>
+                    ${formatDateDisplay(pago.periodoInicio)} - ${formatDateDisplay(pago.periodoFin)} 
+                    (${formatCurrency(pago.monto)})
+                </option>
+            `).join('');
         }
 
         // ========================================
         // CALENDARIO
         // ========================================
 
-        function getWeekdaysInMonth(year, month, diasLaborables) {
+        function getDiasLaborablesPeriodo(inicio, fin, diasLaborables) {
             const days = [];
-            const lastDay = new Date(year, month + 1, 0);
+            const inicioDate = new Date(inicio + 'T00:00:00');
+            const finDate = new Date(fin + 'T00:00:00');
             
-            for (let d = 1; d <= lastDay.getDate(); d++) {
-                const date = new Date(year, month, d);
-                const dayOfWeek = date.getDay();
-                
+            let currentDate = new Date(inicioDate);
+            
+            while (currentDate <= finDate) {
+                const dayOfWeek = currentDate.getDay();
                 if (diasLaborables.includes(dayOfWeek)) {
-                    days.push(formatDate(date));
+                    days.push(formatDate(currentDate));
                 }
+                currentDate.setDate(currentDate.getDate() + 1);
             }
             
             return days;
         }
 
-        function renderCalendar() {
+        function renderCalendarioPeriodo() {
             const data = loadData();
             const coach = data.coaches.find(c => c.id === currentCoachId);
+            const pago = (data.pagos[currentCoachId] || []).find(p => p.id === currentPagoId);
+            
+            if (!pago) return;
+            
             const grid = document.getElementById('calendar-grid');
-            const label = document.getElementById('current-month-label');
+            const periodoLabel = document.getElementById('periodo-label');
             
-            label.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            periodoLabel.textContent = `${formatDateDisplay(pago.periodoInicio)} - ${formatDateDisplay(pago.periodoFin)}`;
             
-            const days = getWeekdaysInMonth(currentYear, currentMonth, coach.diasLaborables);
+            const days = getDiasLaborablesPeriodo(pago.periodoInicio, pago.periodoFin, coach.diasLaborables);
             const asistencias = data.asistencias[currentCoachId] || {};
             
-            // Determinar número de columnas (max días en coach)
+            // Determinar número de columnas
             const maxDias = coach.diasLaborables.length;
             
             let html = `<div class="grid grid-cols-${maxDias} gap-2 min-w-max">`;
@@ -589,49 +651,29 @@
                 html += `<div class="text-xs font-semibold text-gray-700 text-center py-2">${diasNombres[dia]}</div>`;
             });
             
-            // Agrupar días por semana
-            const semanas = [];
-            let semanaActual = [];
+            // Renderizar días agrupados por semana
+            let diaIndex = 0;
+            let semanaIniciada = false;
             
             days.forEach(dateStr => {
-                const date = new Date(dateStr + 'T00:00:00');
-                const dayOfWeek = date.getDay();
+                const asist = asistencias[dateStr] || { asistio: false, reposicion: false };
                 
-                // Si es el primer día de la semana según config, iniciar nueva semana
-                if (dayOfWeek === coach.diasLaborables[0] && semanaActual.length > 0) {
-                    semanas.push(semanaActual);
-                    semanaActual = [];
-                }
-                
-                semanaActual.push(dateStr);
-            });
-            
-            if (semanaActual.length > 0) {
-                semanas.push(semanaActual);
-            }
-            
-            // Renderizar semanas
-            semanas.forEach(semana => {
-                semana.forEach(dateStr => {
-                    const asist = asistencias[dateStr] || { asistio: false, reposicion: false };
-                    
-                    html += `
-                        <div class="border border-gray-200 rounded-lg p-3 ${asist.asistio ? 'bg-green-50' : 'bg-gray-50'}"
-                             oncontextmenu="toggleReposicion('${dateStr}'); return false;">
-                            <p class="text-xs text-gray-400 mb-2">${formatDateDisplay(dateStr).split('/').slice(0,2).join('/')}</p>
-                            <label class="flex items-center gap-2 text-xs cursor-pointer">
-                                <input 
-                                    type="checkbox" 
-                                    ${asist.asistio ? 'checked' : ''}
-                                    onchange="toggleAsistencia('${dateStr}')"
-                                    class="rounded border-gray-300"
-                                >
-                                <span>Asistió</span>
-                            </label>
-                            ${asist.reposicion ? '<span class="inline-block mt-2 px-2 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded">R</span>' : ''}
-                        </div>
-                    `;
-                });
+                html += `
+                    <div class="border border-gray-200 rounded-lg p-3 ${asist.asistio ? 'bg-green-50' : 'bg-gray-50'}"
+                         oncontextmenu="toggleReposicion('${dateStr}'); return false;">
+                        <p class="text-xs text-gray-400 mb-2">${formatDateDisplay(dateStr).split('/').slice(0,2).join('/')}</p>
+                        <label class="flex items-center gap-2 text-xs cursor-pointer">
+                            <input 
+                                type="checkbox" 
+                                ${asist.asistio ? 'checked' : ''}
+                                onchange="toggleAsistencia('${dateStr}')"
+                                class="rounded border-gray-300"
+                            >
+                            <span>Asistió</span>
+                        </label>
+                        ${asist.reposicion ? '<span class="inline-block mt-2 px-2 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded">R</span>' : ''}
+                    </div>
+                `;
             });
             
             html += '</div>';
@@ -653,7 +695,7 @@
             
             data.asistencias[currentCoachId][dateStr].asistio = !data.asistencias[currentCoachId][dateStr].asistio;
             saveData(data);
-            renderCalendar();
+            updateMetrics();
         }
 
         function toggleReposicion(dateStr) {
@@ -669,13 +711,17 @@
             
             data.asistencias[currentCoachId][dateStr].reposicion = !data.asistencias[currentCoachId][dateStr].reposicion;
             saveData(data);
-            renderCalendar();
+            renderCalendarioPeriodo();
         }
 
         function updateMetrics() {
             const data = loadData();
             const coach = data.coaches.find(c => c.id === currentCoachId);
-            const days = getWeekdaysInMonth(currentYear, currentMonth, coach.diasLaborables);
+            const pago = (data.pagos[currentCoachId] || []).find(p => p.id === currentPagoId);
+            
+            if (!pago) return;
+            
+            const days = getDiasLaborablesPeriodo(pago.periodoInicio, pago.periodoFin, coach.diasLaborables);
             const asistencias = data.asistencias[currentCoachId] || {};
             
             const programadas = days.length;
@@ -760,7 +806,13 @@
             const data = loadData();
             data.pagos[currentCoachId] = data.pagos[currentCoachId].filter(p => p.id !== pagoId);
             saveData(data);
-            renderHistorialPagos();
+            
+            // Si era el pago seleccionado, limpiar selección
+            if (currentPagoId === pagoId) {
+                currentPagoId = null;
+            }
+            
+            renderDashboard(); // Recargar todo
         }
 
         // ========================================
@@ -969,24 +1021,14 @@
         // Buscar coach
         document.getElementById('buscar-coach').addEventListener('input', renderCoachesList);
         
-        // Navegación calendario
-        document.getElementById('btn-prev-month').addEventListener('click', () => {
-            currentMonth--;
-            if (currentMonth < 0) {
-                currentMonth = 11;
-                currentYear--;
-            }
-            renderCalendar();
+        // Selector de periodo
+        document.getElementById('select-periodo-pago').addEventListener('change', (e) => {
+            currentPagoId = e.target.value;
+            renderCalendarioPeriodo();
         });
         
-        document.getElementById('btn-next-month').addEventListener('click', () => {
-            currentMonth++;
-            if (currentMonth > 11) {
-                currentMonth = 0;
-                currentYear++;
-            }
-            renderCalendar();
-        });
+        // Botón registrar primer pago
+        document.getElementById('btn-registrar-pago-inicio').addEventListener('click', abrirModalPago);
         
         // Registrar pago
         document.getElementById('btn-registrar-pago').addEventListener('click', abrirModalPago);
@@ -1025,8 +1067,11 @@
             data.pagos[currentCoachId].push(pago);
             saveData(data);
             
+            // Seleccionar el pago recién creado
+            currentPagoId = pago.id;
+            
             cerrarModalPago();
-            renderHistorialPagos();
+            renderDashboard(); // Recargar todo el dashboard
         });
         
         // Auto-calcular resumen al cambiar valores en modal de pago
