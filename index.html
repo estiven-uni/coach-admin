@@ -15,17 +15,34 @@
             <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
                 <div>
                     <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Panel de Entrenamiento</h1>
-                    <p class="text-sm text-gray-500 mt-1">Demo estática (sin base de datos)</p>
+                    <p class="text-sm text-gray-500 mt-1">Datos guardados en localStorage</p>
                 </div>
                 
                 <!-- Barra de acciones -->
                 <div class="flex flex-wrap items-center gap-3">
+                    <!-- Selector de coach actual -->
+                    <div class="flex items-center gap-2 px-3 py-2 bg-blue-50 border border-blue-200 rounded-xl">
+                        <label for="coach-actual" class="text-sm font-medium text-blue-900">Coach:</label>
+                        <input 
+                            type="text" 
+                            id="coach-actual"
+                            placeholder="Nombre del coach"
+                            class="bg-transparent border-none text-sm font-semibold text-blue-900 focus:outline-none focus:ring-0 w-40"
+                            aria-label="Coach actual"
+                        >
+                        <button 
+                            id="btn-cambiar-coach"
+                            class="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                            title="Cambiar coach"
+                        >
+                            ✓
+                        </button>
+                    </div>
                     <!-- TODO: Conectar selector de periodo a lógica de filtrado y base de datos -->
                     <label for="periodo-selector" class="sr-only">Selector de periodo</label>
                     <select 
                         id="periodo-selector"
-                        disabled 
-                        class="px-4 py-2 text-sm border border-gray-300 rounded-xl bg-white opacity-60 cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        class="px-4 py-2 text-sm border border-gray-300 rounded-xl bg-white hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                         aria-label="Selector de periodo"
                     >
                         <option>Este mes</option>
@@ -35,8 +52,8 @@
                     
                     <!-- TODO: Implementar exportación a JSON desde Supabase -->
                     <button 
-                        disabled
-                        class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-xl bg-white opacity-60 cursor-not-allowed hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        id="btn-export-json"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-xl bg-white hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                         aria-label="Exportar datos en formato JSON"
                     >
                         Exportar JSON
@@ -44,8 +61,8 @@
                     
                     <!-- TODO: Implementar exportación a CSV desde Supabase -->
                     <button 
-                        disabled
-                        class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-xl bg-white opacity-60 cursor-not-allowed hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        id="btn-export-csv"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-xl bg-white hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                         aria-label="Exportar datos en formato CSV"
                     >
                         Exportar CSV
@@ -53,12 +70,13 @@
                     
                     <!-- TODO: Implementar importación de JSON a Supabase -->
                     <button 
-                        disabled
-                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl opacity-60 cursor-not-allowed hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        id="btn-import-json"
+                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                         aria-label="Importar datos desde archivo JSON"
                     >
                         Importar JSON
                     </button>
+                    <input type="file" id="file-input" accept=".json" class="hidden">
                 </div>
             </div>
         </div>
@@ -74,35 +92,35 @@
                 <!-- Métrica: Programadas -->
                 <article class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
                     <h3 class="text-sm font-medium text-gray-500">Programadas (L–V)</h3>
-                    <p class="text-3xl font-bold text-gray-900 mt-2">0</p>
+                    <p id="metric-programadas" class="text-3xl font-bold text-gray-900 mt-2">0</p>
                     <p class="text-xs text-gray-400 mt-2">Sesiones totales del periodo</p>
                 </article>
                 
                 <!-- Métrica: Asistidas -->
                 <article class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
                     <h3 class="text-sm font-medium text-gray-500">Asistidas</h3>
-                    <p class="text-3xl font-bold text-green-600 mt-2">0</p>
+                    <p id="metric-asistidas" class="text-3xl font-bold text-green-600 mt-2">0</p>
                     <p class="text-xs text-gray-400 mt-2">Confirmadas y completadas</p>
                 </article>
                 
                 <!-- Métrica: Faltas -->
                 <article class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
                     <h3 class="text-sm font-medium text-gray-500">Faltas</h3>
-                    <p class="text-3xl font-bold text-red-600 mt-2">0</p>
+                    <p id="metric-faltas" class="text-3xl font-bold text-red-600 mt-2">0</p>
                     <p class="text-xs text-gray-400 mt-2">Sin asistencia registrada</p>
                 </article>
                 
                 <!-- Métrica: Reposiciones -->
                 <article class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
                     <h3 class="text-sm font-medium text-gray-500">Reposiciones</h3>
-                    <p class="text-3xl font-bold text-blue-600 mt-2">0</p>
+                    <p id="metric-reposiciones" class="text-3xl font-bold text-blue-600 mt-2">0</p>
                     <p class="text-xs text-gray-400 mt-2">Sesiones reprogramadas</p>
                 </article>
                 
                 <!-- Métrica: Pendientes -->
                 <article class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
                     <h3 class="text-sm font-medium text-gray-500">Pendientes</h3>
-                    <p class="text-3xl font-bold text-amber-600 mt-2">0</p>
+                    <p id="metric-pendientes" class="text-3xl font-bold text-amber-600 mt-2">0</p>
                     <p class="text-xs text-gray-400 mt-2">Sin confirmar todavía</p>
                 </article>
             </div>
@@ -115,34 +133,25 @@
             <section aria-labelledby="calendario-titulo" class="md:col-span-7">
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
                     <div class="flex items-center justify-between mb-4">
-                        <h2 id="calendario-titulo" class="text-xl font-bold text-gray-900">Calendario de asistencia</h2>
+                        <div>
+                            <h2 id="calendario-titulo" class="text-xl font-bold text-gray-900">Calendario de asistencia</h2>
+                            <p id="calendario-coach" class="text-xs text-blue-600 font-medium mt-1"></p>
+                        </div>
                         
                         <!-- Selector de mes -->
                         <!-- TODO: Conectar selector de mes a lógica de navegación y carga de datos desde Supabase -->
                         <div class="flex items-center gap-2">
                             <button 
-                                disabled
-                                class="px-3 py-1 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg opacity-60 cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                                id="btn-prev-month"
+                                class="px-3 py-1 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                                 aria-label="Mes anterior"
                             >
                                 «
                             </button>
-                            <label for="mes-selector" class="sr-only">Seleccionar mes</label>
-                            <select 
-                                id="mes-selector"
-                                disabled
-                                class="px-3 py-1 text-sm border border-gray-300 rounded-lg bg-white opacity-60 cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
-                            >
-                                <option>Enero 2025</option>
-                                <option>Febrero 2025</option>
-                                <option>Marzo 2025</option>
-                                <option selected>Octubre 2025</option>
-                                <option>Noviembre 2025</option>
-                                <option>Diciembre 2025</option>
-                            </select>
+                            <span id="current-month-label" class="px-3 py-1 text-sm font-medium text-gray-900">Octubre 2025</span>
                             <button 
-                                disabled
-                                class="px-3 py-1 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg opacity-60 cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                                id="btn-next-month"
+                                class="px-3 py-1 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                                 aria-label="Mes siguiente"
                             >
                                 »
@@ -150,186 +159,12 @@
                         </div>
                     </div>
                     
-                    <p class="text-xs text-gray-500 mb-4">Solo lunes a viernes</p>
+                    <p class="text-xs text-gray-500 mb-4">Solo lunes a viernes • Click derecho en día para marcar reposición</p>
                     
                     <!-- Cuadrícula del calendario -->
-                    <div class="overflow-x-auto">
-                        <div class="grid grid-cols-5 gap-2 min-w-max">
-                            
-                            <!-- Headers de días -->
-                            <div class="text-xs font-semibold text-gray-700 text-center py-2">Lun</div>
-                            <div class="text-xs font-semibold text-gray-700 text-center py-2">Mar</div>
-                            <div class="text-xs font-semibold text-gray-700 text-center py-2">Mié</div>
-                            <div class="text-xs font-semibold text-gray-700 text-center py-2">Jue</div>
-                            <div class="text-xs font-semibold text-gray-700 text-center py-2">Vie</div>
-                            
-                            <!-- Semana 1 -->
-                            <!-- TODO: Conectar checkboxes de asistencia a Supabase para persistir estado -->
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-06</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-06">
-                                    <span>Asistido</span>
-                                </label>
-                                <span class="hidden inline-block mt-2 px-2 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded">R</span>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-07</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-07">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-08</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-08">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-09</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-09">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-10</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-10">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <!-- Semana 2 -->
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-13</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-13">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-14</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-14">
-                                    <span>Asistido</span>
-                                </label>
-                                <span class="inline-block mt-2 px-2 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded" aria-label="Reposición">R</span>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-15</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-15">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-16</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-16">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-17</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-17">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <!-- Semana 3 -->
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-20</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-20">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-21</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-21">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-22</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-22">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-23</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-23">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-24</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-24">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <!-- Semana 4 -->
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-27</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-27">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-28</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-28">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-29</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-29">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-30</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-30">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                            
-                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
-                                <p class="text-xs text-gray-400 mb-2">2025-10-31</p>
-                                <label class="flex items-center gap-2 text-xs">
-                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-31">
-                                    <span>Asistido</span>
-                                </label>
-                            </div>
-                        </div>
+                    <!-- TODO: Conectar checkboxes de asistencia a Supabase para persistir estado -->
+                    <div id="calendar-grid" class="overflow-x-auto">
+                        <!-- El calendario se generará dinámicamente con JavaScript -->
                     </div>
                     
                     <!-- Fines de semana -->
@@ -338,7 +173,7 @@
                         <p class="text-xs text-gray-500 mt-1">Sábados y domingos no se muestran en el calendario de entrenamientos regulares.</p>
                     </div>
                     
-                    <p class="text-xs text-gray-500 mt-4" role="note">Este calendario es de demostración, no guarda datos.</p>
+                    <p class="text-xs text-gray-500 mt-4" role="note">Los datos se guardan en localStorage de tu navegador.</p>
                 </div>
             </section>
             
@@ -348,9 +183,9 @@
                 <!-- Formulario de registro de pago -->
                 <!-- TODO: Conectar formulario de pagos a Supabase para persistir registros -->
                 <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                    <h2 id="pagos-titulo" class="text-xl font-bold text-gray-900 mb-4">Registrar pago (demo)</h2>
+                    <h2 id="pagos-titulo" class="text-xl font-bold text-gray-900 mb-4">Registrar pago</h2>
                     
-                    <form class="space-y-4">
+                    <form id="form-pago" class="space-y-4">
                         <div>
                             <label for="pago-coach" class="block text-sm font-medium text-gray-700 mb-1">Coach</label>
                             <input 
@@ -410,16 +245,17 @@
                             ></textarea>
                         </div>
                         
+                        <input type="hidden" id="pago-id" value="">
                         <button 
-                            type="button"
-                            disabled
-                            class="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg opacity-60 cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                            type="submit"
+                            id="btn-guardar-pago"
+                            class="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                         >
                             Guardar
                         </button>
                     </form>
                     
-                    <p class="text-xs text-gray-500 mt-4">Esta es una maqueta. Los datos no se guardarán hasta conectar la base de datos.</p>
+                    <p class="text-xs text-gray-500 mt-4">Los datos se guardan en localStorage de tu navegador.</p>
                 </div>
                 
                 <!-- Tabla de pagos -->
@@ -439,63 +275,13 @@
                                     <th class="text-left py-3 px-2 font-semibold text-gray-700">Acciones</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody id="tabla-pagos-body">
                                 <!-- TODO: Las filas deben generarse dinámicamente desde Supabase -->
-                                <tr class="border-b border-gray-100">
-                                    <td class="py-3 px-2 text-gray-900">2025-10-01</td>
-                                    <td class="py-3 px-2 text-gray-600 text-xs">01/10 → 31/10</td>
-                                    <td class="py-3 px-2 font-semibold text-gray-900">$450.000</td>
-                                    <td class="py-3 px-2 text-gray-900">Carlos Pérez</td>
-                                    <td class="py-3 px-2 text-gray-500 text-xs">Pago completo</td>
-                                    <td class="py-3 px-2">
-                                        <div class="flex gap-2">
-                                            <button 
-                                                disabled
-                                                class="text-xs text-blue-600 opacity-60 cursor-not-allowed"
-                                                aria-label="Editar pago"
-                                            >
-                                                Editar
-                                            </button>
-                                            <button 
-                                                disabled
-                                                class="text-xs text-red-600 opacity-60 cursor-not-allowed"
-                                                aria-label="Eliminar pago"
-                                            >
-                                                Eliminar
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
-                                <tr class="border-b border-gray-100">
-                                    <td class="py-3 px-2 text-gray-900">2025-09-28</td>
-                                    <td class="py-3 px-2 text-gray-600 text-xs">01/09 → 30/09</td>
-                                    <td class="py-3 px-2 font-semibold text-gray-900">$450.000</td>
-                                    <td class="py-3 px-2 text-gray-900">Carlos Pérez</td>
-                                    <td class="py-3 px-2 text-gray-500 text-xs">—</td>
-                                    <td class="py-3 px-2">
-                                        <div class="flex gap-2">
-                                            <button 
-                                                disabled
-                                                class="text-xs text-blue-600 opacity-60 cursor-not-allowed"
-                                                aria-label="Editar pago"
-                                            >
-                                                Editar
-                                            </button>
-                                            <button 
-                                                disabled
-                                                class="text-xs text-red-600 opacity-60 cursor-not-allowed"
-                                                aria-label="Eliminar pago"
-                                            >
-                                                Eliminar
-                                            </button>
-                                        </div>
-                                    </td>
-                                </tr>
                             </tbody>
                         </table>
                     </div>
                     
-                    <p class="text-xs text-gray-500 mt-4">Datos de ejemplo. Se cargarán desde la base de datos al conectar.</p>
+                    <p class="text-xs text-gray-500 mt-4">Los datos se cargan desde localStorage de tu navegador.</p>
                 </div>
             </section>
         </div>
@@ -504,16 +290,17 @@
         <!-- TODO: Conectar configuración a Supabase para persistir preferencias -->
         <section aria-labelledby="config-titulo" class="mb-8">
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                <h2 id="config-titulo" class="text-xl font-bold text-gray-900 mb-4">Configuración (demo)</h2>
+                <h2 id="config-titulo" class="text-xl font-bold text-gray-900 mb-4">Configuración</h2>
                 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <!-- Días laborables -->
                     <div>
                         <h3 class="text-sm font-medium text-gray-700 mb-3">Días laborables</h3>
-                        <div class="flex flex-wrap gap-3">
+                        <div id="dias-laborables" class="flex flex-wrap gap-3">
                             <label class="flex items-center gap-2 text-sm">
                                 <input 
                                     type="checkbox" 
+                                    data-dia="1"
                                     checked 
                                     class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500"
                                     aria-label="Lunes laborable"
@@ -523,6 +310,7 @@
                             <label class="flex items-center gap-2 text-sm">
                                 <input 
                                     type="checkbox" 
+                                    data-dia="2"
                                     checked 
                                     class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500"
                                     aria-label="Martes laborable"
@@ -532,6 +320,7 @@
                             <label class="flex items-center gap-2 text-sm">
                                 <input 
                                     type="checkbox" 
+                                    data-dia="3"
                                     checked 
                                     class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500"
                                     aria-label="Miércoles laborable"
@@ -541,6 +330,7 @@
                             <label class="flex items-center gap-2 text-sm">
                                 <input 
                                     type="checkbox" 
+                                    data-dia="4"
                                     checked 
                                     class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500"
                                     aria-label="Jueves laborable"
@@ -550,6 +340,7 @@
                             <label class="flex items-center gap-2 text-sm">
                                 <input 
                                     type="checkbox" 
+                                    data-dia="5"
                                     checked 
                                     class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500"
                                     aria-label="Viernes laborable"
@@ -574,13 +365,13 @@
                 
                 <button 
                     type="button"
-                    disabled
-                    class="mt-6 px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg opacity-60 cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                    id="btn-guardar-config"
+                    class="mt-6 px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                 >
                     Guardar configuración
                 </button>
                 
-                <p class="text-xs text-gray-500 mt-4">Se aplicará cuando conectes la base de datos.</p>
+                <p class="text-xs text-gray-500 mt-4">Los cambios se guardan en localStorage de tu navegador.</p>
             </div>
         </section>
 
@@ -589,9 +380,573 @@
     <!-- Footer -->
     <footer class="border-t border-gray-200 bg-white">
         <div class="container mx-auto px-4 py-4 md:px-6">
-            <p class="text-xs text-gray-500 text-center">Versión estática para pruebas. Sin almacenamiento.</p>
+            <p class="text-xs text-gray-500 text-center">Versión funcional con localStorage. Datos guardados localmente en tu navegador.</p>
         </div>
     </footer>
 
+    <script>
+        // ========================================
+        // GESTIÓN DE DATOS CON LOCALSTORAGE
+        // ========================================
+        
+        const STORAGE_KEYS = {
+            ASISTENCIAS: 'coach_asistencias',
+            REPOSICIONES: 'coach_reposiciones',
+            PAGOS: 'coach_pagos',
+            CONFIG: 'coach_config',
+            COACH_ACTUAL: 'coach_actual'
+        };
+
+        // Estado global
+        let currentYear = 2025;
+        let currentMonth = 9; // Octubre (0-based)
+        let editandoPagoId = null;
+        let currentCoach = '';
+
+        // Funciones de almacenamiento
+        const storage = {
+            get(key) {
+                try {
+                    const item = localStorage.getItem(key);
+                    return item ? JSON.parse(item) : null;
+                } catch (e) {
+                    console.error('Error al leer localStorage:', e);
+                    return null;
+                }
+            },
+            set(key, value) {
+                try {
+                    localStorage.setItem(key, JSON.stringify(value));
+                } catch (e) {
+                    console.error('Error al guardar en localStorage:', e);
+                }
+            },
+            remove(key) {
+                localStorage.removeItem(key);
+            }
+        };
+
+        // Inicializar datos
+        function initData() {
+            // Estructura: { "NombreCoach": { "2025-10-01": true, "2025-10-02": false } }
+            if (!storage.get(STORAGE_KEYS.ASISTENCIAS)) {
+                storage.set(STORAGE_KEYS.ASISTENCIAS, {});
+            }
+            if (!storage.get(STORAGE_KEYS.REPOSICIONES)) {
+                storage.set(STORAGE_KEYS.REPOSICIONES, {});
+            }
+            if (!storage.get(STORAGE_KEYS.PAGOS)) {
+                storage.set(STORAGE_KEYS.PAGOS, []);
+            }
+            if (!storage.get(STORAGE_KEYS.CONFIG)) {
+                storage.set(STORAGE_KEYS.CONFIG, {
+                    diasLaborables: [1, 2, 3, 4, 5], // Lun-Vie
+                    precioMensual: 450000
+                });
+            }
+            // Cargar coach actual
+            currentCoach = storage.get(STORAGE_KEYS.COACH_ACTUAL) || '';
+            if (currentCoach) {
+                document.getElementById('coach-actual').value = currentCoach;
+            }
+        }
+
+        // ========================================
+        // UTILIDADES
+        // ========================================
+
+        function formatDate(date) {
+            const year = date.getFullYear();
+            const month = String(date.getMonth() + 1).padStart(2, '0');
+            const day = String(date.getDate()).padStart(2, '0');
+            return `${year}-${month}-${day}`;
+        }
+
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('es-CO', {
+                style: 'currency',
+                currency: 'COP',
+                minimumFractionDigits: 0
+            }).format(amount);
+        }
+
+        function formatDateDisplay(dateString) {
+            const [y, m, d] = dateString.split('-');
+            return `${d}/${m}`;
+        }
+
+        const monthNames = [
+            'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+        ];
+
+        // ========================================
+        // CALENDARIO
+        // ========================================
+
+        function getWeekdaysInMonth(year, month) {
+            const config = storage.get(STORAGE_KEYS.CONFIG);
+            const diasLaborables = config?.diasLaborables || [1, 2, 3, 4, 5];
+            
+            const days = [];
+            const firstDay = new Date(year, month, 1);
+            const lastDay = new Date(year, month + 1, 0);
+            
+            for (let d = 1; d <= lastDay.getDate(); d++) {
+                const date = new Date(year, month, d);
+                const dayOfWeek = date.getDay();
+                
+                // dayOfWeek: 0=Dom, 1=Lun, 2=Mar, etc.
+                // Convertimos a nuestro sistema: 1=Lun, 2=Mar, etc.
+                const diaSistema = dayOfWeek === 0 ? 7 : dayOfWeek;
+                
+                if (diasLaborables.includes(diaSistema)) {
+                    days.push(formatDate(date));
+                }
+            }
+            
+            return days;
+        }
+
+        function renderCalendar() {
+            const grid = document.getElementById('calendar-grid');
+            const label = document.getElementById('current-month-label');
+            const coachLabel = document.getElementById('calendario-coach');
+            
+            if (!currentCoach) {
+                grid.innerHTML = '<div class="text-center py-8 text-gray-500"><p class="text-sm">Por favor, ingresa el nombre del coach arriba para ver el calendario.</p></div>';
+                coachLabel.textContent = '';
+                updateMetrics();
+                return;
+            }
+            
+            label.textContent = `${monthNames[currentMonth]} ${currentYear}`;
+            coachLabel.textContent = `Coach: ${currentCoach}`;
+            
+            const days = getWeekdaysInMonth(currentYear, currentMonth);
+            const asistenciasData = storage.get(STORAGE_KEYS.ASISTENCIAS) || {};
+            const reposicionesData = storage.get(STORAGE_KEYS.REPOSICIONES) || {};
+            
+            // Obtener datos del coach actual
+            const asistencias = asistenciasData[currentCoach] || {};
+            const reposiciones = reposicionesData[currentCoach] || {};
+            
+            let html = '<div class="grid grid-cols-5 gap-2 min-w-max">';
+            
+            // Headers
+            html += '<div class="text-xs font-semibold text-gray-700 text-center py-2">Lun</div>';
+            html += '<div class="text-xs font-semibold text-gray-700 text-center py-2">Mar</div>';
+            html += '<div class="text-xs font-semibold text-gray-700 text-center py-2">Mié</div>';
+            html += '<div class="text-xs font-semibold text-gray-700 text-center py-2">Jue</div>';
+            html += '<div class="text-xs font-semibold text-gray-700 text-center py-2">Vie</div>';
+            
+            // Días
+            days.forEach(dateStr => {
+                const isAsistido = asistencias[dateStr] || false;
+                const isReposicion = reposiciones[dateStr] || false;
+                
+                html += `
+                    <div class="border border-gray-200 rounded-lg p-3 bg-gray-50" data-date="${dateStr}" oncontextmenu="toggleReposicion('${dateStr}'); return false;">
+                        <p class="text-xs text-gray-400 mb-2">${formatDateDisplay(dateStr)}</p>
+                        <label class="flex items-center gap-2 text-xs cursor-pointer">
+                            <input 
+                                type="checkbox" 
+                                ${isAsistido ? 'checked' : ''}
+                                onchange="toggleAsistencia('${dateStr}')"
+                                class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" 
+                                aria-label="Marcar asistencia para ${dateStr}"
+                            >
+                            <span>Asistido</span>
+                        </label>
+                        ${isReposicion ? '<span class="inline-block mt-2 px-2 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded" aria-label="Reposición">R</span>' : ''}
+                    </div>
+                `;
+            });
+            
+            html += '</div>';
+            grid.innerHTML = html;
+            
+            updateMetrics();
+        }
+
+        function toggleAsistencia(dateStr) {
+            if (!currentCoach) return;
+            
+            const asistenciasData = storage.get(STORAGE_KEYS.ASISTENCIAS) || {};
+            if (!asistenciasData[currentCoach]) {
+                asistenciasData[currentCoach] = {};
+            }
+            asistenciasData[currentCoach][dateStr] = !asistenciasData[currentCoach][dateStr];
+            storage.set(STORAGE_KEYS.ASISTENCIAS, asistenciasData);
+            updateMetrics();
+        }
+
+        function toggleReposicion(dateStr) {
+            if (!currentCoach) return;
+            
+            const reposicionesData = storage.get(STORAGE_KEYS.REPOSICIONES) || {};
+            if (!reposicionesData[currentCoach]) {
+                reposicionesData[currentCoach] = {};
+            }
+            reposicionesData[currentCoach][dateStr] = !reposicionesData[currentCoach][dateStr];
+            storage.set(STORAGE_KEYS.REPOSICIONES, reposicionesData);
+            renderCalendar();
+        }
+
+        // ========================================
+        // MÉTRICAS
+        // ========================================
+
+        function updateMetrics() {
+            if (!currentCoach) {
+                document.getElementById('metric-programadas').textContent = 0;
+                document.getElementById('metric-asistidas').textContent = 0;
+                document.getElementById('metric-faltas').textContent = 0;
+                document.getElementById('metric-reposiciones').textContent = 0;
+                document.getElementById('metric-pendientes').textContent = 0;
+                return;
+            }
+            
+            const days = getWeekdaysInMonth(currentYear, currentMonth);
+            const asistenciasData = storage.get(STORAGE_KEYS.ASISTENCIAS) || {};
+            const reposicionesData = storage.get(STORAGE_KEYS.REPOSICIONES) || {};
+            
+            const asistencias = asistenciasData[currentCoach] || {};
+            const reposiciones = reposicionesData[currentCoach] || {};
+            
+            const programadas = days.length;
+            let asistidas = 0;
+            let reposicionesCount = 0;
+            
+            days.forEach(day => {
+                if (asistencias[day]) asistidas++;
+                if (reposiciones[day]) reposicionesCount++;
+            });
+            
+            const faltas = programadas - asistidas;
+            const pendientes = programadas - asistidas;
+            
+            document.getElementById('metric-programadas').textContent = programadas;
+            document.getElementById('metric-asistidas').textContent = asistidas;
+            document.getElementById('metric-faltas').textContent = faltas;
+            document.getElementById('metric-reposiciones').textContent = reposicionesCount;
+            document.getElementById('metric-pendientes').textContent = pendientes;
+        }
+
+        // ========================================
+        // GESTIÓN DE COACH ACTUAL
+        // ========================================
+
+        function cambiarCoach() {
+            const nuevoCoach = document.getElementById('coach-actual').value.trim();
+            
+            if (!nuevoCoach) {
+                alert('Por favor ingresa el nombre del coach');
+                return;
+            }
+            
+            currentCoach = nuevoCoach;
+            storage.set(STORAGE_KEYS.COACH_ACTUAL, currentCoach);
+            
+            // Autocompletar en formulario de pagos
+            if (document.getElementById('pago-coach').value === '') {
+                document.getElementById('pago-coach').value = currentCoach;
+            }
+            
+            renderCalendar();
+            renderPagos();
+        }
+
+        document.getElementById('btn-cambiar-coach').addEventListener('click', cambiarCoach);
+        
+        document.getElementById('coach-actual').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                cambiarCoach();
+            }
+        });
+
+        // ========================================
+        // NAVEGACIÓN DE MESES
+        // ========================================
+
+        document.getElementById('btn-prev-month').addEventListener('click', () => {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            renderCalendar();
+        });
+
+        document.getElementById('btn-next-month').addEventListener('click', () => {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            renderCalendar();
+        });
+
+        // ========================================
+        // PAGOS
+        // ========================================
+
+        function renderPagos() {
+            const tbody = document.getElementById('tabla-pagos-body');
+            let pagos = storage.get(STORAGE_KEYS.PAGOS) || [];
+            
+            // Filtrar por coach actual si está seleccionado
+            if (currentCoach) {
+                pagos = pagos.filter(p => p.coach === currentCoach);
+            }
+            
+            if (pagos.length === 0) {
+                const mensaje = currentCoach 
+                    ? `No hay pagos registrados para ${currentCoach}`
+                    : 'No hay pagos registrados';
+                tbody.innerHTML = `<tr><td colspan="6" class="py-4 px-2 text-center text-gray-500 text-sm">${mensaje}</td></tr>`;
+                return;
+            }
+            
+            let html = '';
+            pagos.forEach(pago => {
+                html += `
+                    <tr class="border-b border-gray-100">
+                        <td class="py-3 px-2 text-gray-900">${formatDateDisplay(pago.fechaPago)}</td>
+                        <td class="py-3 px-2 text-gray-600 text-xs">${formatDateDisplay(pago.periodoInicio)} → ${formatDateDisplay(pago.periodoFin)}</td>
+                        <td class="py-3 px-2 font-semibold text-gray-900">${formatCurrency(pago.monto)}</td>
+                        <td class="py-3 px-2 text-gray-900">${pago.coach}</td>
+                        <td class="py-3 px-2 text-gray-500 text-xs">${pago.nota || '—'}</td>
+                        <td class="py-3 px-2">
+                            <div class="flex gap-2">
+                                <button 
+                                    onclick="editarPago('${pago.id}')"
+                                    class="text-xs text-blue-600 hover:underline"
+                                    aria-label="Editar pago"
+                                >
+                                    Editar
+                                </button>
+                                <button 
+                                    onclick="eliminarPago('${pago.id}')"
+                                    class="text-xs text-red-600 hover:underline"
+                                    aria-label="Eliminar pago"
+                                >
+                                    Eliminar
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `;
+            });
+            
+            tbody.innerHTML = html;
+        }
+
+        document.getElementById('form-pago').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            const coach = document.getElementById('pago-coach').value;
+            const monto = parseFloat(document.getElementById('pago-monto').value);
+            const fechaPago = document.getElementById('pago-fecha').value;
+            const periodoInicio = document.getElementById('pago-inicio').value;
+            const periodoFin = document.getElementById('pago-fin').value;
+            const nota = document.getElementById('pago-nota').value;
+            const pagoId = document.getElementById('pago-id').value;
+            
+            if (!coach || !monto || !fechaPago || !periodoInicio || !periodoFin) {
+                alert('Por favor completa todos los campos obligatorios');
+                return;
+            }
+            
+            const pagos = storage.get(STORAGE_KEYS.PAGOS) || [];
+            
+            if (pagoId) {
+                // Editar
+                const index = pagos.findIndex(p => p.id === pagoId);
+                if (index !== -1) {
+                    pagos[index] = { id: pagoId, coach, monto, fechaPago, periodoInicio, periodoFin, nota };
+                }
+            } else {
+                // Crear
+                const nuevoPago = {
+                    id: Date.now().toString(),
+                    coach,
+                    monto,
+                    fechaPago,
+                    periodoInicio,
+                    periodoFin,
+                    nota
+                };
+                pagos.push(nuevoPago);
+            }
+            
+            storage.set(STORAGE_KEYS.PAGOS, pagos);
+            limpiarFormularioPago();
+            renderPagos();
+        });
+
+        function editarPago(id) {
+            const pagos = storage.get(STORAGE_KEYS.PAGOS) || [];
+            const pago = pagos.find(p => p.id === id);
+            
+            if (pago) {
+                document.getElementById('pago-id').value = pago.id;
+                document.getElementById('pago-coach').value = pago.coach;
+                document.getElementById('pago-monto').value = pago.monto;
+                document.getElementById('pago-fecha').value = pago.fechaPago;
+                document.getElementById('pago-inicio').value = pago.periodoInicio;
+                document.getElementById('pago-fin').value = pago.periodoFin;
+                document.getElementById('pago-nota').value = pago.nota || '';
+                
+                document.getElementById('btn-guardar-pago').textContent = 'Actualizar';
+                document.getElementById('pagos-titulo').textContent = 'Editar pago';
+            }
+        }
+
+        function eliminarPago(id) {
+            if (!confirm('¿Estás seguro de eliminar este pago?')) return;
+            
+            let pagos = storage.get(STORAGE_KEYS.PAGOS) || [];
+            pagos = pagos.filter(p => p.id !== id);
+            storage.set(STORAGE_KEYS.PAGOS, pagos);
+            renderPagos();
+        }
+
+        function limpiarFormularioPago() {
+            document.getElementById('pago-id').value = '';
+            document.getElementById('pago-coach').value = currentCoach || '';
+            document.getElementById('pago-monto').value = '';
+            document.getElementById('pago-fecha').value = '';
+            document.getElementById('pago-inicio').value = '';
+            document.getElementById('pago-fin').value = '';
+            document.getElementById('pago-nota').value = '';
+            document.getElementById('btn-guardar-pago').textContent = 'Guardar';
+            document.getElementById('pagos-titulo').textContent = 'Registrar pago';
+        }
+
+        // ========================================
+        // CONFIGURACIÓN
+        // ========================================
+
+        function cargarConfiguracion() {
+            const config = storage.get(STORAGE_KEYS.CONFIG) || {
+                diasLaborables: [1, 2, 3, 4, 5],
+                precioMensual: 450000
+            };
+            
+            // Marcar checkboxes
+            document.querySelectorAll('#dias-laborables input[type="checkbox"]').forEach(cb => {
+                const dia = parseInt(cb.dataset.dia);
+                cb.checked = config.diasLaborables.includes(dia);
+            });
+            
+            document.getElementById('precio-mensual').value = config.precioMensual;
+        }
+
+        document.getElementById('btn-guardar-config').addEventListener('click', () => {
+            const diasLaborables = [];
+            document.querySelectorAll('#dias-laborables input[type="checkbox"]:checked').forEach(cb => {
+                diasLaborables.push(parseInt(cb.dataset.dia));
+            });
+            
+            const precioMensual = parseFloat(document.getElementById('precio-mensual').value) || 0;
+            
+            storage.set(STORAGE_KEYS.CONFIG, { diasLaborables, precioMensual });
+            
+            alert('Configuración guardada correctamente');
+            renderCalendar(); // Re-renderizar calendario con nuevos días laborables
+        });
+
+        // ========================================
+        // EXPORTAR / IMPORTAR
+        // ========================================
+
+        document.getElementById('btn-export-json').addEventListener('click', () => {
+            const data = {
+                asistencias: storage.get(STORAGE_KEYS.ASISTENCIAS),
+                reposiciones: storage.get(STORAGE_KEYS.REPOSICIONES),
+                pagos: storage.get(STORAGE_KEYS.PAGOS),
+                config: storage.get(STORAGE_KEYS.CONFIG),
+                exportDate: new Date().toISOString()
+            };
+            
+            const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `coach-admin-${formatDate(new Date())}.json`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        document.getElementById('btn-export-csv').addEventListener('click', () => {
+            const pagos = storage.get(STORAGE_KEYS.PAGOS) || [];
+            
+            let csv = 'Fecha Pago,Periodo Inicio,Periodo Fin,Monto,Coach,Nota\n';
+            
+            pagos.forEach(pago => {
+                csv += `${pago.fechaPago},${pago.periodoInicio},${pago.periodoFin},${pago.monto},"${pago.coach}","${pago.nota || ''}"\n`;
+            });
+            
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = `pagos-${formatDate(new Date())}.csv`;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        });
+
+        document.getElementById('btn-import-json').addEventListener('click', () => {
+            document.getElementById('file-input').click();
+        });
+
+        document.getElementById('file-input').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                try {
+                    const data = JSON.parse(event.target.result);
+                    
+                    if (data.asistencias) storage.set(STORAGE_KEYS.ASISTENCIAS, data.asistencias);
+                    if (data.reposiciones) storage.set(STORAGE_KEYS.REPOSICIONES, data.reposiciones);
+                    if (data.pagos) storage.set(STORAGE_KEYS.PAGOS, data.pagos);
+                    if (data.config) storage.set(STORAGE_KEYS.CONFIG, data.config);
+                    
+                    alert('Datos importados correctamente');
+                    cargarConfiguracion();
+                    renderCalendar();
+                    renderPagos();
+                } catch (err) {
+                    alert('Error al importar archivo: ' + err.message);
+                }
+            };
+            reader.readAsText(file);
+            e.target.value = ''; // Reset input
+        });
+
+        // ========================================
+        // INICIALIZACIÓN
+        // ========================================
+
+        document.addEventListener('DOMContentLoaded', () => {
+            initData();
+            cargarConfiguracion();
+            
+            // Autocompletar coach en formulario de pagos si hay un coach actual
+            if (currentCoach) {
+                document.getElementById('pago-coach').value = currentCoach;
+            }
+            
+            renderCalendar();
+            renderPagos();
+        });
+    </script>
 </body>
 </html>
