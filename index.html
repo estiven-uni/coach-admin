@@ -346,28 +346,16 @@
                 </div>
 
                 <div>
-                    <label for="pago-monto-base" class="block text-sm font-medium text-gray-700 mb-1">Monto base del periodo (COP) *</label>
+                    <label for="pago-monto" class="block text-sm font-medium text-gray-700 mb-1">Monto pagado (COP) *</label>
                     <input 
-                        type="number" 
-                        id="pago-monto-base"
-                        required
-                        min="0"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="450000"
-                    >
-                    <p class="text-xs text-gray-500 mt-1">Monto acordado para el periodo completo</p>
-                </div>
-
-                <div>
-                    <label for="pago-monto" class="block text-sm font-medium text-gray-700 mb-1">Monto real pagado (COP) *</label>
-                    <input 
-                        type="number" 
+                        type="text" 
                         id="pago-monto"
                         required
-                        min="0"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 font-semibold text-lg"
+                        placeholder="450.000"
                     >
-                    <p class="text-xs text-gray-500 mt-1">El sistema calcula el monto proporcional según asistencias</p>
+                    <input type="hidden" id="pago-monto-raw">
+                    <p class="text-xs text-gray-500 mt-1">El sistema sugiere el monto proporcional según las asistencias ya registradas</p>
                 </div>
 
                 <div>
@@ -405,6 +393,52 @@
             <p class="text-xs text-gray-500 text-center">Sistema de gestión de coaches - Datos en localStorage</p>
         </div>
     </footer>
+
+    <!-- Modal Nota del Día -->
+    <div id="modal-nota-dia" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900">Nota del día</h2>
+                    <p id="nota-fecha-display" class="text-sm text-gray-500 mt-1"></p>
+                </div>
+                <button onclick="cerrarModalNotaDia()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <form id="form-nota-dia" class="p-6 space-y-4">
+                <div>
+                    <label for="nota-dia-texto" class="block text-sm font-medium text-gray-700 mb-2">Nota</label>
+                    <textarea 
+                        id="nota-dia-texto" 
+                        rows="4"
+                        maxlength="500"
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                        placeholder="Escribe una nota para este día..."
+                    ></textarea>
+                    <p class="text-xs text-gray-400 mt-1">Máximo 500 caracteres</p>
+                </div>
+                
+                <div class="flex gap-3">
+                    <button 
+                        type="submit"
+                        class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium"
+                    >
+                        Guardar nota
+                    </button>
+                    <button 
+                        type="button"
+                        onclick="eliminarNotaDia()"
+                        class="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 font-medium"
+                    >
+                        Eliminar
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
 
     <script>
         // ========================================
@@ -458,7 +492,9 @@
 
         function formatDateDisplay(dateStr) {
             const [y, m, d] = dateStr.split('-');
-            return `${d}/${m}/${y}`;
+            const meses = ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun', 'Jul', 'Ago', 'Sep', 'Oct', 'Nov', 'Dic'];
+            const mesTexto = meses[parseInt(m) - 1];
+            return `${d} ${mesTexto} ${y}`;
         }
 
         function calcularFinDeMes(inicioStr) {
@@ -514,7 +550,7 @@
             grid.innerHTML = coaches.map(coach => {
                 const diasTexto = getDiasTexto(coach.diasLaborables);
                 const pagos = data.pagos[coach.id] || [];
-                const totalPagos = pagos.length;
+                const totalPagos = pagos.reduce((sum, pago) => sum + (pago.monto || 0), 0);
                 
                 return `
                     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow cursor-pointer"
@@ -529,8 +565,8 @@
                                 <span class="text-xs font-medium">${diasTexto}</span>
                             </div>
                             <div class="flex justify-between">
-                                <span class="text-gray-500">Pagos registrados:</span>
-                                <span class="text-xs font-semibold text-blue-600">${totalPagos}</span>
+                                <span class="text-gray-500">Total pagado:</span>
+                                <span class="text-xs font-semibold text-blue-600">${formatCurrency(totalPagos)}</span>
                             </div>
                         </div>
                     </div>
@@ -561,7 +597,8 @@
             document.getElementById('coach-dias').textContent = getDiasTexto(coach.diasLaborables);
             
             const pagos = data.pagos[currentCoachId] || [];
-            document.getElementById('coach-total-pagos').textContent = pagos.length;
+            const sumaTotalPagos = pagos.reduce((sum, pago) => sum + (pago.monto || 0), 0);
+            document.getElementById('coach-total-pagos').textContent = formatCurrency(sumaTotalPagos);
 
             // Verificar si hay pagos
             if (pagos.length === 0) {
@@ -659,9 +696,18 @@
                 const asist = asistencias[dateStr] || { asistio: false, reposicion: false };
                 
                 html += `
-                    <div class="border border-gray-200 rounded-lg p-3 ${asist.asistio ? 'bg-green-50' : 'bg-gray-50'}"
+                    <div class="border border-gray-200 rounded-lg p-3 ${asist.asistio ? 'bg-green-50' : 'bg-gray-50'} relative"
                          oncontextmenu="toggleReposicion('${dateStr}'); return false;">
-                        <p class="text-xs text-gray-400 mb-2">${formatDateDisplay(dateStr).split('/').slice(0,2).join('/')}</p>
+                        <div class="flex justify-between items-start mb-2">
+                            <p class="text-xs text-gray-400">${formatDateDisplay(dateStr).split(' ').slice(0,2).join(' ')}</p>
+                            <button 
+                                onclick="abrirModalNotaDia('${dateStr}')"
+                                class="text-xs ${asist.nota ? 'text-yellow-600 hover:text-yellow-700' : 'text-gray-400 hover:text-gray-600'}"
+                                title="${asist.nota ? 'Ver nota' : 'Agregar nota'}"
+                            >
+                                ${asist.nota ? '📝' : '📄'}
+                            </button>
+                        </div>
                         <label class="flex items-center gap-2 text-xs cursor-pointer">
                             <input 
                                 type="checkbox" 
@@ -672,6 +718,7 @@
                             <span>Asistió</span>
                         </label>
                         ${asist.reposicion ? '<span class="inline-block mt-2 px-2 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded">R</span>' : ''}
+                        ${asist.nota ? '<p class="text-xs text-gray-600 mt-2 italic truncate" title="' + asist.nota + '">"' + (asist.nota.length > 30 ? asist.nota.substring(0, 30) + '...' : asist.nota) + '"</p>' : ''}
                     </div>
                 `;
             });
@@ -690,7 +737,7 @@
             }
             
             if (!data.asistencias[currentCoachId][dateStr]) {
-                data.asistencias[currentCoachId][dateStr] = { asistio: false, reposicion: false };
+                data.asistencias[currentCoachId][dateStr] = { asistio: false, reposicion: false, nota: '' };
             }
             
             data.asistencias[currentCoachId][dateStr].asistio = !data.asistencias[currentCoachId][dateStr].asistio;
@@ -706,7 +753,7 @@
             }
             
             if (!data.asistencias[currentCoachId][dateStr]) {
-                data.asistencias[currentCoachId][dateStr] = { asistio: false, reposicion: false };
+                data.asistencias[currentCoachId][dateStr] = { asistio: false, reposicion: false, nota: '' };
             }
             
             data.asistencias[currentCoachId][dateStr].reposicion = !data.asistencias[currentCoachId][dateStr].reposicion;
@@ -748,6 +795,7 @@
 
         function renderHistorialPagos() {
             const data = loadData();
+            const coach = data.coaches.find(c => c.id === currentCoachId);
             const pagos = (data.pagos[currentCoachId] || []).sort((a, b) => 
                 new Date(b.fecha) - new Date(a.fecha)
             );
@@ -759,45 +807,63 @@
                 return;
             }
             
-            lista.innerHTML = pagos.map(pago => `
-                <div class="border border-gray-200 rounded-lg p-3 hover:bg-gray-50">
-                    <div class="flex justify-between items-start mb-2">
-                        <div class="flex-1">
-                            <p class="text-lg font-bold text-gray-900">${formatCurrency(pago.monto)}</p>
-                            <p class="text-xs text-gray-500">Pagado: ${formatDateDisplay(pago.fecha)}</p>
-                            <p class="text-xs text-blue-600 font-medium mt-1">
-                                Periodo: ${formatDateDisplay(pago.periodoInicio)} - ${formatDateDisplay(pago.periodoFin)}
-                            </p>
-                            ${pago.montoBase ? `<p class="text-xs text-gray-400">Base: ${formatCurrency(pago.montoBase)}</p>` : ''}
+            lista.innerHTML = pagos.map((pago, index) => {
+                // Recalcular estadísticas en tiempo real
+                const stats = calcularEstadisticasPeriodo(pago.periodoInicio, pago.periodoFin, currentCoachId, pago.montoBase);
+                
+                return `
+                <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div class="flex justify-between items-start mb-3">
+                        <div class="flex gap-3 flex-1">
+                            <span class="flex-shrink-0 w-7 h-7 rounded-full ${index === 0 ? 'bg-gradient-to-br from-green-500 to-green-600' : 'bg-gradient-to-br from-gray-400 to-gray-500'} text-white text-xs font-bold flex items-center justify-center shadow-sm">
+                                ${index + 1}
+                            </span>
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <p class="text-xl font-bold text-gray-900">${formatCurrency(pago.monto)}</p>
+                                    ${index === 0 ? '<span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-md">Más reciente</span>' : ''}
+                                </div>
+                                <p class="text-xs text-gray-600">📅 Pagado: ${formatDateDisplay(pago.fecha)}</p>
+                                <p class="text-xs text-blue-600 font-medium mt-1">
+                                    📆 ${formatDateDisplay(pago.periodoInicio)} - ${formatDateDisplay(pago.periodoFin)}
+                                </p>
+                                ${pago.montoBase ? `<p class="text-xs text-gray-500 mt-1">💵 Base: ${formatCurrency(pago.montoBase)}</p>` : ''}
+                            </div>
                         </div>
                         <button 
                             onclick="eliminarPago('${pago.id}')"
-                            class="text-xs text-red-600 hover:text-red-700 ml-2"
+                            class="text-sm text-red-600 hover:text-red-700 hover:bg-red-50 rounded px-2 py-1 transition-colors"
+                            title="Eliminar pago"
                         >
                             ✕
                         </button>
                     </div>
-                    <div class="grid grid-cols-4 gap-2 text-xs mt-2 pt-2 border-t border-gray-200">
-                        <div>
-                            <span class="text-gray-500">Prog:</span>
-                            <span class="font-semibold text-gray-900">${pago.stats.programadas}</span>
+                    <div class="grid grid-cols-2 gap-3 text-xs mt-3 pt-3 border-t border-gray-200">
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-gray-500"></span>
+                            <span class="text-gray-600">Prog:</span>
+                            <span class="font-bold text-gray-900">${stats.programadas}</span>
                         </div>
-                        <div>
-                            <span class="text-green-600">Asist:</span>
-                            <span class="font-semibold text-green-900">${pago.stats.asistidas}</span>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-green-500"></span>
+                            <span class="text-green-700">Asist:</span>
+                            <span class="font-bold text-green-900">${stats.asistidas}</span>
                         </div>
-                        <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-red-500"></span>
                             <span class="text-red-600">Faltas:</span>
-                            <span class="font-semibold text-red-900">${pago.stats.faltas}</span>
+                            <span class="font-bold text-red-900">${stats.faltas}</span>
                         </div>
-                        <div>
+                        <div class="flex items-center gap-2">
+                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                             <span class="text-blue-600">Repos:</span>
-                            <span class="font-semibold text-blue-900">${pago.stats.reposiciones}</span>
+                            <span class="font-bold text-blue-900">${stats.reposiciones}</span>
                         </div>
                     </div>
-                    ${pago.nota ? `<p class="text-xs text-gray-600 mt-2 italic">"${pago.nota}"</p>` : ''}
+                    ${pago.nota ? `<p class="text-xs text-gray-600 mt-3 p-2 bg-gray-50 rounded italic">"${pago.nota}"</p>` : ''}
                 </div>
-            `).join('');
+            `;
+            }).join('');
         }
 
         function eliminarPago(pagoId) {
@@ -905,14 +971,28 @@
             };
         }
 
+        function formatearMontoInput(valor) {
+            // Eliminar todo excepto números
+            const numero = valor.replace(/\D/g, '');
+            if (!numero) return '';
+            
+            // Formatear con puntos de miles
+            return parseInt(numero).toLocaleString('es-CO');
+        }
+        
+        function obtenerValorMontoRaw() {
+            const valorFormateado = document.getElementById('pago-monto').value;
+            return parseInt(valorFormateado.replace(/\D/g, '') || '0');
+        }
+
         function actualizarResumenPago() {
             const inicio = document.getElementById('pago-periodo-inicio').value;
             const fin = document.getElementById('pago-periodo-fin').value;
-            const montoBase = parseFloat(document.getElementById('pago-monto-base').value) || 0;
+            const montoBase = obtenerValorMontoRaw();
             
-            if (!inicio || !fin || !montoBase) return;
+            if (!inicio || !fin) return;
             
-            const stats = calcularEstadisticasPeriodo(inicio, fin, currentCoachId, montoBase);
+            const stats = calcularEstadisticasPeriodo(inicio, fin, currentCoachId, montoBase || 0);
             
             document.getElementById('resumen-programadas').textContent = stats.programadas;
             document.getElementById('resumen-asistidas').textContent = stats.asistidas;
@@ -920,8 +1000,10 @@
             document.getElementById('resumen-reposiciones-pago').textContent = stats.reposiciones;
             document.getElementById('resumen-monto').textContent = formatCurrency(stats.montoSugerido);
             
-            // Sugerir el monto calculado
-            document.getElementById('pago-monto').value = stats.montoSugerido;
+            // Si no han ingresado monto aún, sugerir el calculado
+            if (!montoBase) {
+                document.getElementById('pago-monto').value = formatearMontoInput(stats.montoSugerido.toString());
+            }
         }
 
         function abrirModalPago() {
@@ -943,6 +1025,55 @@
 
         function cerrarModalPago() {
             document.getElementById('modal-pago').classList.add('hidden');
+        }
+
+        // ========================================
+        // MODAL NOTA DEL DÍA
+        // ========================================
+        
+        let currentNotaDate = null;
+        
+        function abrirModalNotaDia(dateStr) {
+            currentNotaDate = dateStr;
+            const data = loadData();
+            
+            if (!data.asistencias[currentCoachId]) {
+                data.asistencias[currentCoachId] = {};
+            }
+            
+            if (!data.asistencias[currentCoachId][dateStr]) {
+                data.asistencias[currentCoachId][dateStr] = { asistio: false, reposicion: false, nota: '' };
+            }
+            
+            const nota = data.asistencias[currentCoachId][dateStr].nota || '';
+            
+            document.getElementById('nota-fecha-display').textContent = formatDateDisplay(dateStr);
+            document.getElementById('nota-dia-texto').value = nota;
+            document.getElementById('modal-nota-dia').classList.remove('hidden');
+            
+            // Focus en el textarea
+            setTimeout(() => {
+                document.getElementById('nota-dia-texto').focus();
+            }, 100);
+        }
+        
+        function cerrarModalNotaDia() {
+            document.getElementById('modal-nota-dia').classList.add('hidden');
+            currentNotaDate = null;
+        }
+        
+        function eliminarNotaDia() {
+            if (!currentNotaDate) return;
+            
+            const data = loadData();
+            
+            if (data.asistencias[currentCoachId] && data.asistencias[currentCoachId][currentNotaDate]) {
+                data.asistencias[currentCoachId][currentNotaDate].nota = '';
+                saveData(data);
+                renderCalendarioPeriodo();
+            }
+            
+            cerrarModalNotaDia();
         }
 
         // ========================================
@@ -1045,16 +1176,16 @@
             
             const periodoInicio = document.getElementById('pago-periodo-inicio').value;
             const periodoFin = document.getElementById('pago-periodo-fin').value;
-            const montoBase = parseFloat(document.getElementById('pago-monto-base').value);
-            const stats = calcularEstadisticasPeriodo(periodoInicio, periodoFin, currentCoachId, montoBase);
+            const monto = obtenerValorMontoRaw();
+            const stats = calcularEstadisticasPeriodo(periodoInicio, periodoFin, currentCoachId, monto);
             
             const pago = {
                 id: generateId(),
                 fecha: document.getElementById('pago-fecha').value,
                 periodoInicio,
                 periodoFin,
-                montoBase,
-                monto: parseFloat(document.getElementById('pago-monto').value),
+                montoBase: monto,
+                monto: monto,
                 nota: document.getElementById('pago-nota').value.trim(),
                 stats: {
                     programadas: stats.programadas,
@@ -1074,10 +1205,47 @@
             renderDashboard(); // Recargar todo el dashboard
         });
         
+        // Guardar nota del día
+        document.getElementById('form-nota-dia').addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            if (!currentNotaDate) return;
+            
+            const data = loadData();
+            const nota = document.getElementById('nota-dia-texto').value.trim();
+            
+            if (!data.asistencias[currentCoachId]) {
+                data.asistencias[currentCoachId] = {};
+            }
+            
+            if (!data.asistencias[currentCoachId][currentNotaDate]) {
+                data.asistencias[currentCoachId][currentNotaDate] = { asistio: false, reposicion: false, nota: '' };
+            }
+            
+            data.asistencias[currentCoachId][currentNotaDate].nota = nota;
+            saveData(data);
+            renderCalendarioPeriodo();
+            
+            cerrarModalNotaDia();
+        });
+        
         // Auto-calcular resumen al cambiar valores en modal de pago
         document.getElementById('pago-periodo-inicio').addEventListener('change', actualizarResumenPago);
         document.getElementById('pago-periodo-fin').addEventListener('change', actualizarResumenPago);
-        document.getElementById('pago-monto-base').addEventListener('input', actualizarResumenPago);
+        // Formatear monto mientras se escribe
+        document.getElementById('pago-monto').addEventListener('input', function(e) {
+            const cursorPos = e.target.selectionStart;
+            const valorAnterior = e.target.value;
+            const valorFormateado = formatearMontoInput(valorAnterior);
+            
+            e.target.value = valorFormateado;
+            
+            // Ajustar posición del cursor
+            const diff = valorFormateado.length - valorAnterior.length;
+            e.target.setSelectionRange(cursorPos + diff, cursorPos + diff);
+            
+            actualizarResumenPago();
+        });
         
         // Auto-calcular fin de periodo en pago
         document.getElementById('pago-periodo-inicio').addEventListener('change', (e) => {
