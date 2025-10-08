@@ -102,8 +102,11 @@
             <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
                 <div class="flex items-start justify-between">
                     <div class="flex-1">
-                        <h2 id="coach-nombre" class="text-2xl font-bold text-gray-900"></h2>
-                        <div class="flex items-center gap-6 mt-3">
+                        <div class="flex items-center gap-3 mb-3">
+                            <h2 id="coach-nombre" class="text-2xl font-bold text-gray-900"></h2>
+                            <span id="coach-estado-badge" class="px-3 py-1 text-xs font-semibold rounded"></span>
+                        </div>
+                        <div class="flex items-center gap-6">
                             <div>
                                 <p class="text-xs text-gray-500">Días laborables</p>
                                 <p id="coach-dias" class="text-sm font-medium text-gray-900 mt-1"></p>
@@ -243,6 +246,19 @@
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         placeholder="Ej: Carlos Pérez"
                     >
+                </div>
+
+                <div>
+                    <label for="coach-estado-input" class="block text-sm font-medium text-gray-700 mb-1">Estado *</label>
+                    <select 
+                        id="coach-estado-input"
+                        required
+                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                        <option value="activo">Activo</option>
+                        <option value="inactivo">Inactivo</option>
+                        <option value="pausado">Pausado</option>
+                    </select>
                 </div>
 
                 <div>
@@ -557,7 +573,7 @@
 
         function mostrarVistaDashboard(coachId) {
             currentCoachId = coachId;
-            currentPagoId = null; // Limpiar para que se seleccione el más reciente
+            currentPagoId = null; // Limpiar selección de periodo (el usuario debe seleccionar manualmente)
             document.getElementById('vista-lista-coaches').classList.add('hidden');
             document.getElementById('vista-dashboard-coach').classList.remove('hidden');
             document.getElementById('btn-volver-lista').classList.remove('hidden');
@@ -601,12 +617,35 @@
                 const pagos = data.pagos[coach.id] || [];
                 const totalPagos = pagos.reduce((sum, pago) => sum + (pago.monto || 0), 0);
                 
+                // Determinar estado y colores
+                const estado = coach.estado || 'activo';
+                let estadoClasses = '';
+                let estadoTexto = '';
+                
+                switch(estado) {
+                    case 'activo':
+                        estadoClasses = 'bg-green-100 text-green-700';
+                        estadoTexto = 'Activo';
+                        break;
+                    case 'inactivo':
+                        estadoClasses = 'bg-red-100 text-red-700';
+                        estadoTexto = 'Inactivo';
+                        break;
+                    case 'pausado':
+                        estadoClasses = 'bg-yellow-100 text-yellow-700';
+                        estadoTexto = 'Pausado';
+                        break;
+                    default:
+                        estadoClasses = 'bg-gray-100 text-gray-700';
+                        estadoTexto = estado;
+                }
+                
                 return `
                     <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-5 hover:shadow-md transition-shadow cursor-pointer"
                          onclick="mostrarVistaDashboard('${coach.id}')">
                         <div class="flex items-start justify-between mb-3">
                             <h3 class="text-lg font-bold text-gray-900">${coach.nombre}</h3>
-                            <span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded">Activo</span>
+                            <span class="px-2 py-1 text-xs font-semibold ${estadoClasses} rounded">${estadoTexto}</span>
                         </div>
                         <div class="space-y-2 text-sm">
                             <div class="flex justify-between">
@@ -645,6 +684,27 @@
             document.getElementById('coach-nombre').textContent = coach.nombre;
             document.getElementById('coach-dias').textContent = getDiasTexto(coach.diasLaborables);
             
+            // Mostrar estado con colores
+            const estado = coach.estado || 'activo';
+            const estadoBadge = document.getElementById('coach-estado-badge');
+            switch(estado) {
+                case 'activo':
+                    estadoBadge.className = 'px-3 py-1 text-xs font-semibold rounded bg-green-100 text-green-700';
+                    estadoBadge.textContent = 'Activo';
+                    break;
+                case 'inactivo':
+                    estadoBadge.className = 'px-3 py-1 text-xs font-semibold rounded bg-red-100 text-red-700';
+                    estadoBadge.textContent = 'Inactivo';
+                    break;
+                case 'pausado':
+                    estadoBadge.className = 'px-3 py-1 text-xs font-semibold rounded bg-yellow-100 text-yellow-700';
+                    estadoBadge.textContent = 'Pausado';
+                    break;
+                default:
+                    estadoBadge.className = 'px-3 py-1 text-xs font-semibold rounded bg-gray-100 text-gray-700';
+                    estadoBadge.textContent = estado;
+            }
+            
             const pagos = data.pagos[currentCoachId] || [];
             const sumaTotalPagos = pagos.reduce((sum, pago) => sum + (pago.monto || 0), 0);
             document.getElementById('coach-total-pagos').textContent = formatCurrency(sumaTotalPagos);
@@ -660,18 +720,24 @@
                 document.getElementById('mensaje-sin-pagos').classList.add('hidden');
                 document.getElementById('contenido-con-pagos').classList.remove('hidden');
                 
-                // Cargar selector de periodos
+                // Cargar selector de periodos (sin selección automática)
                 cargarSelectorPeriodos();
                 
-                // Si no hay periodo seleccionado, seleccionar el más reciente (por fecha)
-                if (!currentPagoId) {
-                    const pagosOrdenados = [...pagos].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
-                    currentPagoId = pagosOrdenados[0].id;
+                // Solo renderizar si hay un periodo previamente seleccionado
+                if (currentPagoId) {
+                    const pagoSeleccionado = pagos.find(p => p.id === currentPagoId);
+                    if (pagoSeleccionado) {
+                        renderCalendarioPeriodo();
+                        renderHistorialPagos();
+                    } else {
+                        // Si el periodo no existe, limpiar selección
+                        currentPagoId = null;
+                        renderCalendarioPeriodo(); // Esto mostrará el mensaje de "Selecciona un periodo"
+                    }
+                } else {
+                    // No hay periodo seleccionado, mostrar mensaje
+                    renderCalendarioPeriodo(); // Esto mostrará el mensaje de "Selecciona un periodo"
                 }
-                
-                // Renderizar calendario y métricas del periodo
-                renderCalendarioPeriodo();
-                renderHistorialPagos();
             }
         }
 
@@ -683,12 +749,27 @@
             
             const selector = document.getElementById('select-periodo-pago');
             
-            selector.innerHTML = pagos.map(pago => `
-                <option value="${pago.id}" ${pago.id === currentPagoId ? 'selected' : ''}>
+            // Opción por defecto
+            let opciones = '<option value="">Selecciona un periodo...</option>';
+            
+            // Agregar todos los periodos
+            opciones += pagos.map(pago => `
+                <option value="${pago.id}">
                     ${formatDateDisplay(pago.periodoInicio)} - ${formatDateDisplay(pago.periodoFin)} 
                     (${formatCurrency(pago.monto)})
                 </option>
             `).join('');
+            
+            selector.innerHTML = opciones;
+            
+            // Asegurar que el valor seleccionado coincida con currentPagoId
+            if (currentPagoId) {
+                selector.value = currentPagoId;
+                console.log('Selector sincronizado con currentPagoId:', currentPagoId, '- Valor del selector:', selector.value);
+            } else {
+                selector.value = '';
+                console.log('No hay periodo seleccionado - mostrando opción por defecto');
+            }
         }
 
         // ========================================
@@ -736,12 +817,28 @@
             const coach = data.coaches.find(c => c.id === currentCoachId);
             const pago = (data.pagos[currentCoachId] || []).find(p => p.id === currentPagoId);
             
-            if (!pago) return;
+            if (!pago || !currentPagoId) {
+                // Ocultar calendario y métricas si no hay periodo seleccionado
+                document.getElementById('calendar-grid').innerHTML = '<p class="text-center text-gray-500 py-8">Selecciona un periodo para ver el calendario</p>';
+                document.getElementById('periodo-label').textContent = '';
+                
+                // Limpiar métricas
+                document.getElementById('metric-programadas').textContent = '0';
+                document.getElementById('metric-asistidas').textContent = '0';
+                document.getElementById('metric-faltas').textContent = '0';
+                document.getElementById('metric-reposiciones').textContent = '0';
+                
+                const indicador = document.getElementById('reposiciones-disponibles');
+                if (indicador) indicador.style.display = 'none';
+                
+                return;
+            }
             
             const grid = document.getElementById('calendar-grid');
             const periodoLabel = document.getElementById('periodo-label');
             
             periodoLabel.textContent = `${formatDateDisplay(pago.periodoInicio)} - ${formatDateDisplay(pago.periodoFin)}`;
+            console.log('Renderizando calendario para periodo:', pago.periodoInicio, '-', pago.periodoFin, 'ID:', pago.id);
             
             const days = getTodosDiasPeriodo(pago.periodoInicio, pago.periodoFin);
             const asistencias = data.asistencias[currentCoachId] || {};
@@ -845,7 +942,7 @@
             
             data.asistencias[currentCoachId][dateStr].asistio = !data.asistencias[currentCoachId][dateStr].asistio;
             saveData(data);
-            updateMetrics();
+            renderCalendarioPeriodo();
         }
 
         function toggleReposicion(dateStr) {
@@ -934,10 +1031,30 @@
             const todosDias = getTodosDiasPeriodo(pago.periodoInicio, pago.periodoFin);
             let reposiciones = 0;
             
+            // Limpiar reposiciones inválidas (si hay más reposiciones que faltas)
+            let hayReposicionesInvalidas = false;
             todosDias.forEach(({fecha}) => {
                 const asist = asistencias[fecha];
-                if (asist?.reposicion) reposiciones++;
+                if (asist?.reposicion) {
+                    reposiciones++;
+                    // Si hay más reposiciones que faltas, marcar para limpiar
+                    if (faltas === 0 || reposiciones > faltas) {
+                        hayReposicionesInvalidas = true;
+                    }
+                }
             });
+            
+            // Si hay reposiciones inválidas, limpiarlas
+            if (hayReposicionesInvalidas && faltas === 0) {
+                todosDias.forEach(({fecha}) => {
+                    if (asistencias[fecha]?.reposicion) {
+                        asistencias[fecha].reposicion = false;
+                        asistencias[fecha].asistio = false;
+                    }
+                });
+                saveData(data);
+                reposiciones = 0;
+            }
             
             document.getElementById('metric-programadas').textContent = programadas;
             document.getElementById('metric-asistidas').textContent = asistidas;
@@ -1076,6 +1193,7 @@
                 titulo.textContent = 'Editar Coach';
                 document.getElementById('coach-id-input').value = coach.id;
                 document.getElementById('coach-nombre-input').value = coach.nombre;
+                document.getElementById('coach-estado-input').value = coach.estado || 'activo';
                 
                 // Marcar días
                 document.querySelectorAll('.dia-checkbox').forEach(cb => {
@@ -1086,6 +1204,7 @@
                 titulo.textContent = 'Agregar Coach';
                 document.getElementById('form-coach').reset();
                 document.getElementById('coach-id-input').value = '';
+                document.getElementById('coach-estado-input').value = 'activo';
                 
                 // Días por defecto: L-V
                 document.querySelectorAll('.dia-checkbox').forEach(cb => {
@@ -1291,6 +1410,7 @@
             
             const coachData = {
                 nombre: document.getElementById('coach-nombre-input').value.trim(),
+                estado: document.getElementById('coach-estado-input').value,
                 diasLaborables
             };
             
@@ -1341,8 +1461,12 @@
         
         // Selector de periodo
         document.getElementById('select-periodo-pago').addEventListener('change', (e) => {
-            currentPagoId = e.target.value;
+            currentPagoId = e.target.value || null;
+            console.log('Periodo cambiado a:', currentPagoId);
             renderCalendarioPeriodo();
+            if (currentPagoId) {
+                renderHistorialPagos();
+            }
         });
         
         // Botón registrar primer pago
