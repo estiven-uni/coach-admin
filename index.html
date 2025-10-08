@@ -1,0 +1,597 @@
+<!DOCTYPE html>
+<html lang="es-CO">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Panel de administración de entrenamiento - Demo estática">
+    <title>Panel de Entrenamiento - Demo</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-50 text-gray-900 antialiased">
+    
+    <!-- Encabezado sticky -->
+    <header class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
+        <div class="container mx-auto px-4 py-4 md:px-6 md:py-5">
+            <div class="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                    <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Panel de Entrenamiento</h1>
+                    <p class="text-sm text-gray-500 mt-1">Demo estática (sin base de datos)</p>
+                </div>
+                
+                <!-- Barra de acciones -->
+                <div class="flex flex-wrap items-center gap-3">
+                    <!-- TODO: Conectar selector de periodo a lógica de filtrado y base de datos -->
+                    <label for="periodo-selector" class="sr-only">Selector de periodo</label>
+                    <select 
+                        id="periodo-selector"
+                        disabled 
+                        class="px-4 py-2 text-sm border border-gray-300 rounded-xl bg-white opacity-60 cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        aria-label="Selector de periodo"
+                    >
+                        <option>Este mes</option>
+                        <option>Último mes</option>
+                        <option>Últimos 3 meses</option>
+                    </select>
+                    
+                    <!-- TODO: Implementar exportación a JSON desde Supabase -->
+                    <button 
+                        disabled
+                        class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-xl bg-white opacity-60 cursor-not-allowed hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        aria-label="Exportar datos en formato JSON"
+                    >
+                        Exportar JSON
+                    </button>
+                    
+                    <!-- TODO: Implementar exportación a CSV desde Supabase -->
+                    <button 
+                        disabled
+                        class="px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-xl bg-white opacity-60 cursor-not-allowed hover:bg-gray-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        aria-label="Exportar datos en formato CSV"
+                    >
+                        Exportar CSV
+                    </button>
+                    
+                    <!-- TODO: Implementar importación de JSON a Supabase -->
+                    <button 
+                        disabled
+                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-xl opacity-60 cursor-not-allowed hover:bg-blue-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        aria-label="Importar datos desde archivo JSON"
+                    >
+                        Importar JSON
+                    </button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main class="container mx-auto px-4 py-6 md:px-6 md:py-8">
+        
+        <!-- Métricas - Grid responsive -->
+        <section aria-labelledby="metricas-titulo" class="mb-8">
+            <h2 id="metricas-titulo" class="sr-only">Métricas de asistencia</h2>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
+                
+                <!-- Métrica: Programadas -->
+                <article class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                    <h3 class="text-sm font-medium text-gray-500">Programadas (L–V)</h3>
+                    <p class="text-3xl font-bold text-gray-900 mt-2">0</p>
+                    <p class="text-xs text-gray-400 mt-2">Sesiones totales del periodo</p>
+                </article>
+                
+                <!-- Métrica: Asistidas -->
+                <article class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                    <h3 class="text-sm font-medium text-gray-500">Asistidas</h3>
+                    <p class="text-3xl font-bold text-green-600 mt-2">0</p>
+                    <p class="text-xs text-gray-400 mt-2">Confirmadas y completadas</p>
+                </article>
+                
+                <!-- Métrica: Faltas -->
+                <article class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                    <h3 class="text-sm font-medium text-gray-500">Faltas</h3>
+                    <p class="text-3xl font-bold text-red-600 mt-2">0</p>
+                    <p class="text-xs text-gray-400 mt-2">Sin asistencia registrada</p>
+                </article>
+                
+                <!-- Métrica: Reposiciones -->
+                <article class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                    <h3 class="text-sm font-medium text-gray-500">Reposiciones</h3>
+                    <p class="text-3xl font-bold text-blue-600 mt-2">0</p>
+                    <p class="text-xs text-gray-400 mt-2">Sesiones reprogramadas</p>
+                </article>
+                
+                <!-- Métrica: Pendientes -->
+                <article class="bg-white rounded-xl border border-gray-200 shadow-sm p-5">
+                    <h3 class="text-sm font-medium text-gray-500">Pendientes</h3>
+                    <p class="text-3xl font-bold text-amber-600 mt-2">0</p>
+                    <p class="text-xs text-gray-400 mt-2">Sin confirmar todavía</p>
+                </article>
+            </div>
+        </section>
+
+        <!-- Grid principal: Calendario + Pagos -->
+        <div class="grid grid-cols-1 md:grid-cols-12 gap-6 mb-8">
+            
+            <!-- Calendario -->
+            <section aria-labelledby="calendario-titulo" class="md:col-span-7">
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h2 id="calendario-titulo" class="text-xl font-bold text-gray-900">Calendario de asistencia</h2>
+                        
+                        <!-- Selector de mes -->
+                        <!-- TODO: Conectar selector de mes a lógica de navegación y carga de datos desde Supabase -->
+                        <div class="flex items-center gap-2">
+                            <button 
+                                disabled
+                                class="px-3 py-1 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg opacity-60 cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                                aria-label="Mes anterior"
+                            >
+                                «
+                            </button>
+                            <label for="mes-selector" class="sr-only">Seleccionar mes</label>
+                            <select 
+                                id="mes-selector"
+                                disabled
+                                class="px-3 py-1 text-sm border border-gray-300 rounded-lg bg-white opacity-60 cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                            >
+                                <option>Enero 2025</option>
+                                <option>Febrero 2025</option>
+                                <option>Marzo 2025</option>
+                                <option selected>Octubre 2025</option>
+                                <option>Noviembre 2025</option>
+                                <option>Diciembre 2025</option>
+                            </select>
+                            <button 
+                                disabled
+                                class="px-3 py-1 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg opacity-60 cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                                aria-label="Mes siguiente"
+                            >
+                                »
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <p class="text-xs text-gray-500 mb-4">Solo lunes a viernes</p>
+                    
+                    <!-- Cuadrícula del calendario -->
+                    <div class="overflow-x-auto">
+                        <div class="grid grid-cols-5 gap-2 min-w-max">
+                            
+                            <!-- Headers de días -->
+                            <div class="text-xs font-semibold text-gray-700 text-center py-2">Lun</div>
+                            <div class="text-xs font-semibold text-gray-700 text-center py-2">Mar</div>
+                            <div class="text-xs font-semibold text-gray-700 text-center py-2">Mié</div>
+                            <div class="text-xs font-semibold text-gray-700 text-center py-2">Jue</div>
+                            <div class="text-xs font-semibold text-gray-700 text-center py-2">Vie</div>
+                            
+                            <!-- Semana 1 -->
+                            <!-- TODO: Conectar checkboxes de asistencia a Supabase para persistir estado -->
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-06</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-06">
+                                    <span>Asistido</span>
+                                </label>
+                                <span class="hidden inline-block mt-2 px-2 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded">R</span>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-07</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-07">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-08</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-08">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-09</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-09">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-10</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-10">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <!-- Semana 2 -->
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-13</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-13">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-14</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-14">
+                                    <span>Asistido</span>
+                                </label>
+                                <span class="inline-block mt-2 px-2 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded" aria-label="Reposición">R</span>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-15</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-15">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-16</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-16">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-17</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-17">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <!-- Semana 3 -->
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-20</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-20">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-21</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-21">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-22</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-22">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-23</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-23">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-24</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-24">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <!-- Semana 4 -->
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-27</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-27">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-28</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-28">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-29</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-29">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-30</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-30">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                            
+                            <div class="border border-gray-200 rounded-lg p-3 bg-gray-50">
+                                <p class="text-xs text-gray-400 mb-2">2025-10-31</p>
+                                <label class="flex items-center gap-2 text-xs">
+                                    <input type="checkbox" class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500" aria-label="Marcar asistencia para 2025-10-31">
+                                    <span>Asistido</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Fines de semana -->
+                    <div class="mt-4 p-4 bg-gray-100 border border-gray-200 rounded-lg">
+                        <p class="text-sm text-gray-600 font-medium">Fin de semana (no programado)</p>
+                        <p class="text-xs text-gray-500 mt-1">Sábados y domingos no se muestran en el calendario de entrenamientos regulares.</p>
+                    </div>
+                    
+                    <p class="text-xs text-gray-500 mt-4" role="note">Este calendario es de demostración, no guarda datos.</p>
+                </div>
+            </section>
+            
+            <!-- Pagos -->
+            <section aria-labelledby="pagos-titulo" class="md:col-span-5 space-y-6">
+                
+                <!-- Formulario de registro de pago -->
+                <!-- TODO: Conectar formulario de pagos a Supabase para persistir registros -->
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                    <h2 id="pagos-titulo" class="text-xl font-bold text-gray-900 mb-4">Registrar pago (demo)</h2>
+                    
+                    <form class="space-y-4">
+                        <div>
+                            <label for="pago-coach" class="block text-sm font-medium text-gray-700 mb-1">Coach</label>
+                            <input 
+                                type="text" 
+                                id="pago-coach" 
+                                placeholder="Nombre del coach"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                            >
+                        </div>
+                        
+                        <div>
+                            <label for="pago-monto" class="block text-sm font-medium text-gray-700 mb-1">Monto (COP)</label>
+                            <input 
+                                type="number" 
+                                id="pago-monto" 
+                                placeholder="0"
+                                min="0"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                            >
+                        </div>
+                        
+                        <div>
+                            <label for="pago-fecha" class="block text-sm font-medium text-gray-700 mb-1">Fecha de pago</label>
+                            <input 
+                                type="date" 
+                                id="pago-fecha"
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                            >
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-3">
+                            <div>
+                                <label for="pago-inicio" class="block text-sm font-medium text-gray-700 mb-1">Periodo inicio</label>
+                                <input 
+                                    type="date" 
+                                    id="pago-inicio"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                                >
+                            </div>
+                            <div>
+                                <label for="pago-fin" class="block text-sm font-medium text-gray-700 mb-1">Periodo fin</label>
+                                <input 
+                                    type="date" 
+                                    id="pago-fin"
+                                    class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                                >
+                            </div>
+                        </div>
+                        
+                        <div>
+                            <label for="pago-nota" class="block text-sm font-medium text-gray-700 mb-1">Nota</label>
+                            <textarea 
+                                id="pago-nota" 
+                                rows="2"
+                                placeholder="Observaciones adicionales..."
+                                class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                            ></textarea>
+                        </div>
+                        
+                        <button 
+                            type="button"
+                            disabled
+                            class="w-full px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg opacity-60 cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        >
+                            Guardar
+                        </button>
+                    </form>
+                    
+                    <p class="text-xs text-gray-500 mt-4">Esta es una maqueta. Los datos no se guardarán hasta conectar la base de datos.</p>
+                </div>
+                
+                <!-- Tabla de pagos -->
+                <!-- TODO: Conectar tabla de pagos a Supabase para cargar y mostrar registros reales -->
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                    <h3 class="text-lg font-bold text-gray-900 mb-4">Historial de pagos</h3>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-sm">
+                            <thead>
+                                <tr class="border-b border-gray-200">
+                                    <th class="text-left py-3 px-2 font-semibold text-gray-700">Fecha pago</th>
+                                    <th class="text-left py-3 px-2 font-semibold text-gray-700">Periodo</th>
+                                    <th class="text-left py-3 px-2 font-semibold text-gray-700">Monto</th>
+                                    <th class="text-left py-3 px-2 font-semibold text-gray-700">Coach</th>
+                                    <th class="text-left py-3 px-2 font-semibold text-gray-700">Nota</th>
+                                    <th class="text-left py-3 px-2 font-semibold text-gray-700">Acciones</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- TODO: Las filas deben generarse dinámicamente desde Supabase -->
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-3 px-2 text-gray-900">2025-10-01</td>
+                                    <td class="py-3 px-2 text-gray-600 text-xs">01/10 → 31/10</td>
+                                    <td class="py-3 px-2 font-semibold text-gray-900">$450.000</td>
+                                    <td class="py-3 px-2 text-gray-900">Carlos Pérez</td>
+                                    <td class="py-3 px-2 text-gray-500 text-xs">Pago completo</td>
+                                    <td class="py-3 px-2">
+                                        <div class="flex gap-2">
+                                            <button 
+                                                disabled
+                                                class="text-xs text-blue-600 opacity-60 cursor-not-allowed"
+                                                aria-label="Editar pago"
+                                            >
+                                                Editar
+                                            </button>
+                                            <button 
+                                                disabled
+                                                class="text-xs text-red-600 opacity-60 cursor-not-allowed"
+                                                aria-label="Eliminar pago"
+                                            >
+                                                Eliminar
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                                <tr class="border-b border-gray-100">
+                                    <td class="py-3 px-2 text-gray-900">2025-09-28</td>
+                                    <td class="py-3 px-2 text-gray-600 text-xs">01/09 → 30/09</td>
+                                    <td class="py-3 px-2 font-semibold text-gray-900">$450.000</td>
+                                    <td class="py-3 px-2 text-gray-900">Carlos Pérez</td>
+                                    <td class="py-3 px-2 text-gray-500 text-xs">—</td>
+                                    <td class="py-3 px-2">
+                                        <div class="flex gap-2">
+                                            <button 
+                                                disabled
+                                                class="text-xs text-blue-600 opacity-60 cursor-not-allowed"
+                                                aria-label="Editar pago"
+                                            >
+                                                Editar
+                                            </button>
+                                            <button 
+                                                disabled
+                                                class="text-xs text-red-600 opacity-60 cursor-not-allowed"
+                                                aria-label="Eliminar pago"
+                                            >
+                                                Eliminar
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    <p class="text-xs text-gray-500 mt-4">Datos de ejemplo. Se cargarán desde la base de datos al conectar.</p>
+                </div>
+            </section>
+        </div>
+
+        <!-- Configuración -->
+        <!-- TODO: Conectar configuración a Supabase para persistir preferencias -->
+        <section aria-labelledby="config-titulo" class="mb-8">
+            <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                <h2 id="config-titulo" class="text-xl font-bold text-gray-900 mb-4">Configuración (demo)</h2>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <!-- Días laborables -->
+                    <div>
+                        <h3 class="text-sm font-medium text-gray-700 mb-3">Días laborables</h3>
+                        <div class="flex flex-wrap gap-3">
+                            <label class="flex items-center gap-2 text-sm">
+                                <input 
+                                    type="checkbox" 
+                                    checked 
+                                    class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500"
+                                    aria-label="Lunes laborable"
+                                >
+                                <span class="font-medium">L</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-sm">
+                                <input 
+                                    type="checkbox" 
+                                    checked 
+                                    class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500"
+                                    aria-label="Martes laborable"
+                                >
+                                <span class="font-medium">M</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-sm">
+                                <input 
+                                    type="checkbox" 
+                                    checked 
+                                    class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500"
+                                    aria-label="Miércoles laborable"
+                                >
+                                <span class="font-medium">X</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-sm">
+                                <input 
+                                    type="checkbox" 
+                                    checked 
+                                    class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500"
+                                    aria-label="Jueves laborable"
+                                >
+                                <span class="font-medium">J</span>
+                            </label>
+                            <label class="flex items-center gap-2 text-sm">
+                                <input 
+                                    type="checkbox" 
+                                    checked 
+                                    class="rounded border-gray-300 focus-visible:ring-2 focus-visible:ring-blue-500"
+                                    aria-label="Viernes laborable"
+                                >
+                                <span class="font-medium">V</span>
+                            </label>
+                        </div>
+                    </div>
+                    
+                    <!-- Precio mensual -->
+                    <div>
+                        <label for="precio-mensual" class="block text-sm font-medium text-gray-700 mb-2">Precio mensual por defecto (COP)</label>
+                        <input 
+                            type="number" 
+                            id="precio-mensual" 
+                            value="450000"
+                            min="0"
+                            class="w-full px-3 py-2 border border-gray-300 rounded-lg text-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                        >
+                    </div>
+                </div>
+                
+                <button 
+                    type="button"
+                    disabled
+                    class="mt-6 px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg opacity-60 cursor-not-allowed focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
+                >
+                    Guardar configuración
+                </button>
+                
+                <p class="text-xs text-gray-500 mt-4">Se aplicará cuando conectes la base de datos.</p>
+            </div>
+        </section>
+
+    </main>
+
+    <!-- Footer -->
+    <footer class="border-t border-gray-200 bg-white">
+        <div class="container mx-auto px-4 py-4 md:px-6">
+            <p class="text-xs text-gray-500 text-center">Versión estática para pruebas. Sin almacenamiento.</p>
+        </div>
+    </footer>
+
+</body>
+</html>
