@@ -39,12 +39,50 @@
                     <h1 class="text-2xl md:text-3xl font-bold text-gray-900">Gestión de Coaches</h1>
                     <p class="text-sm text-gray-500 mt-1">Administra tus entrenamientos y pagos</p>
                 </div>
-                <button 
-                    id="btn-volver-lista"
-                    class="hidden px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
-                >
-                    ← Volver a lista
-                </button>
+                <div class="flex items-center gap-2">
+                    <!-- Input file oculto para importar -->
+                    <input type="file" id="input-importar-backup" accept="application/json,.json" class="hidden">
+                    
+                    <button 
+                        id="btn-configuracion"
+                        class="px-3 py-2 text-sm font-medium text-gray-600 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-2 shadow-sm"
+                        title="Configuración del sistema"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </button>
+                    
+                    <button 
+                        id="btn-importar-backup"
+                        class="px-4 py-2 text-sm font-medium text-gray-700 bg-white border-2 border-green-600 rounded-lg hover:bg-green-50 flex items-center gap-2 shadow-sm"
+                        title="Importar backup desde archivo JSON"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 text-green-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L9 8m4-4v12" />
+                        </svg>
+                        <span class="text-green-600 font-semibold">Importar</span>
+                    </button>
+                    
+                    <button 
+                        id="btn-descargar-backup"
+                        class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-2 shadow-sm"
+                        title="Descargar backup de la base de datos"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                        </svg>
+                        Exportar
+                    </button>
+                    
+                    <button 
+                        id="btn-volver-lista"
+                        class="hidden px-4 py-2 text-sm font-medium text-gray-700 border border-gray-300 rounded-lg hover:bg-gray-50"
+                    >
+                        ← Volver a lista
+                    </button>
+                </div>
             </div>
         </div>
     </header>
@@ -199,6 +237,17 @@
                         </div>
                     </div>
                 </section>
+
+                <!-- Alerta de periodo completado -->
+                <div id="alerta-completado" class="hidden bg-green-50 border-2 border-green-400 rounded-xl p-4 mb-6">
+                    <div class="flex items-start gap-3">
+                        <div class="text-3xl">✅</div>
+                        <div class="flex-1">
+                            <h4 class="text-sm font-bold text-green-900 mb-1">¡Periodo completado!</h4>
+                            <p class="text-xs text-green-700">Todas las clases programadas han sido completadas. No hay pendientes en este periodo.</p>
+                        </div>
+                    </div>
+                </div>
 
                 <!-- Alerta de pendientes -->
                 <div id="alerta-pendientes" class="hidden bg-orange-50 border-2 border-orange-300 rounded-xl p-4 mb-6">
@@ -419,6 +468,66 @@
         </div>
     </div>
 
+    <!-- MODAL: Configuración -->
+    <div id="modal-configuracion" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md" onclick="event.stopPropagation()">
+            <div class="flex items-center justify-between p-6 border-b border-gray-200">
+                <div class="flex items-center gap-3">
+                    <div class="p-2 bg-gray-100 rounded-lg">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 text-gray-600" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" />
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                        </svg>
+                    </div>
+                    <h2 class="text-xl font-bold text-gray-900">Configuración</h2>
+                </div>
+                <button onclick="cerrarModalConfiguracion()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="p-6 space-y-6">
+                <!-- Modo de pruebas -->
+                <div class="bg-purple-50 border border-purple-200 rounded-lg p-4">
+                    <div class="flex items-start justify-between">
+                        <div class="flex-1">
+                            <div class="flex items-center gap-2 mb-2">
+                                <span class="text-2xl">🧪</span>
+                                <h3 class="text-sm font-bold text-gray-900">Modo de pruebas</h3>
+                            </div>
+                            <p class="text-xs text-gray-600 mb-3">Activa el modo de pruebas para simular fechas y probar funcionalidades sin afectar los datos reales.</p>
+                            
+                            <!-- Toggle Switch -->
+                            <label class="relative inline-flex items-center cursor-pointer">
+                                <input type="checkbox" id="toggle-modo-pruebas" class="sr-only peer">
+                                <div class="w-11 h-6 bg-gray-300 peer-focus:outline-none peer-focus:ring-4 peer-focus:ring-purple-300 rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-purple-600"></div>
+                                <span class="ml-3 text-sm font-medium text-gray-700" id="estado-modo-pruebas">Desactivado</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Información adicional -->
+                <div class="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                    <p class="text-xs text-blue-800">
+                        <strong>💡 Tip:</strong> El modo de pruebas te permite simular fechas futuras para probar alertas de pendientes y otros comportamientos del sistema.
+                    </p>
+                </div>
+            </div>
+
+            <div class="p-6 border-t border-gray-200">
+                <button 
+                    onclick="cerrarModalConfiguracion()"
+                    class="w-full px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-lg hover:bg-gray-900"
+                >
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
     <!-- Footer -->
     <footer class="border-t border-gray-200 bg-white mt-auto">
         <div class="container mx-auto px-4 py-4 md:px-6">
@@ -627,6 +736,7 @@
         // ========================================
         
         const STORAGE_KEY = 'coaches_data';
+        const CONFIG_KEY = 'coaches_config';
         
         let currentCoachId = null;
         let currentPagoId = null; // ID del pago/periodo actualmente seleccionado
@@ -646,6 +756,15 @@
 
         function saveData(data) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+        }
+
+        function loadConfig() {
+            const config = localStorage.getItem(CONFIG_KEY);
+            return config ? JSON.parse(config) : { modoPruebas: false };
+        }
+
+        function saveConfig(config) {
+            localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
         }
 
         function generateId() {
@@ -878,10 +997,23 @@
                 document.getElementById('mensaje-sin-pagos').classList.add('hidden');
                 document.getElementById('contenido-con-pagos').classList.remove('hidden');
                 
-                // Cargar selector de periodos (sin selección automática)
+                // Cargar selector de periodos
                 cargarSelectorPeriodos();
                 
-                // Solo renderizar si hay un periodo previamente seleccionado
+                // Buscar periodo que contenga la fecha actual
+                const fechaActual = fechaSimulada || formatDate(new Date());
+                let periodoActual = pagos.find(pago => {
+                    return fechaActual >= pago.periodoInicio && fechaActual <= pago.periodoFin;
+                });
+                
+                // Si hay un periodo actual, seleccionarlo automáticamente
+                if (periodoActual && !currentPagoId) {
+                    currentPagoId = periodoActual.id;
+                    const selector = document.getElementById('select-periodo-pago');
+                    if (selector) selector.value = currentPagoId;
+                }
+                
+                // Solo renderizar si hay un periodo seleccionado
                 if (currentPagoId) {
                     const pagoSeleccionado = pagos.find(p => p.id === currentPagoId);
                     if (pagoSeleccionado) {
@@ -991,8 +1123,10 @@
                 const indicador = document.getElementById('reposiciones-disponibles');
                 if (indicador) indicador.style.display = 'none';
                 
-                // Ocultar alerta de pendientes
+                // Ocultar alertas
+                const alertaCompletado = document.getElementById('alerta-completado');
                 const alertaPendientes = document.getElementById('alerta-pendientes');
+                if (alertaCompletado) alertaCompletado.classList.add('hidden');
                 if (alertaPendientes) alertaPendientes.classList.add('hidden');
                 
                 return;
@@ -1277,24 +1411,36 @@
                 }
             }
             
-            // Mostrar alerta de pendientes si hay pendientes y el periodo está cerca de terminar o ya terminó
+            // Mostrar alerta de periodo completado o pendientes
+            const alertaCompletado = document.getElementById('alerta-completado');
             const alertaPendientes = document.getElementById('alerta-pendientes');
-            if (alertaPendientes) {
-                // Usar fecha simulada si existe, sino usar fecha real
-                const hoy = fechaSimulada ? new Date(fechaSimulada) : new Date();
-                hoy.setHours(0, 0, 0, 0);
-                const fechaFin = new Date(pago.periodoFin);
-                fechaFin.setHours(0, 0, 0, 0);
+            
+            if (pendientes === 0) {
+                // Periodo completado: mostrar alerta verde
+                if (alertaCompletado) alertaCompletado.classList.remove('hidden');
+                if (alertaPendientes) alertaPendientes.classList.add('hidden');
+            } else {
+                // Hay pendientes: ocultar alerta verde
+                if (alertaCompletado) alertaCompletado.classList.add('hidden');
                 
-                // Calcular días restantes del periodo
-                const diasRestantes = Math.ceil((fechaFin - hoy) / (1000 * 60 * 60 * 24));
-                
-                // Mostrar alerta si hay pendientes y quedan 3 días o menos (o ya terminó)
-                if (pendientes > 0 && diasRestantes <= 3) {
-                    document.getElementById('alerta-pendientes-cantidad').textContent = pendientes;
-                    alertaPendientes.classList.remove('hidden');
-                } else {
-                    alertaPendientes.classList.add('hidden');
+                // Mostrar alerta naranja si el periodo está cerca de terminar o ya terminó
+                if (alertaPendientes) {
+                    // Usar fecha simulada si existe, sino usar fecha real
+                    const hoy = fechaSimulada ? new Date(fechaSimulada) : new Date();
+                    hoy.setHours(0, 0, 0, 0);
+                    const fechaFin = new Date(pago.periodoFin);
+                    fechaFin.setHours(0, 0, 0, 0);
+                    
+                    // Calcular días restantes del periodo
+                    const diasRestantes = Math.ceil((fechaFin - hoy) / (1000 * 60 * 60 * 24));
+                    
+                    // Mostrar alerta si hay pendientes y quedan 3 días o menos (o ya terminó)
+                    if (diasRestantes <= 3) {
+                        document.getElementById('alerta-pendientes-cantidad').textContent = pendientes;
+                        alertaPendientes.classList.remove('hidden');
+                    } else {
+                        alertaPendientes.classList.add('hidden');
+                    }
                 }
             }
         }
@@ -1678,11 +1824,9 @@
         }
 
         // ========================================
-        // EVENTOS
+        // EVENTOS (Se inicializan en DOMContentLoaded)
         // ========================================
-
-        // Agregar coach
-        document.getElementById('btn-agregar-coach').addEventListener('click', () => abrirModalCoach());
+        // Nota: Los event listeners principales se registran en inicializarEventListeners()
         
         // Cancelar modal coach
         document.getElementById('btn-cancelar-modal').addEventListener('click', cerrarModalCoach);
@@ -1730,11 +1874,7 @@
             }
         });
         
-        // Volver a lista
-        document.getElementById('btn-volver-lista').addEventListener('click', mostrarVistaLista);
-        
-        // Buscar coach
-        document.getElementById('buscar-coach').addEventListener('input', renderCoachesList);
+        // Los event listeners se inicializan en DOMContentLoaded (ver inicializarEventListeners)
         
         // Selector de periodo
         document.getElementById('select-periodo-pago').addEventListener('change', (e) => {
@@ -1753,9 +1893,7 @@
         // Botón registrar primer pago
         document.getElementById('btn-registrar-pago-inicio').addEventListener('click', abrirModalPago);
         
-        // Registrar pago
-        document.getElementById('btn-registrar-pago').addEventListener('click', abrirModalPago);
-        document.getElementById('btn-cancelar-pago').addEventListener('click', cerrarModalPago);
+        // Event listeners de pago se registran en inicializarEventListeners()
         
         document.getElementById('form-pago').addEventListener('submit', (e) => {
             e.preventDefault();
@@ -1768,6 +1906,19 @@
             
             const periodoInicio = document.getElementById('pago-periodo-inicio').value;
             const periodoFin = document.getElementById('pago-periodo-fin').value;
+            
+            // Validar que no haya solapamiento con otros periodos
+            const periodosExistentes = data.pagos[currentCoachId] || [];
+            const haySolapamiento = periodosExistentes.some(p => {
+                // Verificar si hay solapamiento entre el nuevo periodo y uno existente
+                return (periodoInicio <= p.periodoFin && periodoFin >= p.periodoInicio);
+            });
+            
+            if (haySolapamiento) {
+                alert('❌ Error: Ya existe un periodo con fechas que se solapan con las que intentas registrar.\n\nPor favor, verifica los periodos existentes y elige fechas diferentes.');
+                return;
+            }
+            
             const monto = obtenerValorMontoRaw();
             const stats = calcularEstadisticasPeriodo(periodoInicio, periodoFin, currentCoachId, monto);
             
@@ -1819,6 +1970,21 @@
             // Validar que la nueva fecha sea posterior o igual a la ORIGINAL
             if (new Date(nuevaFechaFin) < new Date(pago.periodoFinOriginal)) {
                 alert('La nueva fecha de fin debe ser posterior o igual a la fecha original del periodo');
+                return;
+            }
+            
+            // Validar que la extensión no se solape con otros periodos
+            const periodosExistentes = data.pagos[currentCoachId] || [];
+            const haySolapamiento = periodosExistentes.some(p => {
+                // Ignorar el periodo que estamos editando
+                if (p.id === currentPagoId) return false;
+                
+                // Verificar si hay solapamiento con otros periodos
+                return (pago.periodoInicio <= p.periodoFin && nuevaFechaFin >= p.periodoInicio);
+            });
+            
+            if (haySolapamiento) {
+                alert('❌ Error: La extensión del periodo se solaparía con otro periodo existente.\n\nPor favor, elige una fecha que no se solape con otros periodos.');
                 return;
             }
             
@@ -1988,6 +2154,12 @@
                 if (modalEditarPeriodo && !modalEditarPeriodo.classList.contains('hidden')) {
                     cerrarModalEditarPeriodo();
                 }
+                
+                // Cerrar modal de configuración si está abierto
+                const modalConfiguracion = document.getElementById('modal-configuracion');
+                if (modalConfiguracion && !modalConfiguracion.classList.contains('hidden')) {
+                    cerrarModalConfiguracion();
+                }
             }
         });
         
@@ -2040,10 +2212,281 @@
         }
 
         // ========================================
+        // CONFIGURACIÓN
+        // ========================================
+        
+        function abrirModalConfiguracion() {
+            console.log('📂 Función abrirModalConfiguracion ejecutada');
+            const modal = document.getElementById('modal-configuracion');
+            
+            if (!modal) {
+                console.error('❌ Modal de configuración no encontrado');
+                return;
+            }
+            
+            console.log('✅ Modal encontrado, removiendo clase hidden');
+            modal.classList.remove('hidden');
+            
+            // Cargar estado actual del modo de pruebas
+            const config = loadConfig();
+            const toggle = document.getElementById('toggle-modo-pruebas');
+            const estadoTexto = document.getElementById('estado-modo-pruebas');
+            
+            if (toggle) {
+                toggle.checked = config.modoPruebas;
+            }
+            if (estadoTexto) {
+                estadoTexto.textContent = config.modoPruebas ? 'Activado' : 'Desactivado';
+            }
+            
+            console.log('✅ Modal de configuración abierto. Modo pruebas:', config.modoPruebas);
+        }
+        
+        function cerrarModalConfiguracion() {
+            const modal = document.getElementById('modal-configuracion');
+            modal.classList.add('hidden');
+        }
+        
+        function toggleModoPruebas(activo) {
+            const config = loadConfig();
+            config.modoPruebas = activo;
+            saveConfig(config);
+            
+            // Actualizar texto del estado
+            const estadoTexto = document.getElementById('estado-modo-pruebas');
+            estadoTexto.textContent = activo ? 'Activado' : 'Desactivado';
+            
+            // Mostrar u ocultar panel de pruebas
+            const panel = document.getElementById('panel-pruebas');
+            if (activo) {
+                panel.classList.remove('hidden');
+            } else {
+                panel.classList.add('hidden');
+                // Si se desactiva, también cerrar el contenido del panel y resetear fecha
+                document.getElementById('contenido-panel-pruebas').classList.add('hidden');
+                fechaSimulada = null;
+                document.getElementById('fecha-simulada').value = '';
+            }
+            
+            console.log('Modo de pruebas:', activo ? 'Activado' : 'Desactivado');
+        }
+        
+        function actualizarVisibilidadPanelPruebas() {
+            const config = loadConfig();
+            const panel = document.getElementById('panel-pruebas');
+            
+            if (config.modoPruebas) {
+                panel.classList.remove('hidden');
+            } else {
+                panel.classList.add('hidden');
+            }
+        }
+
+        // ========================================
+        // BACKUP DE BASE DE DATOS
+        // ========================================
+        
+        function descargarBackup() {
+            try {
+                // Obtener todos los datos del localStorage
+                const data = loadData();
+                const config = loadConfig();
+                
+                // Crear un objeto con metadatos adicionales
+                const backup = {
+                    version: '1.0',
+                    fecha_backup: new Date().toISOString(),
+                    fecha_backup_legible: formatDateDisplay(formatDate(new Date())) + ' ' + new Date().toLocaleTimeString('es-CO'),
+                    datos: data,
+                    configuracion: config
+                };
+                
+                // Convertir a JSON con formato legible
+                const jsonStr = JSON.stringify(backup, null, 2);
+                
+                // Crear un blob con el contenido
+                const blob = new Blob([jsonStr], { type: 'application/json' });
+                
+                // Crear un link temporal para descargar
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                
+                // Nombre del archivo con fecha
+                const fechaArchivo = formatDate(new Date()).replace(/-/g, '');
+                const horaArchivo = new Date().toTimeString().slice(0, 8).replace(/:/g, '');
+                link.download = `backup_coaches_${fechaArchivo}_${horaArchivo}.json`;
+                
+                // Simular clic y descargar
+                document.body.appendChild(link);
+                link.click();
+                
+                // Limpiar
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+                
+                console.log('✅ Backup descargado exitosamente');
+            } catch (error) {
+                console.error('❌ Error al descargar backup:', error);
+                alert('Error al crear el backup. Revisa la consola para más detalles.');
+            }
+        }
+
+        function importarBackup(file) {
+            // Validar que sea un archivo JSON
+            if (!file.name.endsWith('.json')) {
+                alert('❌ Por favor selecciona un archivo JSON válido');
+                return;
+            }
+            
+            const reader = new FileReader();
+            
+            reader.onload = (e) => {
+                try {
+                    // Parsear el JSON
+                    const contenido = JSON.parse(e.target.result);
+                    
+                    // Validar estructura del backup
+                    if (!contenido.datos) {
+                        alert('❌ El archivo no tiene el formato correcto de backup');
+                        return;
+                    }
+                    
+                    const datos = contenido.datos;
+                    const configuracion = contenido.configuracion || { modoPruebas: false };
+                    
+                    // Validar que tenga las propiedades esperadas
+                    if (!datos.coaches || !datos.pagos || !datos.asistencias) {
+                        alert('❌ El backup no contiene todos los datos necesarios (coaches, pagos, asistencias)');
+                        return;
+                    }
+                    
+                    // Mostrar información del backup
+                    const numCoaches = datos.coaches.length;
+                    const numPagos = Object.values(datos.pagos).reduce((sum, arr) => sum + arr.length, 0);
+                    const fechaBackup = contenido.fecha_backup_legible || contenido.fecha_backup || 'Desconocida';
+                    const modoPruebasTexto = configuracion.modoPruebas ? 'Activado' : 'Desactivado';
+                    
+                    // Confirmar antes de importar
+                    const confirmacion = confirm(
+                        `⚠️ ADVERTENCIA: Esta acción sobrescribirá TODOS los datos actuales.\n\n` +
+                        `Información del backup:\n` +
+                        `• Fecha: ${fechaBackup}\n` +
+                        `• Coaches: ${numCoaches}\n` +
+                        `• Periodos: ${numPagos}\n` +
+                        `• Modo de pruebas: ${modoPruebasTexto}\n\n` +
+                        `¿Estás seguro de que deseas continuar?`
+                    );
+                    
+                    if (!confirmacion) {
+                        console.log('❌ Importación cancelada por el usuario');
+                        return;
+                    }
+                    
+                    // Guardar los datos y configuración en localStorage
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
+                    localStorage.setItem(CONFIG_KEY, JSON.stringify(configuracion));
+                    
+                    console.log('✅ Backup importado exitosamente:', {
+                        coaches: numCoaches,
+                        pagos: numPagos,
+                        fecha: fechaBackup,
+                        modoPruebas: configuracion.modoPruebas
+                    });
+                    
+                    // Mostrar confirmación
+                    alert(`✅ Backup importado exitosamente!\n\n• ${numCoaches} coaches\n• ${numPagos} periodos de pago\n• Modo de pruebas: ${modoPruebasTexto}`);
+                    
+                    // Actualizar visibilidad del panel de pruebas
+                    actualizarVisibilidadPanelPruebas();
+                    
+                    // Recargar la vista
+                    currentCoachId = null;
+                    currentPagoId = null;
+                    mostrarVistaLista();
+                    
+                } catch (error) {
+                    console.error('❌ Error al importar backup:', error);
+                    alert('❌ Error al procesar el archivo JSON. Asegúrate de que sea un backup válido.\n\n' + error.message);
+                }
+            };
+            
+            reader.onerror = () => {
+                console.error('❌ Error al leer el archivo');
+                alert('❌ Error al leer el archivo');
+            };
+            
+            // Leer el archivo como texto
+            reader.readAsText(file);
+        }
+
+        // ========================================
         // INICIALIZACIÓN
         // ========================================
         
+        function inicializarEventListeners() {
+            // Agregar coach
+            document.getElementById('btn-agregar-coach')?.addEventListener('click', () => abrirModalCoach());
+            
+            // Cancelar modal coach
+            document.getElementById('btn-cancelar-modal')?.addEventListener('click', cerrarModalCoach);
+            
+            // Volver a lista
+            document.getElementById('btn-volver-lista')?.addEventListener('click', mostrarVistaLista);
+            
+            // Configuración
+            document.getElementById('btn-configuracion')?.addEventListener('click', () => {
+                console.log('🔧 Abriendo modal de configuración...');
+                abrirModalConfiguracion();
+            });
+            
+            // Toggle modo de pruebas
+            document.getElementById('toggle-modo-pruebas')?.addEventListener('change', (e) => {
+                toggleModoPruebas(e.target.checked);
+            });
+            
+            // Cerrar modal de configuración con clic fuera
+            document.getElementById('modal-configuracion')?.addEventListener('click', (e) => {
+                if (e.target.id === 'modal-configuracion') {
+                    cerrarModalConfiguracion();
+                }
+            });
+            
+            // Descargar backup
+            document.getElementById('btn-descargar-backup')?.addEventListener('click', descargarBackup);
+            
+            // Importar backup
+            document.getElementById('btn-importar-backup')?.addEventListener('click', () => {
+                document.getElementById('input-importar-backup').click();
+            });
+            
+            document.getElementById('input-importar-backup')?.addEventListener('change', (e) => {
+                const file = e.target.files[0];
+                if (file) {
+                    importarBackup(file);
+                }
+                e.target.value = '';
+            });
+            
+            // Buscar coach
+            document.getElementById('buscar-coach')?.addEventListener('input', renderCoachesList);
+            
+            // Registrar pago
+            document.getElementById('btn-registrar-pago')?.addEventListener('click', abrirModalPago);
+            document.getElementById('btn-cancelar-pago')?.addEventListener('click', cerrarModalPago);
+            
+            console.log('✅ Event listeners inicializados');
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
+            console.log('🚀 DOM Cargado, inicializando aplicación...');
+            
+            // Inicializar event listeners
+            inicializarEventListeners();
+            
+            // Actualizar visibilidad del panel de pruebas según configuración
+            actualizarVisibilidadPanelPruebas();
+            
             mostrarVistaLista();
             
             // Actualizar info de fecha real en panel de pruebas
@@ -2052,6 +2495,8 @@
                 const hoy = new Date();
                 fechaRealSpan.textContent = formatDate(hoy);
             }
+            
+            console.log('✅ Aplicación inicializada correctamente');
         });
     </script>
 </body>
