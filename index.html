@@ -142,24 +142,6 @@
                 </div>
             </div>
 
-            <!-- Historial de pagos (oculto por defecto) -->
-            <div id="seccion-historial-pagos" class="hidden bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
-                <div class="flex justify-between items-center mb-4">
-                    <h3 class="text-lg font-bold text-gray-900">Todos los pagos</h3>
-                    <button 
-                        onclick="toggleHistorialPagos()"
-                        class="text-gray-400 hover:text-gray-600"
-                    >
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                        </svg>
-                    </button>
-                </div>
-                
-                <div id="lista-pagos" class="space-y-3 max-h-96 overflow-y-auto">
-                    <!-- Se llena dinámicamente -->
-                </div>
-            </div>
 
             <!-- Mensaje: Sin pagos -->
             <div id="mensaje-sin-pagos" class="bg-blue-50 border border-blue-200 rounded-xl p-8 text-center">
@@ -429,6 +411,25 @@
         </div>
     </footer>
 
+    <!-- Modal Historial de Pagos -->
+    <div id="modal-historial-pagos" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl mx-4 max-h-[90vh] flex flex-col">
+            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+                <h2 class="text-xl font-bold text-gray-900">📋 Todos los pagos</h2>
+                <button onclick="cerrarModalHistorialPagos()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            <div class="p-6 overflow-y-auto flex-1">
+                <div id="lista-pagos" class="space-y-3">
+                    <!-- Se llena dinámicamente -->
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Modal Nota del Día -->
     <div id="modal-nota-dia" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4">
@@ -558,24 +559,15 @@
             document.getElementById('vista-dashboard-coach').classList.remove('hidden');
             document.getElementById('btn-volver-lista').classList.remove('hidden');
             
-            // Ocultar historial al entrar
-            document.getElementById('seccion-historial-pagos').classList.add('hidden');
-            document.getElementById('btn-ver-historial').innerHTML = '📋 Ver pagos';
-            
             renderDashboard();
         }
         
         function toggleHistorialPagos() {
-            const seccion = document.getElementById('seccion-historial-pagos');
-            const btn = document.getElementById('btn-ver-historial');
-            
-            if (seccion.classList.contains('hidden')) {
-                seccion.classList.remove('hidden');
-                btn.innerHTML = '📋 Ocultar pagos';
-            } else {
-                seccion.classList.add('hidden');
-                btn.innerHTML = '📋 Ver pagos';
-            }
+            document.getElementById('modal-historial-pagos').classList.remove('hidden');
+        }
+        
+        function cerrarModalHistorialPagos() {
+            document.getElementById('modal-historial-pagos').classList.add('hidden');
         }
 
         // ========================================
@@ -750,7 +742,7 @@
             const days = getTodosDiasPeriodo(pago.periodoInicio, pago.periodoFin);
             const asistencias = data.asistencias[currentCoachId] || {};
             
-            let html = `<div class="grid grid-cols-7 gap-2 min-w-max">`;
+            let html = `<div class="grid grid-cols-7 gap-2">`;
             
             // Headers (todos los días de la semana)
             const diasNombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
@@ -1365,6 +1357,12 @@
         // ========================================
         // INICIALIZACIÓN
         // ========================================
+        // Cerrar modal de historial al hacer clic fuera de él
+        document.getElementById('modal-historial-pagos')?.addEventListener('click', (e) => {
+            if (e.target.id === 'modal-historial-pagos') {
+                cerrarModalHistorialPagos();
+            }
+        });
         
         document.addEventListener('DOMContentLoaded', () => {
             mostrarVistaLista();
