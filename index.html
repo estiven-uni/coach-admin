@@ -6,8 +6,30 @@
     <meta name="description" content="Panel de administración de coaches">
     <title>Gestión de Coaches - Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .line-clamp-2 {
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        
+        .truncate-multiline {
+            display: -webkit-box;
+            -webkit-line-clamp: 3;
+            line-clamp: 3;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            word-break: break-word;
+            line-height: 1.3;
+            max-height: 3.9em; /* 3 líneas x 1.3em */
+        }
+    </style>
 </head>
-<body class="bg-gray-50 text-gray-900 antialiased">
+<body class="bg-gray-50 text-gray-900 antialiased min-h-screen flex flex-col">
     
     <!-- Encabezado -->
     <header class="sticky top-0 z-50 bg-white border-b border-gray-200 shadow-sm">
@@ -27,7 +49,7 @@
         </div>
     </header>
 
-    <main class="container mx-auto px-4 py-6 md:px-6 md:py-8">
+    <main class="flex-1 container mx-auto px-4 py-6 md:px-6 md:py-8">
         
         <!-- VISTA: Lista de Coaches -->
         <div id="vista-lista-coaches">
@@ -87,12 +109,23 @@
                                 <p id="coach-dias" class="text-sm font-medium text-gray-900 mt-1"></p>
                             </div>
                             <div>
-                                <p class="text-xs text-gray-500">Total de pagos</p>
-                                <p id="coach-total-pagos" class="text-sm font-semibold text-blue-600 mt-1">0</p>
+                                <p class="text-xs text-gray-500">Total pagado</p>
+                                <p id="coach-total-pagos" class="text-sm font-semibold text-blue-600 mt-1">$ 0</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500">Cantidad de pagos</p>
+                                <p id="coach-cantidad-pagos" class="text-sm font-semibold text-green-600 mt-1">0</p>
                             </div>
                         </div>
                     </div>
                     <div class="flex gap-2">
+                        <button 
+                            id="btn-ver-historial"
+                            onclick="toggleHistorialPagos()"
+                            class="px-3 py-2 text-sm font-medium text-green-600 border border-green-300 rounded-lg hover:bg-green-50"
+                        >
+                            📋 Ver pagos
+                        </button>
                         <button 
                             id="btn-editar-coach"
                             class="px-3 py-2 text-sm font-medium text-blue-600 border border-blue-300 rounded-lg hover:bg-blue-50"
@@ -106,6 +139,25 @@
                             Eliminar
                         </button>
                     </div>
+                </div>
+            </div>
+
+            <!-- Historial de pagos (oculto por defecto) -->
+            <div id="seccion-historial-pagos" class="hidden bg-white rounded-xl border border-gray-200 shadow-sm p-6 mb-6">
+                <div class="flex justify-between items-center mb-4">
+                    <h3 class="text-lg font-bold text-gray-900">Todos los pagos</h3>
+                    <button 
+                        onclick="toggleHistorialPagos()"
+                        class="text-gray-400 hover:text-gray-600"
+                    >
+                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
+                </div>
+                
+                <div id="lista-pagos" class="space-y-3 max-h-96 overflow-y-auto">
+                    <!-- Se llena dinámicamente -->
                 </div>
             </div>
 
@@ -173,34 +225,17 @@
                     </div>
                 </section>
 
-                <!-- Grid: Calendario + Historial -->
-                <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                    
-                    <!-- Calendario -->
-                    <div class="lg:col-span-2">
-                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                            <div class="flex items-center justify-between mb-4">
-                                <h3 class="text-lg font-bold text-gray-900">Calendario del periodo</h3>
-                                <span id="periodo-label" class="text-sm text-blue-600 font-medium"></span>
-                            </div>
-                            
-                            <p class="text-xs text-gray-500 mb-4">Click derecho para marcar reposición</p>
-                            
-                            <div id="calendar-grid" class="overflow-x-auto">
-                                <!-- Se genera dinámicamente -->
-                            </div>
-                        </div>
+                <!-- Calendario -->
+                <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900">Calendario del periodo</h3>
+                        <span id="periodo-label" class="text-sm text-blue-600 font-medium"></span>
                     </div>
-
-                    <!-- Historial de pagos -->
-                    <div class="lg:col-span-1">
-                        <div class="bg-white rounded-xl border border-gray-200 shadow-sm p-6">
-                            <h3 class="text-lg font-bold text-gray-900 mb-4">Todos los pagos</h3>
-                            
-                            <div id="lista-pagos" class="space-y-3 max-h-96 overflow-y-auto">
-                                <!-- Se llena dinámicamente -->
-                            </div>
-                        </div>
+                    
+                    <p class="text-xs text-gray-500 mb-4">Click derecho para marcar reposición</p>
+                    
+                    <div id="calendar-grid" class="overflow-x-auto">
+                        <!-- Se genera dinámicamente -->
                     </div>
                 </div>
             </div>
@@ -388,7 +423,7 @@
     </div>
 
     <!-- Footer -->
-    <footer class="border-t border-gray-200 bg-white mt-12">
+    <footer class="border-t border-gray-200 bg-white mt-auto">
         <div class="container mx-auto px-4 py-4 md:px-6">
             <p class="text-xs text-gray-500 text-center">Sistema de gestión de coaches - Datos en localStorage</p>
         </div>
@@ -522,7 +557,25 @@
             document.getElementById('vista-lista-coaches').classList.add('hidden');
             document.getElementById('vista-dashboard-coach').classList.remove('hidden');
             document.getElementById('btn-volver-lista').classList.remove('hidden');
+            
+            // Ocultar historial al entrar
+            document.getElementById('seccion-historial-pagos').classList.add('hidden');
+            document.getElementById('btn-ver-historial').innerHTML = '📋 Ver pagos';
+            
             renderDashboard();
+        }
+        
+        function toggleHistorialPagos() {
+            const seccion = document.getElementById('seccion-historial-pagos');
+            const btn = document.getElementById('btn-ver-historial');
+            
+            if (seccion.classList.contains('hidden')) {
+                seccion.classList.remove('hidden');
+                btn.innerHTML = '📋 Ocultar pagos';
+            } else {
+                seccion.classList.add('hidden');
+                btn.innerHTML = '📋 Ver pagos';
+            }
         }
 
         // ========================================
@@ -599,6 +652,7 @@
             const pagos = data.pagos[currentCoachId] || [];
             const sumaTotalPagos = pagos.reduce((sum, pago) => sum + (pago.monto || 0), 0);
             document.getElementById('coach-total-pagos').textContent = formatCurrency(sumaTotalPagos);
+            document.getElementById('coach-cantidad-pagos').textContent = pagos.length;
 
             // Verificar si hay pagos
             if (pagos.length === 0) {
@@ -613,9 +667,10 @@
                 // Cargar selector de periodos
                 cargarSelectorPeriodos();
                 
-                // Si no hay periodo seleccionado, seleccionar el más reciente
+                // Si no hay periodo seleccionado, seleccionar el más reciente (por fecha)
                 if (!currentPagoId) {
-                    currentPagoId = pagos[pagos.length - 1].id;
+                    const pagosOrdenados = [...pagos].sort((a, b) => new Date(b.fecha) - new Date(a.fecha));
+                    currentPagoId = pagosOrdenados[0].id;
                 }
                 
                 // Renderizar calendario y métricas del periodo
@@ -661,6 +716,24 @@
             
             return days;
         }
+        
+        function getTodosDiasPeriodo(inicio, fin) {
+            const days = [];
+            const inicioDate = new Date(inicio + 'T00:00:00');
+            const finDate = new Date(fin + 'T00:00:00');
+            
+            let currentDate = new Date(inicioDate);
+            
+            while (currentDate <= finDate) {
+                days.push({
+                    fecha: formatDate(currentDate),
+                    diaSemana: currentDate.getDay()
+                });
+                currentDate.setDate(currentDate.getDate() + 1);
+            }
+            
+            return days;
+        }
 
         function renderCalendarioPeriodo() {
             const data = loadData();
@@ -674,51 +747,57 @@
             
             periodoLabel.textContent = `${formatDateDisplay(pago.periodoInicio)} - ${formatDateDisplay(pago.periodoFin)}`;
             
-            const days = getDiasLaborablesPeriodo(pago.periodoInicio, pago.periodoFin, coach.diasLaborables);
+            const days = getTodosDiasPeriodo(pago.periodoInicio, pago.periodoFin);
             const asistencias = data.asistencias[currentCoachId] || {};
             
-            // Determinar número de columnas
-            const maxDias = coach.diasLaborables.length;
+            let html = `<div class="grid grid-cols-7 gap-2 min-w-max">`;
             
-            let html = `<div class="grid grid-cols-${maxDias} gap-2 min-w-max">`;
-            
-            // Headers
+            // Headers (todos los días de la semana)
             const diasNombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
-            coach.diasLaborables.forEach(dia => {
-                html += `<div class="text-xs font-semibold text-gray-700 text-center py-2">${diasNombres[dia]}</div>`;
+            diasNombres.forEach(dia => {
+                html += `<div class="text-xs font-semibold text-gray-700 text-center py-2">${dia}</div>`;
             });
             
-            // Renderizar días agrupados por semana
-            let diaIndex = 0;
-            let semanaIniciada = false;
+            // Agregar espacios vacíos al inicio si el mes no empieza en domingo
+            const primerDia = days[0].diaSemana;
+            for (let i = 0; i < primerDia; i++) {
+                html += `<div class="border border-transparent rounded-lg p-2 h-36"></div>`;
+            }
             
-            days.forEach(dateStr => {
-                const asist = asistencias[dateStr] || { asistio: false, reposicion: false };
+            // Renderizar todos los días
+            days.forEach(({fecha: dateStr, diaSemana}) => {
+                const asist = asistencias[dateStr] || { asistio: false, reposicion: false, nota: '' };
+                const esLaborable = coach.diasLaborables.includes(diaSemana);
                 
                 html += `
-                    <div class="border border-gray-200 rounded-lg p-3 ${asist.asistio ? 'bg-green-50' : 'bg-gray-50'} relative"
+                    <div class="border ${esLaborable ? 'border-gray-300' : 'border-gray-200'} rounded-lg p-2 ${asist.asistio ? 'bg-green-50' : (esLaborable ? 'bg-white' : 'bg-gray-100')} ${esLaborable ? '' : 'opacity-60'} h-36 flex flex-col overflow-hidden"
                          oncontextmenu="toggleReposicion('${dateStr}'); return false;">
-                        <div class="flex justify-between items-start mb-2">
-                            <p class="text-xs text-gray-400">${formatDateDisplay(dateStr).split(' ').slice(0,2).join(' ')}</p>
+                        <div class="flex justify-between items-start mb-1 flex-shrink-0">
+                            <div class="flex-1 min-w-0">
+                                <p class="text-xs ${esLaborable ? 'text-gray-700 font-semibold' : 'text-gray-400'}">${formatDateDisplay(dateStr).split(' ').slice(0,2).join(' ')}</p>
+                                ${!esLaborable ? '<p class="text-xs text-gray-400 leading-tight">No laboral</p>' : ''}
+                            </div>
                             <button 
                                 onclick="abrirModalNotaDia('${dateStr}')"
-                                class="text-xs ${asist.nota ? 'text-yellow-600 hover:text-yellow-700' : 'text-gray-400 hover:text-gray-600'}"
+                                class="text-sm ${asist.nota ? 'text-yellow-600 hover:text-yellow-700' : 'text-gray-400 hover:text-gray-600'} flex-shrink-0 ml-1"
                                 title="${asist.nota ? 'Ver nota' : 'Agregar nota'}"
                             >
                                 ${asist.nota ? '📝' : '📄'}
                             </button>
                         </div>
-                        <label class="flex items-center gap-2 text-xs cursor-pointer">
+                        <label class="flex items-center gap-1 text-xs cursor-pointer mb-1 flex-shrink-0">
                             <input 
                                 type="checkbox" 
                                 ${asist.asistio ? 'checked' : ''}
                                 onchange="toggleAsistencia('${dateStr}')"
-                                class="rounded border-gray-300"
+                                class="rounded border-gray-300 flex-shrink-0 w-3 h-3"
                             >
-                            <span>Asistió</span>
+                            <span class="${esLaborable ? 'text-gray-900' : 'text-gray-500'}">Asistió</span>
                         </label>
-                        ${asist.reposicion ? '<span class="inline-block mt-2 px-2 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded">R</span>' : ''}
-                        ${asist.nota ? '<p class="text-xs text-gray-600 mt-2 italic truncate" title="' + asist.nota + '">"' + (asist.nota.length > 30 ? asist.nota.substring(0, 30) + '...' : asist.nota) + '"</p>' : ''}
+                        <div class="flex-1 overflow-hidden min-h-0">
+                            ${asist.reposicion ? '<span class="inline-block mb-1 px-1.5 py-0.5 text-xs font-semibold text-blue-700 bg-blue-100 rounded">R</span>' : ''}
+                            ${asist.nota ? '<p class="text-xs text-gray-600 italic truncate-multiline" title="' + asist.nota.replace(/"/g, '&quot;') + '">"' + asist.nota + '"</p>' : ''}
+                        </div>
                     </div>
                 `;
             });
@@ -1227,6 +1306,33 @@
             renderCalendarioPeriodo();
             
             cerrarModalNotaDia();
+        });
+        
+        // Permitir guardar nota con Enter (sin Shift para nueva línea)
+        document.getElementById('nota-dia-texto').addEventListener('keydown', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+                e.preventDefault();
+                e.stopPropagation();
+                
+                // Guardar la nota manualmente
+                if (!currentNotaDate) return;
+                
+                const data = loadData();
+                const nota = document.getElementById('nota-dia-texto').value.trim();
+                
+                if (!data.asistencias[currentCoachId]) {
+                    data.asistencias[currentCoachId] = {};
+                }
+                
+                if (!data.asistencias[currentCoachId][currentNotaDate]) {
+                    data.asistencias[currentCoachId][currentNotaDate] = { asistio: false, reposicion: false, nota: '' };
+                }
+                
+                data.asistencias[currentCoachId][currentNotaDate].nota = nota;
+                saveData(data);
+                renderCalendarioPeriodo();
+                cerrarModalNotaDia();
+            }
         });
         
         // Auto-calcular resumen al cambiar valores en modal de pago
