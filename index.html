@@ -684,12 +684,80 @@
         </div>
     </div>
 
-    <!-- Modal Nota del Día -->
-    <div id="modal-nota-dia" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-md mx-4">
-            <div class="flex justify-between items-center p-6 border-b border-gray-200">
+    <!-- Modal: Gestionar Ejercicios -->
+    <div id="modal-ejercicios-biblioteca" class="hidden fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-[60] p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[80vh] flex flex-col">
+            <div class="flex justify-between items-center p-4 border-b border-gray-200 flex-shrink-0">
                 <div>
-                    <h2 class="text-xl font-bold text-gray-900">Nota del día</h2>
+                    <h2 class="text-lg font-bold text-gray-900">📚 Biblioteca de Ejercicios</h2>
+                    <p class="text-xs text-gray-500 mt-1">Gestiona tu catálogo de ejercicios</p>
+                </div>
+                <button onclick="cerrarModalBibliotecaEjercicios()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
+            
+            <div class="p-4 flex-1 overflow-y-auto">
+                <!-- Agregar nuevo ejercicio -->
+                <div class="bg-blue-50 border-2 border-blue-200 rounded-lg p-4 mb-4">
+                    <h3 class="text-sm font-bold text-blue-900 mb-3">➕ Agregar nuevo ejercicio</h3>
+                    <div class="flex gap-2">
+                        <input 
+                            type="text" 
+                            id="nuevo-ejercicio-nombre"
+                            placeholder="Nombre del ejercicio (ej: Press de banca)"
+                            class="flex-1 px-3 py-2 text-sm border border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        >
+                        <button 
+                            onclick="agregarEjercicioABiblioteca()"
+                            class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 whitespace-nowrap"
+                        >
+                            + Agregar
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Buscador -->
+                <div class="mb-3">
+                    <input 
+                        type="text" 
+                        id="buscar-ejercicio-biblioteca"
+                        placeholder="🔍 Buscar ejercicio..."
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        oninput="renderBibliotecaEjercicios()"
+                    >
+                </div>
+                
+                <!-- Lista de ejercicios -->
+                <div id="lista-ejercicios-biblioteca" class="space-y-2">
+                    <!-- Se llena dinámicamente -->
+                </div>
+                
+                <div id="mensaje-sin-ejercicios-biblioteca" class="hidden text-center py-8 text-gray-500">
+                    <p class="text-sm">No hay ejercicios en la biblioteca</p>
+                    <p class="text-xs mt-1">Agrega tu primer ejercicio arriba</p>
+                </div>
+            </div>
+            
+            <div class="p-4 border-t border-gray-200 flex-shrink-0">
+                <button 
+                    onclick="cerrarModalBibliotecaEjercicios()"
+                    class="w-full px-4 py-2 text-sm font-medium text-white bg-gray-800 rounded-lg hover:bg-gray-900"
+                >
+                    Cerrar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal Nota del Día -->
+    <div id="modal-nota-dia" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden overflow-y-auto p-4">
+        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl my-8">
+            <div class="flex justify-between items-center p-5 border-b border-gray-200">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900">🏋️ Rutina del día</h2>
                     <p id="nota-fecha-display" class="text-sm text-gray-500 mt-1"></p>
                 </div>
                 <button onclick="cerrarModalNotaDia()" class="text-gray-400 hover:text-gray-600">
@@ -698,32 +766,150 @@
                     </svg>
                 </button>
             </div>
-            <form id="form-nota-dia" class="p-6 space-y-4">
+            <form id="form-nota-dia" class="p-4 space-y-4 max-h-[70vh] overflow-y-auto">
+                <!-- Calentamiento -->
+                <div class="bg-orange-50 border border-orange-200 rounded-lg p-3">
+                    <label class="flex items-center gap-2 cursor-pointer">
+                        <input 
+                            type="checkbox" 
+                            id="calentamiento-check"
+                            class="w-4 h-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                            checked
+                        >
+                        <span class="text-sm font-semibold text-orange-900">🔥 Incluyó calentamiento</span>
+                    </label>
+                </div>
+
+                <!-- Tipo de entrenamiento -->
+                <div class="grid grid-cols-2 gap-2">
+                    <label class="flex items-center gap-2 p-2 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                        <input 
+                            type="checkbox" 
+                            id="tipo-maquinas"
+                            class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            checked
+                        >
+                        <span class="text-sm font-medium text-gray-700">⚙️ Máquinas</span>
+                    </label>
+                    <label class="flex items-center gap-2 p-2 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-green-50 transition-colors has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
+                        <input 
+                            type="checkbox" 
+                            id="tipo-calistenia"
+                            class="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                        >
+                        <span class="text-sm font-medium text-gray-700">💪 Calistenia</span>
+                    </label>
+                </div>
+
+                <div class="grid grid-cols-2 gap-4">
+                    <!-- Tren trabajado -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Tren trabajado</label>
+                        <div class="grid grid-cols-1 gap-2">
+                            <label class="flex items-center gap-2 p-2 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-purple-50 transition-colors has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50">
+                                <input 
+                                    type="radio" 
+                                    name="tren"
+                                    id="tren-superior"
+                                    value="superior"
+                                    class="w-4 h-4 text-purple-600 focus:ring-purple-500"
+                                >
+                                <span class="text-sm font-medium text-gray-700">💪 Tren Superior</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-2 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-indigo-50 transition-colors has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+                                <input 
+                                    type="radio" 
+                                    name="tren"
+                                    id="tren-inferior"
+                                    value="inferior"
+                                    class="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
+                                >
+                                <span class="text-sm font-medium text-gray-700">🦵 Tren Inferior</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <!-- Unidad de peso -->
+                    <div>
+                        <label class="block text-sm font-semibold text-gray-700 mb-2">Unidad de peso</label>
+                        <div class="grid grid-cols-1 gap-2">
+                            <label class="flex items-center gap-2 p-2 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-teal-50 transition-colors has-[:checked]:border-teal-500 has-[:checked]:bg-teal-50">
+                                <input 
+                                    type="radio" 
+                                    name="unidad-peso"
+                                    id="peso-kg"
+                                    value="kg"
+                                    class="w-4 h-4 text-teal-600 focus:ring-teal-500"
+                                    checked
+                                >
+                                <span class="text-sm font-medium text-gray-700">⚖️ Kilogramos (kg)</span>
+                            </label>
+                            <label class="flex items-center gap-2 p-2 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-cyan-50 transition-colors has-[:checked]:border-cyan-500 has-[:checked]:bg-cyan-50">
+                                <input 
+                                    type="radio" 
+                                    name="unidad-peso"
+                                    id="peso-lb"
+                                    value="lb"
+                                    class="w-4 h-4 text-cyan-600 focus:ring-cyan-500"
+                                >
+                                <span class="text-sm font-medium text-gray-700">⚖️ Libras (lb)</span>
+                            </label>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Lista de ejercicios -->
                 <div>
-                    <label for="nota-dia-texto" class="block text-sm font-medium text-gray-700 mb-2">Nota</label>
+                    <div class="flex items-center justify-between mb-3">
+                        <label class="text-sm font-bold text-gray-900">Ejercicios realizados</label>
+                        <div class="flex gap-2">
+                            <button 
+                                type="button"
+                                onclick="abrirModalBibliotecaEjercicios()"
+                                class="px-3 py-1.5 text-xs font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 flex items-center gap-1.5"
+                            >
+                                📚 Biblioteca
+                            </button>
+                            <button 
+                                type="button"
+                                onclick="agregarEjercicio()"
+                                class="px-3 py-1.5 text-xs font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-1"
+                            >
+                                <span class="text-base">+</span> Agregar
+                            </button>
+                        </div>
+                    </div>
+                    <div id="lista-ejercicios" class="space-y-3">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2">💡 Tip: Usa la biblioteca para guardar y reutilizar tus ejercicios favoritos</p>
+                </div>
+
+                <!-- Nota adicional (opcional) -->
+                <div>
+                    <label for="nota-dia-texto" class="block text-sm font-medium text-gray-700 mb-1">Nota adicional (opcional)</label>
                     <textarea 
                         id="nota-dia-texto" 
-                        rows="4"
-                        maxlength="500"
-                        class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
-                        placeholder="Escribe una nota para este día..."
+                        rows="2"
+                        maxlength="200"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                        placeholder="Observaciones, sensaciones, logros..."
                     ></textarea>
-                    <p class="text-xs text-gray-400 mt-1">Máximo 500 caracteres</p>
                 </div>
                 
-                <div class="flex gap-3">
+                <div class="flex gap-2 pt-2 border-t">
                     <button 
                         type="submit"
-                        class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium"
+                        class="flex-1 bg-blue-600 text-white px-4 py-2 rounded-lg hover:bg-blue-700 font-medium text-sm"
                     >
-                        Guardar nota
+                        💾 Guardar rutina
                     </button>
                     <button 
                         type="button"
                         onclick="eliminarNotaDia()"
-                        class="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 font-medium"
+                        class="px-4 py-2 border border-red-300 text-red-600 rounded-lg hover:bg-red-50 font-medium text-sm"
                     >
-                        Eliminar
+                        🗑️
                     </button>
                 </div>
             </form>
@@ -737,6 +923,7 @@
         
         const STORAGE_KEY = 'coaches_data';
         const CONFIG_KEY = 'coaches_config';
+        const EJERCICIOS_KEY = 'ejercicios_biblioteca';
         
         let currentCoachId = null;
         let currentPagoId = null; // ID del pago/periodo actualmente seleccionado
@@ -770,6 +957,238 @@
         function generateId() {
             return Date.now().toString() + Math.random().toString(36).substr(2, 9);
         }
+
+        // ========================================
+        // BIBLIOTECA DE EJERCICIOS
+        // ========================================
+
+        function loadEjercicios() {
+            const ejercicios = localStorage.getItem(EJERCICIOS_KEY);
+            if (ejercicios) {
+                return JSON.parse(ejercicios);
+            }
+            
+            // Ejercicios por defecto si la biblioteca está vacía
+            const ejerciciosDefault = [
+                // Pecho
+                'Press de banca',
+                'Press inclinado con mancuernas',
+                'Press declinado',
+                'Aperturas con mancuernas',
+                'Fondos en paralelas',
+                'Press con mancuernas plano',
+                'Cruces en polea',
+                'Peck deck',
+                
+                // Espalda
+                'Dominadas',
+                'Remo con barra',
+                'Remo con mancuerna',
+                'Jalón al pecho',
+                'Jalón tras nuca',
+                'Peso muerto',
+                'Remo en polea baja',
+                'Pull over',
+                'Remo en T',
+                
+                // Hombros
+                'Press militar',
+                'Press Arnold',
+                'Elevaciones laterales',
+                'Elevaciones frontales',
+                'Pájaros (elevaciones posteriores)',
+                'Press con mancuernas sentado',
+                'Encogimientos de hombros',
+                
+                // Brazos - Bíceps
+                'Curl con barra',
+                'Curl con mancuernas',
+                'Curl martillo',
+                'Curl concentrado',
+                'Curl en polea',
+                'Curl predicador',
+                
+                // Brazos - Tríceps
+                'Press francés',
+                'Extensiones en polea',
+                'Fondos en banco',
+                'Patada de tríceps',
+                'Press cerrado',
+                
+                // Piernas
+                'Sentadilla',
+                'Prensa de piernas',
+                'Zancadas',
+                'Extensiones de cuádriceps',
+                'Curl femoral',
+                'Peso muerto rumano',
+                'Elevaciones de gemelos',
+                'Sentadilla búlgara',
+                'Hip thrust',
+                'Abductores en máquina',
+                'Aductores en máquina',
+                
+                // Core/Abdominales
+                'Plancha',
+                'Abdominales crunch',
+                'Elevaciones de piernas',
+                'Bicicleta en el suelo',
+                'Plancha lateral',
+                'Russian twists',
+                'Mountain climbers',
+                
+                // Calistenia
+                'Flexiones',
+                'Burpees',
+                'Sentadilla con peso corporal',
+                'Jumping jacks',
+                'Dips',
+                'Pull-ups',
+                'Chin-ups'
+            ].sort();
+            
+            const ejerciciosIniciales = ejerciciosDefault.map(nombre => ({
+                id: generateId(),
+                nombre: nombre,
+                fechaCreacion: new Date().toISOString(),
+                porDefecto: true
+            }));
+            
+            saveEjercicios(ejerciciosIniciales);
+            return ejerciciosIniciales;
+        }
+
+        function saveEjercicios(ejercicios) {
+            localStorage.setItem(EJERCICIOS_KEY, JSON.stringify(ejercicios));
+        }
+
+        function agregarEjercicioABiblioteca() {
+            const input = document.getElementById('nuevo-ejercicio-nombre');
+            const nombre = input.value.trim();
+            
+            if (!nombre) {
+                alert('Por favor ingresa el nombre del ejercicio');
+                return;
+            }
+            
+            const ejercicios = loadEjercicios();
+            
+            // Verificar si ya existe
+            if (ejercicios.some(e => e.nombre.toLowerCase() === nombre.toLowerCase())) {
+                alert('Este ejercicio ya existe en la biblioteca');
+                return;
+            }
+            
+            ejercicios.push({
+                id: generateId(),
+                nombre: nombre,
+                fechaCreacion: new Date().toISOString()
+            });
+            
+            ejercicios.sort((a, b) => a.nombre.localeCompare(b.nombre));
+            saveEjercicios(ejercicios);
+            
+            input.value = '';
+            renderBibliotecaEjercicios();
+        }
+
+        function eliminarEjercicioDeBiblioteca(id) {
+            if (!confirm('¿Eliminar este ejercicio de la biblioteca?')) return;
+            
+            let ejercicios = loadEjercicios();
+            ejercicios = ejercicios.filter(e => e.id !== id);
+            saveEjercicios(ejercicios);
+            renderBibliotecaEjercicios();
+        }
+
+        function renderBibliotecaEjercicios() {
+            const ejercicios = loadEjercicios();
+            const busqueda = document.getElementById('buscar-ejercicio-biblioteca')?.value.toLowerCase() || '';
+            const lista = document.getElementById('lista-ejercicios-biblioteca');
+            const mensaje = document.getElementById('mensaje-sin-ejercicios-biblioteca');
+            
+            const ejerciciosFiltrados = ejercicios.filter(e => 
+                e.nombre.toLowerCase().includes(busqueda)
+            );
+            
+            if (ejerciciosFiltrados.length === 0) {
+                lista.innerHTML = '';
+                mensaje?.classList.remove('hidden');
+                return;
+            }
+            
+            mensaje?.classList.add('hidden');
+            
+            lista.innerHTML = ejerciciosFiltrados.map(ejercicio => `
+                <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
+                    <span class="text-sm font-medium text-gray-900">${ejercicio.nombre}</span>
+                    <button 
+                        onclick="eliminarEjercicioDeBiblioteca('${ejercicio.id}')"
+                        class="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded"
+                    >
+                        🗑️
+                    </button>
+                </div>
+            `).join('');
+        }
+
+        function abrirModalBibliotecaEjercicios() {
+            renderBibliotecaEjercicios();
+            document.getElementById('modal-ejercicios-biblioteca').classList.remove('hidden');
+        }
+
+        function cerrarModalBibliotecaEjercicios() {
+            document.getElementById('modal-ejercicios-biblioteca').classList.add('hidden');
+        }
+
+        function mostrarSugerenciasEjercicios(input, ejercicioId) {
+            const valor = input.value.toLowerCase();
+            const sugerenciasDiv = document.getElementById(`sugerencias-${ejercicioId}`);
+            
+            if (!valor) {
+                sugerenciasDiv.classList.add('hidden');
+                return;
+            }
+            
+            const ejercicios = loadEjercicios();
+            const sugerencias = ejercicios.filter(e => 
+                e.nombre.toLowerCase().includes(valor)
+            ).slice(0, 5);
+            
+            if (sugerencias.length === 0) {
+                sugerenciasDiv.classList.add('hidden');
+                return;
+            }
+            
+            sugerenciasDiv.innerHTML = sugerencias.map(ejercicio => `
+                <div 
+                    class="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm"
+                    onclick="seleccionarEjercicio('${ejercicioId}', '${ejercicio.nombre.replace(/'/g, "\\'")}')"
+                >
+                    ${ejercicio.nombre}
+                </div>
+            `).join('');
+            
+            sugerenciasDiv.classList.remove('hidden');
+        }
+
+        function seleccionarEjercicio(ejercicioId, nombre) {
+            const ejercicioDiv = document.getElementById(ejercicioId);
+            const input = ejercicioDiv.querySelector('.ejercicio-nombre');
+            input.value = nombre;
+            
+            const sugerenciasDiv = document.getElementById(`sugerencias-${ejercicioId}`);
+            sugerenciasDiv.classList.add('hidden');
+        }
+
+        // Cerrar sugerencias al hacer clic fuera
+        document.addEventListener('click', (e) => {
+            if (!e.target.classList.contains('ejercicio-nombre')) {
+                document.querySelectorAll('[id^="sugerencias-"]').forEach(div => {
+                    div.classList.add('hidden');
+                });
+            }
+        });
 
         // ========================================
         // UTILIDADES
@@ -1193,6 +1612,18 @@
                     borderClasses = 'border border-gray-200';
                 }
                 
+                // Obtener información de la rutina si existe
+                const tieneRutina = asist.rutina && (asist.rutina.ejercicios?.length > 0 || asist.rutina.nota);
+                const numEjercicios = tieneRutina ? (asist.rutina.ejercicios?.length || 0) : 0;
+                const tieneCalentamiento = tieneRutina && asist.rutina.calentamiento;
+                const tipos = [];
+                if (tieneRutina) {
+                    if (asist.rutina.tipoMaquinas) tipos.push('⚙️');
+                    if (asist.rutina.tipoCalistenia) tipos.push('💪');
+                }
+                const trenTexto = tieneRutina && asist.rutina.tren ? 
+                    (asist.rutina.tren === 'superior' ? '💪 Superior' : '🦵 Inferior') : '';
+                
                 html += `
                     <div class="${borderClasses} rounded-lg p-2 ${asist.asistio ? 'bg-green-50' : (esLaborable ? 'bg-white' : 'bg-gray-100')} ${esLaborable ? '' : 'opacity-60'} h-44 flex flex-col overflow-hidden ${esDiaActual ? 'relative' : ''}">
                         <div class="flex justify-between items-start mb-1 flex-shrink-0">
@@ -1205,10 +1636,10 @@
                             </div>
                             <button 
                                 onclick="abrirModalNotaDia('${dateStr}')"
-                                class="text-sm ${asist.nota ? 'text-yellow-600 hover:text-yellow-700' : 'text-gray-400 hover:text-gray-600'} flex-shrink-0 ml-1"
-                                title="${asist.nota ? 'Ver nota' : 'Agregar nota'}"
+                                class="text-sm ${tieneRutina ? 'text-blue-600 hover:text-blue-700' : 'text-gray-400 hover:text-gray-600'} flex-shrink-0 ml-1"
+                                title="${tieneRutina ? 'Ver/editar rutina' : 'Agregar rutina'}"
                             >
-                                ${asist.nota ? '📝' : '📄'}
+                                ${tieneRutina ? '🏋️' : '➕'}
                             </button>
                         </div>
                         ${esLaborable ? `
@@ -1233,7 +1664,14 @@
                             </button>
                         `}
                         <div class="flex-1 overflow-hidden min-h-0">
-                            ${asist.nota ? '<p class="text-xs text-gray-600 italic truncate-multiline" title="' + asist.nota.replace(/"/g, '&quot;') + '">"' + asist.nota + '"</p>' : ''}
+                            ${tieneRutina ? `
+                                <div class="text-xs space-y-1">
+                                    ${tieneCalentamiento ? '<p class="text-orange-600 font-medium">🔥 Calentamiento</p>' : ''}
+                                    ${trenTexto ? `<p class="text-purple-700 font-semibold">${trenTexto}</p>` : ''}
+                                    ${tipos.length > 0 || numEjercicios > 0 ? `<p class="text-gray-700">${tipos.join(' ')} ${numEjercicios} ejercicio${numEjercicios !== 1 ? 's' : ''}</p>` : ''}
+                                    ${asist.rutina.nota ? '<p class="text-gray-600 italic truncate-multiline">"' + asist.rutina.nota + '"</p>' : ''}
+                                </div>
+                            ` : ''}
                         </div>
                     </div>
                 `;
@@ -1253,7 +1691,7 @@
             }
             
             if (!data.asistencias[currentCoachId][dateStr]) {
-                data.asistencias[currentCoachId][dateStr] = { asistio: false, reposicion: false, nota: '' };
+                data.asistencias[currentCoachId][dateStr] = { asistio: false, reposicion: false, rutina: null };
             }
             
             data.asistencias[currentCoachId][dateStr].asistio = !data.asistencias[currentCoachId][dateStr].asistio;
@@ -1273,7 +1711,7 @@
             }
             
             if (!data.asistencias[currentCoachId][dateStr]) {
-                data.asistencias[currentCoachId][dateStr] = { asistio: false, reposicion: false, nota: '' };
+                data.asistencias[currentCoachId][dateStr] = { asistio: false, reposicion: false, rutina: null };
             }
             
             const reposicionActual = data.asistencias[currentCoachId][dateStr].reposicion;
@@ -1779,9 +2217,104 @@
         // ========================================
         
         let currentNotaDate = null;
+        let ejerciciosCount = 0;
+        
+        function agregarEjercicio(nombre = '', series = '', repeticiones = '', peso = '') {
+            ejerciciosCount++;
+            const lista = document.getElementById('lista-ejercicios');
+            const id = `ejercicio-${ejerciciosCount}`;
+            
+            // Contar cuántos ejercicios hay actualmente en la lista
+            const numeroEjercicio = lista.children.length + 1;
+            
+            const ejercicioHTML = `
+                <div class="bg-white border-2 border-gray-200 rounded-lg p-3 hover:border-blue-300 transition-colors" id="${id}">
+                    <div class="flex gap-2 mb-3">
+                        <div class="flex-shrink-0 flex items-center justify-center w-8 h-8 bg-blue-600 text-white rounded-full font-bold text-sm">
+                            ${numeroEjercicio}
+                        </div>
+                        <div class="flex-1 relative">
+                            <input 
+                                type="text" 
+                                placeholder="🔍 Nombre del ejercicio..."
+                                value="${nombre}"
+                                class="w-full px-3 py-2 text-sm font-medium border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ejercicio-nombre"
+                                oninput="mostrarSugerenciasEjercicios(this, '${id}')"
+                                onfocus="mostrarSugerenciasEjercicios(this, '${id}')"
+                            >
+                            <div id="sugerencias-${id}" class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"></div>
+                        </div>
+                        <button 
+                            type="button"
+                            onclick="eliminarEjercicio('${id}')"
+                            class="px-3 py-2 text-red-600 hover:bg-red-50 rounded-lg text-sm font-bold border-2 border-red-200 hover:border-red-300 transition-colors"
+                            title="Eliminar ejercicio"
+                        >
+                            ✕
+                        </button>
+                    </div>
+                    <div class="grid grid-cols-3 gap-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Series</label>
+                            <input 
+                                type="text" 
+                                placeholder="3"
+                                value="${series}"
+                                class="w-full px-3 py-2 text-sm text-center border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium ejercicio-series"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Reps</label>
+                            <input 
+                                type="text" 
+                                placeholder="12"
+                                value="${repeticiones}"
+                                class="w-full px-3 py-2 text-sm text-center border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium ejercicio-reps"
+                            >
+                        </div>
+                        <div>
+                            <label class="block text-xs font-semibold text-gray-600 mb-1">Peso <span class="unidad-peso-label">(kg)</span></label>
+                            <input 
+                                type="text" 
+                                placeholder="50"
+                                value="${peso}"
+                                class="w-full px-3 py-2 text-sm text-center border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium ejercicio-peso"
+                            >
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            lista.insertAdjacentHTML('beforeend', ejercicioHTML);
+        }
+        
+        function eliminarEjercicio(id) {
+            document.getElementById(id)?.remove();
+            renumerarEjercicios();
+        }
+        
+        function renumerarEjercicios() {
+            const lista = document.getElementById('lista-ejercicios');
+            const ejercicios = lista.children;
+            
+            Array.from(ejercicios).forEach((ejercicio, index) => {
+                const numeroSpan = ejercicio.querySelector('.flex-shrink-0');
+                if (numeroSpan) {
+                    numeroSpan.textContent = index + 1;
+                }
+            });
+        }
+        
+        function actualizarUnidadPeso() {
+            const unidad = document.querySelector('input[name="unidad-peso"]:checked')?.value || 'kg';
+            document.querySelectorAll('.unidad-peso-label').forEach(label => {
+                label.textContent = `(${unidad})`;
+            });
+        }
         
         function abrirModalNotaDia(dateStr) {
             currentNotaDate = dateStr;
+            ejerciciosCount = 0;
             const data = loadData();
             
             if (!data.asistencias[currentCoachId]) {
@@ -1789,33 +2322,89 @@
             }
             
             if (!data.asistencias[currentCoachId][dateStr]) {
-                data.asistencias[currentCoachId][dateStr] = { asistio: false, reposicion: false, nota: '' };
+                data.asistencias[currentCoachId][dateStr] = { 
+                    asistio: false, 
+                    reposicion: false, 
+                    rutina: null 
+                };
             }
             
-            const nota = data.asistencias[currentCoachId][dateStr].nota || '';
+            const rutina = data.asistencias[currentCoachId][dateStr].rutina;
             
             document.getElementById('nota-fecha-display').textContent = formatDateDisplay(dateStr);
-            document.getElementById('nota-dia-texto').value = nota;
-            document.getElementById('modal-nota-dia').classList.remove('hidden');
             
-            // Focus en el textarea
-            setTimeout(() => {
-                document.getElementById('nota-dia-texto').focus();
-            }, 100);
+            // Limpiar lista de ejercicios
+            document.getElementById('lista-ejercicios').innerHTML = '';
+            
+            // Cargar datos si existen
+            if (rutina) {
+                document.getElementById('calentamiento-check').checked = rutina.calentamiento !== undefined ? rutina.calentamiento : true;
+                document.getElementById('tipo-maquinas').checked = rutina.tipoMaquinas !== undefined ? rutina.tipoMaquinas : true;
+                document.getElementById('tipo-calistenia').checked = rutina.tipoCalistenia || false;
+                document.getElementById('nota-dia-texto').value = rutina.nota || '';
+                
+                // Cargar tren
+                if (rutina.tren === 'superior') {
+                    document.getElementById('tren-superior').checked = true;
+                } else if (rutina.tren === 'inferior') {
+                    document.getElementById('tren-inferior').checked = true;
+                }
+                
+                // Cargar unidad de peso
+                if (rutina.unidadPeso === 'lb') {
+                    document.getElementById('peso-lb').checked = true;
+                } else {
+                    document.getElementById('peso-kg').checked = true;
+                }
+                
+                // Cargar ejercicios
+                if (rutina.ejercicios && rutina.ejercicios.length > 0) {
+                    rutina.ejercicios.forEach(ej => {
+                        agregarEjercicio(ej.nombre, ej.series, ej.repeticiones, ej.peso);
+                    });
+                } else {
+                    // Agregar un ejercicio vacío por defecto
+                    agregarEjercicio();
+                }
+            } else {
+                // Valores por defecto: calentamiento y máquinas activados
+                document.getElementById('calentamiento-check').checked = true;
+                document.getElementById('tipo-maquinas').checked = true;
+                document.getElementById('tipo-calistenia').checked = false;
+                document.getElementById('nota-dia-texto').value = '';
+                
+                // Limpiar tren
+                document.getElementById('tren-superior').checked = false;
+                document.getElementById('tren-inferior').checked = false;
+                
+                // Unidad de peso por defecto: kg
+                document.getElementById('peso-kg').checked = true;
+                
+                // Agregar un ejercicio vacío por defecto
+                agregarEjercicio();
+            }
+            
+            // Actualizar labels de unidad de peso
+            actualizarUnidadPeso();
+            
+            document.getElementById('modal-nota-dia').classList.remove('hidden');
         }
         
         function cerrarModalNotaDia() {
             document.getElementById('modal-nota-dia').classList.add('hidden');
             currentNotaDate = null;
+            ejerciciosCount = 0;
         }
         
         function eliminarNotaDia() {
             if (!currentNotaDate) return;
             
+            if (!confirm('¿Eliminar la rutina de este día?')) return;
+            
             const data = loadData();
             
             if (data.asistencias[currentCoachId] && data.asistencias[currentCoachId][currentNotaDate]) {
-                data.asistencias[currentCoachId][currentNotaDate].nota = '';
+                data.asistencias[currentCoachId][currentNotaDate].rutina = null;
                 saveData(data);
                 renderCalendarioPeriodo();
             }
@@ -2013,48 +2602,61 @@
             if (!currentNotaDate) return;
             
             const data = loadData();
-            const nota = document.getElementById('nota-dia-texto').value.trim();
             
             if (!data.asistencias[currentCoachId]) {
                 data.asistencias[currentCoachId] = {};
             }
             
             if (!data.asistencias[currentCoachId][currentNotaDate]) {
-                data.asistencias[currentCoachId][currentNotaDate] = { asistio: false, reposicion: false, nota: '' };
+                data.asistencias[currentCoachId][currentNotaDate] = { 
+                    asistio: false, 
+                    reposicion: false, 
+                    rutina: null 
+                };
             }
             
-            data.asistencias[currentCoachId][currentNotaDate].nota = nota;
+            // Recopilar ejercicios
+            const ejercicios = [];
+            document.querySelectorAll('#lista-ejercicios > div').forEach(ejercicioDiv => {
+                const nombre = ejercicioDiv.querySelector('.ejercicio-nombre').value.trim();
+                const series = ejercicioDiv.querySelector('.ejercicio-series').value.trim();
+                const repeticiones = ejercicioDiv.querySelector('.ejercicio-reps').value.trim();
+                const peso = ejercicioDiv.querySelector('.ejercicio-peso').value.trim();
+                
+                // Solo agregar si al menos el nombre tiene contenido
+                if (nombre) {
+                    ejercicios.push({ nombre, series, repeticiones, peso });
+                }
+            });
+            
+            // Obtener tren trabajado
+            let tren = null;
+            if (document.getElementById('tren-superior').checked) {
+                tren = 'superior';
+            } else if (document.getElementById('tren-inferior').checked) {
+                tren = 'inferior';
+            }
+            
+            // Obtener unidad de peso
+            const unidadPeso = document.querySelector('input[name="unidad-peso"]:checked')?.value || 'kg';
+            
+            // Crear objeto de rutina
+            const rutina = {
+                calentamiento: document.getElementById('calentamiento-check').checked,
+                tipoMaquinas: document.getElementById('tipo-maquinas').checked,
+                tipoCalistenia: document.getElementById('tipo-calistenia').checked,
+                tren: tren,
+                unidadPeso: unidadPeso,
+                ejercicios: ejercicios,
+                nota: document.getElementById('nota-dia-texto').value.trim()
+            };
+            
+            // Guardar rutina
+            data.asistencias[currentCoachId][currentNotaDate].rutina = rutina;
             saveData(data);
             renderCalendarioPeriodo();
             
             cerrarModalNotaDia();
-        });
-        
-        // Permitir guardar nota con Enter (sin Shift para nueva línea)
-        document.getElementById('nota-dia-texto').addEventListener('keydown', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                // Guardar la nota manualmente
-                if (!currentNotaDate) return;
-                
-                const data = loadData();
-                const nota = document.getElementById('nota-dia-texto').value.trim();
-                
-                if (!data.asistencias[currentCoachId]) {
-                    data.asistencias[currentCoachId] = {};
-                }
-                
-                if (!data.asistencias[currentCoachId][currentNotaDate]) {
-                    data.asistencias[currentCoachId][currentNotaDate] = { asistio: false, reposicion: false, nota: '' };
-                }
-                
-                data.asistencias[currentCoachId][currentNotaDate].nota = nota;
-                saveData(data);
-                renderCalendarioPeriodo();
-                cerrarModalNotaDia();
-            }
         });
         
         // Formatear monto mientras se escribe (modal crear periodo)
@@ -2122,9 +2724,38 @@
             }
         });
         
+        // Cerrar modal de biblioteca al hacer clic fuera de él
+        document.getElementById('modal-ejercicios-biblioteca')?.addEventListener('click', (e) => {
+            if (e.target.id === 'modal-ejercicios-biblioteca') {
+                cerrarModalBibliotecaEjercicios();
+            }
+        });
+        
+        // Event listener para agregar ejercicio con Enter
+        document.getElementById('nuevo-ejercicio-nombre')?.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                agregarEjercicioABiblioteca();
+            }
+        });
+        
+        // Event listeners para cambiar unidad de peso
+        document.addEventListener('change', (e) => {
+            if (e.target.name === 'unidad-peso') {
+                actualizarUnidadPeso();
+            }
+        });
+
         // Cerrar modales con la tecla ESC
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
+                // Cerrar modal de biblioteca de ejercicios
+                const modalBiblioteca = document.getElementById('modal-ejercicios-biblioteca');
+                if (modalBiblioteca && !modalBiblioteca.classList.contains('hidden')) {
+                    cerrarModalBibliotecaEjercicios();
+                    return;
+                }
+                
                 // Cerrar modal de historial si está abierto
                 const modalHistorial = document.getElementById('modal-historial-pagos');
                 if (modalHistorial && !modalHistorial.classList.contains('hidden')) {
