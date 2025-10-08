@@ -1365,6 +1365,23 @@
             }
         });
         
+        // Cerrar modales con la tecla ESC
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                // Cerrar modal de historial si está abierto
+                const modalHistorial = document.getElementById('modal-historial-pagos');
+                if (modalHistorial && !modalHistorial.classList.contains('hidden')) {
+                    cerrarModalHistorialPagos();
+                }
+                
+                // Cerrar modal de nota si está abierto
+                const modalNota = document.getElementById('modal-nota-dia');
+                if (modalNota && !modalNota.classList.contains('hidden')) {
+                    cerrarModalNotaDia();
+                }
+            }
+        });
+        
         document.addEventListener('DOMContentLoaded', () => {
             mostrarVistaLista();
         });
