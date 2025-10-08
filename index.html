@@ -177,7 +177,7 @@
                                 onclick="toggleHistorialPagos()"
                                 class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700"
                             >
-                                📋 Ver periodos
+                                📋 Gestionar periodos
                             </button>
                             <button 
                                 id="btn-registrar-pago"
@@ -913,7 +913,7 @@
                 document.getElementById('metric-programadas').textContent = '0';
                 document.getElementById('metric-asistidas').textContent = '0';
                 document.getElementById('metric-faltas').textContent = '0';
-                document.getElementById('metric-reposiciones').textContent = '0';
+                document.getElementById('metric-reposiciones').textContent = '0/0';
                 document.getElementById('metric-pendientes').textContent = '0';
                 
                 const indicador = document.getElementById('reposiciones-disponibles');
@@ -1168,7 +1168,7 @@
             document.getElementById('metric-programadas').textContent = programadas;
             document.getElementById('metric-asistidas').textContent = asistidas;
             document.getElementById('metric-faltas').textContent = faltas;
-            document.getElementById('metric-reposiciones').textContent = reposiciones;
+            document.getElementById('metric-reposiciones').textContent = `${reposiciones}/${faltas}`;
             document.getElementById('metric-pendientes').textContent = pendientes;
             
             // Actualizar indicador de reposiciones disponibles
@@ -1272,7 +1272,7 @@
                         <div class="flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-blue-500"></span>
                             <span class="text-blue-600">Repos:</span>
-                            <span class="font-bold text-blue-900">${stats.reposiciones}</span>
+                            <span class="font-bold text-blue-900">${stats.reposiciones}/${stats.faltas}</span>
                         </div>
                         <div class="flex items-center gap-2">
                             <span class="w-2 h-2 rounded-full bg-orange-500"></span>
@@ -1308,6 +1308,23 @@
             if (!confirm('¿Estás seguro de eliminar este periodo? Se perderán todas las asistencias registradas en él.')) return;
             
             const data = loadData();
+            
+            // Encontrar el periodo a eliminar
+            const pago = (data.pagos[currentCoachId] || []).find(p => p.id === pagoId);
+            
+            if (pago) {
+                // Obtener todas las fechas del periodo
+                const diasPeriodo = getTodosDiasPeriodo(pago.periodoInicio, pago.periodoFin);
+                
+                // Eliminar asistencias de esas fechas
+                if (data.asistencias[currentCoachId]) {
+                    diasPeriodo.forEach(({fecha}) => {
+                        delete data.asistencias[currentCoachId][fecha];
+                    });
+                }
+            }
+            
+            // Eliminar el periodo
             data.pagos[currentCoachId] = data.pagos[currentCoachId].filter(p => p.id !== pagoId);
             saveData(data);
             
