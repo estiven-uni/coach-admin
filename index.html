@@ -148,14 +148,14 @@
 
             <!-- Mensaje: Sin pagos -->
             <div id="mensaje-sin-pagos" class="bg-blue-50 border border-blue-200 rounded-xl p-8 text-center">
-                <div class="text-blue-400 text-5xl mb-4">💰</div>
-                <h3 class="text-lg font-semibold text-blue-900 mb-2">No hay pagos registrados</h3>
-                <p class="text-sm text-blue-700 mb-4">Registra el primer pago para comenzar a marcar asistencias</p>
+                <div class="text-blue-400 text-5xl mb-4">📅</div>
+                <h3 class="text-lg font-semibold text-blue-900 mb-2">No hay periodos registrados</h3>
+                <p class="text-sm text-blue-700 mb-4">Registra el primer periodo de entrenamiento para comenzar a marcar asistencias</p>
                 <button 
                     onclick="document.getElementById('btn-registrar-pago-inicio').click()"
                     class="px-6 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                 >
-                    + Registrar primer pago
+                    + Registrar primer periodo
                 </button>
                 <button 
                     id="btn-registrar-pago-inicio"
@@ -182,7 +182,7 @@
                             id="btn-registrar-pago"
                             class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                         >
-                            + Nuevo pago
+                            + Nuevo periodo
                         </button>
                     </div>
                 </div>
@@ -234,7 +234,14 @@
     <!-- Modal: Agregar/Editar Coach -->
     <div id="modal-coach" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
-            <h2 id="modal-coach-titulo" class="text-xl font-bold text-gray-900 mb-4">Agregar Coach</h2>
+            <div class="flex justify-between items-center mb-4">
+                <h2 id="modal-coach-titulo" class="text-xl font-bold text-gray-900">Agregar Coach</h2>
+                <button onclick="cerrarModalCoach()" class="text-gray-400 hover:text-gray-600">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
             
             <form id="form-coach" class="space-y-4">
                 <div>
@@ -320,12 +327,22 @@
     <!-- Modal: Registrar Pago -->
     <div id="modal-pago" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
         <div class="bg-white rounded-xl shadow-xl max-w-lg w-full p-6">
-            <h2 class="text-xl font-bold text-gray-900 mb-4">Registrar Pago</h2>
+            <div class="flex justify-between items-start mb-4">
+                <div>
+                    <h2 class="text-xl font-bold text-gray-900">Registrar Periodo de Entrenamiento</h2>
+                    <p class="text-sm text-gray-600 mt-1">Define el periodo de tiempo en el que se va a entrenar y registra el pago asociado</p>
+                </div>
+                <button onclick="cerrarModalPago()" class="text-gray-400 hover:text-gray-600 flex-shrink-0 ml-4">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                    </svg>
+                </button>
+            </div>
             
             <form id="form-pago" class="space-y-4">
                 <div class="grid grid-cols-2 gap-3">
                     <div>
-                        <label for="pago-periodo-inicio" class="block text-sm font-medium text-gray-700 mb-1">Periodo inicio *</label>
+                        <label for="pago-periodo-inicio" class="block text-sm font-medium text-gray-700 mb-1">Inicio del periodo *</label>
                         <input 
                             type="date" 
                             id="pago-periodo-inicio"
@@ -334,40 +351,13 @@
                         >
                     </div>
                     <div>
-                        <label for="pago-periodo-fin" class="block text-sm font-medium text-gray-700 mb-1">Periodo fin *</label>
+                        <label for="pago-periodo-fin" class="block text-sm font-medium text-gray-700 mb-1">Fin del periodo *</label>
                         <input 
                             type="date" 
                             id="pago-periodo-fin"
                             required
                             class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
                         >
-                    </div>
-                </div>
-
-                <!-- Resumen del periodo -->
-                <div id="resumen-periodo" class="bg-blue-50 border border-blue-200 rounded-lg p-4 space-y-2">
-                    <p class="text-sm font-semibold text-blue-900 mb-2">Resumen del periodo:</p>
-                    <div class="grid grid-cols-2 gap-2 text-sm">
-                        <div>
-                            <span class="text-blue-700">Clases programadas:</span>
-                            <span id="resumen-programadas" class="font-semibold text-blue-900">0</span>
-                        </div>
-                        <div>
-                            <span class="text-green-700">Asistidas:</span>
-                            <span id="resumen-asistidas" class="font-semibold text-green-900">0</span>
-                        </div>
-                        <div>
-                            <span class="text-red-700">Faltas:</span>
-                            <span id="resumen-faltas" class="font-semibold text-red-900">0</span>
-                        </div>
-                        <div>
-                            <span class="text-blue-700">Reposiciones:</span>
-                            <span id="resumen-reposiciones-pago" class="font-semibold text-blue-900">0</span>
-                        </div>
-                    </div>
-                    <div class="pt-2 border-t border-blue-300">
-                        <span class="text-sm text-blue-700">Monto sugerido:</span>
-                        <span id="resumen-monto" class="text-lg font-bold text-blue-900">$0</span>
                     </div>
                 </div>
             
@@ -391,16 +381,15 @@
                         placeholder="450.000"
                     >
                     <input type="hidden" id="pago-monto-raw">
-                    <p class="text-xs text-gray-500 mt-1">El sistema sugiere el monto proporcional según las asistencias ya registradas</p>
                 </div>
 
                 <div>
-                    <label for="pago-nota" class="block text-sm font-medium text-gray-700 mb-1">Nota</label>
+                    <label for="pago-nota" class="block text-sm font-medium text-gray-700 mb-1">Nota (opcional)</label>
                     <textarea 
                         id="pago-nota" 
                         rows="2"
                         class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                        placeholder="Observaciones..."
+                        placeholder="Observaciones sobre el periodo o el pago..."
                     ></textarea>
                 </div>
 
@@ -416,7 +405,7 @@
                         type="submit"
                         class="flex-1 px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
                     >
-                        Guardar Pago
+                        Guardar Periodo
                     </button>
                 </div>
             </form>
@@ -1291,27 +1280,6 @@
             return parseInt(valorFormateado.replace(/\D/g, '') || '0');
         }
 
-        function actualizarResumenPago() {
-            const inicio = document.getElementById('pago-periodo-inicio').value;
-            const fin = document.getElementById('pago-periodo-fin').value;
-            const montoBase = obtenerValorMontoRaw();
-            
-            if (!inicio || !fin) return;
-            
-            const stats = calcularEstadisticasPeriodo(inicio, fin, currentCoachId, montoBase || 0);
-            
-            document.getElementById('resumen-programadas').textContent = stats.programadas;
-            document.getElementById('resumen-asistidas').textContent = stats.asistidas;
-            document.getElementById('resumen-faltas').textContent = stats.faltas;
-            document.getElementById('resumen-reposiciones-pago').textContent = stats.reposiciones;
-            document.getElementById('resumen-monto').textContent = formatCurrency(stats.montoSugerido);
-            
-            // Si no han ingresado monto aún, sugerir el calculado
-            if (!montoBase) {
-                document.getElementById('pago-monto').value = formatearMontoInput(stats.montoSugerido.toString());
-            }
-        }
-
         function abrirModalPago() {
             const modal = document.getElementById('modal-pago');
             
@@ -1567,9 +1535,6 @@
             }
         });
         
-        // Auto-calcular resumen al cambiar valores en modal de pago
-        document.getElementById('pago-periodo-inicio').addEventListener('change', actualizarResumenPago);
-        document.getElementById('pago-periodo-fin').addEventListener('change', actualizarResumenPago);
         // Formatear monto mientras se escribe
         document.getElementById('pago-monto').addEventListener('input', function(e) {
             const cursorPos = e.target.selectionStart;
@@ -1581,8 +1546,6 @@
             // Ajustar posición del cursor
             const diff = valorFormateado.length - valorAnterior.length;
             e.target.setSelectionRange(cursorPos + diff, cursorPos + diff);
-            
-            actualizarResumenPago();
         });
         
         // Auto-calcular fin de periodo en pago
@@ -1590,7 +1553,6 @@
             const inicio = e.target.value;
             if (inicio && !document.getElementById('pago-periodo-fin').value) {
                 document.getElementById('pago-periodo-fin').value = calcularFinDeMes(inicio);
-                actualizarResumenPago();
             }
         });
         
@@ -1601,6 +1563,20 @@
         document.getElementById('modal-historial-pagos')?.addEventListener('click', (e) => {
             if (e.target.id === 'modal-historial-pagos') {
                 cerrarModalHistorialPagos();
+            }
+        });
+        
+        // Cerrar modal de pago al hacer clic fuera de él
+        document.getElementById('modal-pago')?.addEventListener('click', (e) => {
+            if (e.target.id === 'modal-pago') {
+                cerrarModalPago();
+            }
+        });
+        
+        // Cerrar modal de coach al hacer clic fuera de él
+        document.getElementById('modal-coach')?.addEventListener('click', (e) => {
+            if (e.target.id === 'modal-coach') {
+                cerrarModalCoach();
             }
         });
         
@@ -1617,6 +1593,18 @@
                 const modalNota = document.getElementById('modal-nota-dia');
                 if (modalNota && !modalNota.classList.contains('hidden')) {
                     cerrarModalNotaDia();
+                }
+                
+                // Cerrar modal de pago si está abierto
+                const modalPago = document.getElementById('modal-pago');
+                if (modalPago && !modalPago.classList.contains('hidden')) {
+                    cerrarModalPago();
+                }
+                
+                // Cerrar modal de coach si está abierto
+                const modalCoach = document.getElementById('modal-coach');
+                if (modalCoach && !modalCoach.classList.contains('hidden')) {
+                    cerrarModalCoach();
                 }
             }
         });
