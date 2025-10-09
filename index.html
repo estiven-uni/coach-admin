@@ -1532,6 +1532,14 @@
             const mesTexto = meses[parseInt(m) - 1];
             return `${d} ${mesTexto} ${y}`;
         }
+        
+        function getFechaActual() {
+            // Devolver fecha simulada si existe (modo pruebas), sino la fecha real
+            if (fechaSimulada) {
+                return fechaSimulada;
+            }
+            return formatDate(new Date());
+        }
 
         function calcularFinDeMes(inicioStr) {
             const inicio = new Date(inicioStr + 'T00:00:00');
@@ -1627,30 +1635,54 @@
             
             // Calcular estadísticas de todas las clases
             const asistencias = data.asistencias[currentCoachId] || {};
+            const hoy = getFechaActual();
             let totalClasesProgramadas = 0;
             let totalClasesAsistidas = 0;
+            let totalClasesFaltadas = 0;
             let totalReposiciones = 0;
             
             pagos.forEach(pago => {
-                const daysLaborables = getDiasLaborablesPeriodo(pago.periodoInicio, pago.periodoFin, coach.diasLaborables);
+                // Usar periodoFinOriginal si existe para contar las programadas
+                const fechaFinParaProgramadas = pago.periodoFinOriginal || pago.periodoFin;
+                const daysLaborables = getDiasLaborablesPeriodo(pago.periodoInicio, fechaFinParaProgramadas, coach.diasLaborables);
                 totalClasesProgramadas += daysLaborables.length;
                 
-                daysLaborables.forEach(day => {
+                // Contar asistencias (sin reposiciones)
+                const daysLaborablesTotales = getDiasLaborablesPeriodo(pago.periodoInicio, pago.periodoFin, coach.diasLaborables);
+                daysLaborablesTotales.forEach(day => {
                     const asist = asistencias[day];
-                    if (asist?.asistio) totalClasesAsistidas++;
+                    // Solo contar asistencias regulares (no reposiciones)
+                    if (asist?.asistio && !asist?.reposicion) {
+                        totalClasesAsistidas++;
+                    }
+                    
+                    // Contar faltas: solo días pasados donde NO asistió
+                    if (day <= hoy && !asist?.asistio) {
+                        totalClasesFaltadas++;
+                    }
                 });
                 
                 // Contar reposiciones en todo el periodo
                 const days = getTodosDiasPeriodo(pago.periodoInicio, pago.periodoFin);
                 days.forEach(({fecha}) => {
                     const asist = asistencias[fecha];
-                    if (asist?.reposicion && asist?.asistio) totalReposiciones++;
+                    if (asist?.reposicion && asist?.asistio) {
+                        totalReposiciones++;
+                    }
                 });
             });
             
-            const totalClasesFaltadas = totalClasesProgramadas - totalClasesAsistidas;
-            const porcentajeAsistencia = totalClasesProgramadas > 0 
-                ? ((totalClasesAsistidas / totalClasesProgramadas) * 100).toFixed(1) 
+            // Calcular porcentaje de asistencia basado en días ya pasados
+            let diasPasadosLaborables = 0;
+            pagos.forEach(pago => {
+                const daysLaborables = getDiasLaborablesPeriodo(pago.periodoInicio, pago.periodoFin, coach.diasLaborables);
+                daysLaborables.forEach(day => {
+                    if (day <= hoy) diasPasadosLaborables++;
+                });
+            });
+            
+            const porcentajeAsistencia = diasPasadosLaborables > 0 
+                ? (((totalClasesAsistidas + totalReposiciones) / diasPasadosLaborables) * 100).toFixed(1) 
                 : 0;
             
             // Llenar estadísticas
@@ -1660,9 +1692,10 @@
             document.getElementById('modal-info-reposiciones').textContent = totalReposiciones;
             document.getElementById('modal-info-porcentaje-asistencia').textContent = `${porcentajeAsistencia}%`;
             
-            // Calcular costo por clase
-            const costoPorClase = totalClasesAsistidas > 0 
-                ? (sumaTotalPagos / totalClasesAsistidas)
+            // Calcular costo por clase (asistidas + reposiciones)
+            const totalClasesCompletadas = totalClasesAsistidas + totalReposiciones;
+            const costoPorClase = totalClasesCompletadas > 0 
+                ? (sumaTotalPagos / totalClasesCompletadas)
                 : 0;
             document.getElementById('modal-info-costo-clase').textContent = formatCurrency(costoPorClase);
             
@@ -2322,7 +2355,7 @@
             
             const diasNombres = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
             
-            let html = '<div class="space-y-2">';
+            let html = '<div class="grid grid-cols-1 lg:grid-cols-2 gap-3">';
             
             days.forEach(({fecha: dateStr, diaSemana}) => {
                 const asist = asistencias[dateStr] || { asistio: false, reposicion: false, nota: '' };
@@ -2489,6 +2522,9 @@
             
             if (!pago) return;
             
+            // Obtener fecha actual (considerando modo de pruebas)
+            const hoy = getFechaActual();
+            
             // Usar periodoFinOriginal si existe, sino usar periodoFin
             // Esto asegura que al extender el periodo, las programadas no aumenten
             const fechaFinParaProgramadas = pago.periodoFinOriginal || pago.periodoFin;
@@ -2502,46 +2538,43 @@
             const asistencias = data.asistencias[currentCoachId] || {};
             
             let asistidas = 0;
+            let faltas = 0;
             
             // Contar asistencias en TODOS los días laborables (incluyendo extensión)
             daysLaborablesTotales.forEach(day => {
                 const asist = asistencias[day];
-                if (asist?.asistio) asistidas++;
+                // Solo contar asistencias que NO sean reposiciones
+                if (asist?.asistio && !asist?.reposicion) {
+                    asistidas++;
+                }
             });
             
-            const faltas = programadas - asistidas;
+            // Calcular faltas: solo días laborables PASADOS donde NO asistió
+            daysLaborablesTotales.forEach(day => {
+                // Solo contar si el día ya pasó
+                if (day <= hoy) {
+                    const asist = asistencias[day];
+                    // Si NO asistió (y no es reposición)
+                    if (!asist?.asistio) {
+                        faltas++;
+                    }
+                }
+            });
             
             // Contar reposiciones en TODOS los días del periodo (incluyendo no laborables)
             const todosDias = getTodosDiasPeriodo(pago.periodoInicio, pago.periodoFin);
             let reposiciones = 0;
             
-            // Limpiar reposiciones inválidas (si hay más reposiciones que faltas)
-            let hayReposicionesInvalidas = false;
             todosDias.forEach(({fecha}) => {
                 const asist = asistencias[fecha];
-                if (asist?.reposicion) {
+                if (asist?.reposicion && asist?.asistio) {
                     reposiciones++;
-                    // Si hay más reposiciones que faltas, marcar para limpiar
-                    if (faltas === 0 || reposiciones > faltas) {
-                        hayReposicionesInvalidas = true;
-                    }
                 }
             });
             
-            // Si hay reposiciones inválidas, limpiarlas
-            if (hayReposicionesInvalidas && faltas === 0) {
-                todosDias.forEach(({fecha}) => {
-                    if (asistencias[fecha]?.reposicion) {
-                        asistencias[fecha].reposicion = false;
-                        asistencias[fecha].asistio = false;
-                    }
-                });
-                saveData(data);
-                reposiciones = 0;
-            }
-            
-            // Calcular pendientes (clases que faltan por completar)
-            const pendientes = Math.max(0, faltas - reposiciones);
+            // Calcular pendientes: Programadas - (Asistidas + Reposiciones)
+            // Esto nos da cuántas clases faltan por completar del total
+            const pendientes = Math.max(0, programadas - (asistidas + reposiciones));
             
             document.getElementById('metric-programadas').textContent = programadas;
             document.getElementById('metric-asistidas').textContent = asistidas;
