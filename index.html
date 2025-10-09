@@ -1673,18 +1673,18 @@
             
             const hayReposicionesDisponibles = reposicionesExistentes < faltas;
             
-            let html = `<div class="grid grid-cols-7 gap-2" style="min-width: 800px;">`;
+            let html = `<div class="grid grid-cols-7 gap-2 sm:gap-3" style="min-width: 900px;">`;
             
             // Headers (todos los días de la semana)
             const diasNombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
             diasNombres.forEach(dia => {
-                html += `<div class="text-sm sm:text-base font-semibold text-gray-700 text-center py-2.5">${dia}</div>`;
+                html += `<div class="text-base sm:text-lg font-semibold text-gray-700 text-center py-3">${dia}</div>`;
             });
             
             // Agregar espacios vacíos al inicio si el mes no empieza en domingo
             const primerDia = days[0].diaSemana;
             for (let i = 0; i < primerDia; i++) {
-                html += `<div class="border border-transparent rounded-lg p-2.5 h-52 sm:h-56 md:h-60"></div>`;
+                html += `<div class="border border-transparent rounded-lg p-3 h-60 sm:h-56 md:h-60"></div>`;
             }
             
             // Obtener fecha actual (solo fecha, sin hora) - usar fecha simulada si existe
@@ -1720,37 +1720,37 @@
                     (asist.rutina.tren === 'superior' ? '💪 Superior' : '🦵 Inferior') : '';
                 
                 html += `
-                    <div class="${borderClasses} rounded-lg p-2.5 ${asist.asistio ? 'bg-green-50' : (esLaborable ? 'bg-white' : 'bg-gray-100')} ${esLaborable ? '' : 'opacity-60'} h-52 sm:h-56 md:h-60 flex flex-col overflow-hidden ${esDiaActual ? 'relative' : ''}">
-                        <div class="flex justify-between items-start mb-1.5 flex-shrink-0">
+                    <div class="${borderClasses} rounded-lg p-3 ${asist.asistio ? 'bg-green-50' : (esLaborable ? 'bg-white' : 'bg-gray-100')} ${esLaborable ? '' : 'opacity-60'} h-60 sm:h-56 md:h-60 flex flex-col overflow-hidden ${esDiaActual ? 'relative' : ''}">
+                        <div class="flex justify-between items-start mb-2 flex-shrink-0">
                             <div class="flex-1 min-w-0">
-                                <div class="flex items-center gap-1 flex-wrap">
-                                    <p class="text-sm sm:text-base font-semibold ${esLaborable ? 'text-gray-700' : 'text-gray-400'}">${formatDateDisplay(dateStr).split(' ').slice(0,2).join(' ')}</p>
-                                    ${esDiaActual ? '<span class="px-2 py-0.5 text-[10px] sm:text-xs font-bold bg-blue-500 text-white rounded">HOY</span>' : ''}
+                                <div class="flex items-center gap-1.5 flex-wrap">
+                                    <p class="text-base sm:text-lg font-bold ${esLaborable ? 'text-gray-700' : 'text-gray-400'}">${formatDateDisplay(dateStr).split(' ').slice(0,2).join(' ')}</p>
+                                    ${esDiaActual ? '<span class="px-2 py-1 text-xs sm:text-sm font-bold bg-blue-500 text-white rounded">HOY</span>' : ''}
                                 </div>
-                                ${!esLaborable ? '<p class="text-xs sm:text-sm text-gray-400 leading-tight">No laboral</p>' : ''}
+                                ${!esLaborable ? '<p class="text-sm sm:text-base text-gray-400 leading-tight">No laboral</p>' : ''}
                             </div>
                             <button 
                                 onclick="abrirModalNotaDia('${dateStr}')"
-                                class="text-base sm:text-lg ${tieneRutina ? 'text-blue-600 hover:text-blue-700' : 'text-gray-400 hover:text-gray-600'} flex-shrink-0 ml-1"
+                                class="text-xl sm:text-2xl ${tieneRutina ? 'text-blue-600 hover:text-blue-700' : 'text-gray-400 hover:text-gray-600'} flex-shrink-0 ml-1"
                                 title="${tieneRutina ? 'Ver/editar rutina' : 'Agregar rutina'}"
                             >
                                 ${tieneRutina ? '🏋️' : '➕'}
                             </button>
                         </div>
                         ${esLaborable ? `
-                            <label class="flex items-center gap-1.5 text-sm sm:text-base cursor-pointer mb-1.5 flex-shrink-0">
+                            <label class="flex items-center gap-2 text-base sm:text-lg cursor-pointer mb-2 flex-shrink-0">
                                 <input 
                                     type="checkbox" 
                                     ${asist.asistio ? 'checked' : ''}
                                     onchange="toggleAsistencia('${dateStr}')"
-                                    class="rounded border-gray-300 flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5"
+                                    class="rounded border-gray-300 flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6"
                                 >
-                                <span class="text-gray-900">Asistió</span>
+                                <span class="text-gray-900 font-medium">Asistió</span>
                             </label>
                         ` : `
                             <button 
                                 onclick="toggleReposicion('${dateStr}')"
-                                class="flex items-center gap-1 text-xs sm:text-sm ${asist.reposicion ? 'text-blue-700 bg-blue-100 hover:bg-blue-200' : (hayReposicionesDisponibles ? 'text-gray-500 bg-gray-100 hover:bg-gray-200' : 'text-gray-400 bg-gray-50 cursor-not-allowed opacity-50')} px-2 py-1 rounded transition-colors mb-1.5 flex-shrink-0"
+                                class="flex items-center gap-1.5 text-sm sm:text-base ${asist.reposicion ? 'text-blue-700 bg-blue-100 hover:bg-blue-200' : (hayReposicionesDisponibles ? 'text-gray-500 bg-gray-100 hover:bg-gray-200' : 'text-gray-400 bg-gray-50 cursor-not-allowed opacity-50')} px-2.5 py-1.5 rounded transition-colors mb-2 flex-shrink-0"
                                 title="${asist.reposicion ? 'Quitar reposición' : (hayReposicionesDisponibles ? 'Marcar como reposición' : 'No hay reposiciones disponibles (no hay faltas)')}"
                                 ${!asist.reposicion && !hayReposicionesDisponibles ? 'disabled' : ''}
                             >
@@ -1760,7 +1760,7 @@
                         `}
                         <div class="flex-1 overflow-hidden min-h-0">
                             ${tieneRutina ? `
-                                <div class="text-xs sm:text-sm space-y-1">
+                                <div class="text-sm sm:text-base space-y-1">
                                     ${tieneCalentamiento ? '<p class="text-orange-600 font-medium">🔥 Calentamiento</p>' : ''}
                                     ${trenTexto ? `<p class="text-purple-700 font-semibold">${trenTexto}</p>` : ''}
                                     ${tipos.length > 0 || numEjercicios > 0 ? `<p class="text-gray-700">${tipos.join(' ')} ${numEjercicios} ejercicio${numEjercicios !== 1 ? 's' : ''}</p>` : ''}
