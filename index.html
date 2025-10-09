@@ -79,6 +79,17 @@
                     </button>
                     
                     <button 
+                        onclick="abrirModalBibliotecaEjercicios()"
+                        class="p-2 sm:px-3 sm:py-2 text-sm font-medium text-purple-700 bg-purple-50 border border-purple-300 rounded-lg hover:bg-purple-100 flex items-center gap-1 sm:gap-2 shadow-sm"
+                        title="Biblioteca de Ejercicios"
+                    >
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 sm:h-5 sm:w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <span class="font-semibold hidden lg:inline">Ejercicios</span>
+                    </button>
+                    
+                    <button 
                         id="btn-importar-backup"
                         class="p-2 sm:px-4 sm:py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border-2 border-green-600 rounded-lg hover:bg-green-50 flex items-center gap-1 sm:gap-2 shadow-sm"
                         title="Importar backup desde archivo JSON"
@@ -829,60 +840,30 @@
                     </label>
                 </div>
 
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <!-- Tren trabajado -->
-                    <div>
-                        <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Tren trabajado</label>
-                        <div class="grid grid-cols-1 gap-2">
-                            <label class="flex items-center gap-2 p-2 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-purple-50 transition-colors has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50">
-                                <input 
-                                    type="radio" 
-                                    name="tren"
-                                    id="tren-superior"
-                                    value="superior"
-                                    class="w-4 h-4 text-purple-600 focus:ring-purple-500"
-                                >
-                                <span class="text-sm font-medium text-gray-700">💪 Tren Superior</span>
-                            </label>
-                            <label class="flex items-center gap-2 p-2 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-indigo-50 transition-colors has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
-                                <input 
-                                    type="radio" 
-                                    name="tren"
-                                    id="tren-inferior"
-                                    value="inferior"
-                                    class="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
-                                >
-                                <span class="text-sm font-medium text-gray-700">🦵 Tren Inferior</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <!-- Unidad de peso -->
-                    <div>
-                        <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Unidad de peso</label>
-                        <div class="grid grid-cols-1 gap-2">
-                            <label class="flex items-center gap-2 p-2 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-teal-50 transition-colors has-[:checked]:border-teal-500 has-[:checked]:bg-teal-50">
-                                <input 
-                                    type="radio" 
-                                    name="unidad-peso"
-                                    id="peso-kg"
-                                    value="kg"
-                                    class="w-4 h-4 text-teal-600 focus:ring-teal-500"
-                                    checked
-                                >
-                                <span class="text-sm font-medium text-gray-700">⚖️ Kilogramos (kg)</span>
-                            </label>
-                            <label class="flex items-center gap-2 p-2 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-cyan-50 transition-colors has-[:checked]:border-cyan-500 has-[:checked]:bg-cyan-50">
-                                <input 
-                                    type="radio" 
-                                    name="unidad-peso"
-                                    id="peso-lb"
-                                    value="lb"
-                                    class="w-4 h-4 text-cyan-600 focus:ring-cyan-500"
-                                >
-                                <span class="text-sm font-medium text-gray-700">⚖️ Libras (lb)</span>
-                            </label>
-                        </div>
+                <!-- Tren trabajado -->
+                <div>
+                    <label class="block text-xs sm:text-sm font-semibold text-gray-700 mb-2">Tren trabajado</label>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                        <label class="flex items-center gap-2 p-2 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-purple-50 transition-colors has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50">
+                            <input 
+                                type="radio" 
+                                name="tren"
+                                id="tren-superior"
+                                value="superior"
+                                class="w-4 h-4 text-purple-600 focus:ring-purple-500"
+                            >
+                            <span class="text-sm font-medium text-gray-700">💪 Tren Superior</span>
+                        </label>
+                        <label class="flex items-center gap-2 p-2 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-indigo-50 transition-colors has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+                            <input 
+                                type="radio" 
+                                name="tren"
+                                id="tren-inferior"
+                                value="inferior"
+                                class="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
+                            >
+                            <span class="text-sm font-medium text-gray-700">🦵 Tren Inferior</span>
+                        </label>
                     </div>
                 </div>
 
@@ -1120,6 +1101,30 @@
             renderBibliotecaEjercicios();
         }
 
+        function editarEjercicioDeBiblioteca(id) {
+            let ejercicios = loadEjercicios();
+            const ejercicio = ejercicios.find(e => e.id === id);
+            
+            if (!ejercicio) return;
+            
+            const nuevoNombre = prompt('Editar nombre del ejercicio:', ejercicio.nombre);
+            
+            if (!nuevoNombre || nuevoNombre.trim() === '') return;
+            
+            const nombreTrimmed = nuevoNombre.trim();
+            
+            // Verificar si ya existe otro ejercicio con ese nombre (excepto el actual)
+            if (ejercicios.some(e => e.id !== id && e.nombre.toLowerCase() === nombreTrimmed.toLowerCase())) {
+                alert('Ya existe un ejercicio con ese nombre');
+                return;
+            }
+            
+            // Actualizar el nombre
+            ejercicio.nombre = nombreTrimmed;
+            saveEjercicios(ejercicios);
+            renderBibliotecaEjercicios();
+        }
+        
         function eliminarEjercicioDeBiblioteca(id) {
             if (!confirm('¿Eliminar este ejercicio de la biblioteca?')) return;
             
@@ -1148,14 +1153,24 @@
             mensaje?.classList.add('hidden');
             
             lista.innerHTML = ejerciciosFiltrados.map(ejercicio => `
-                <div class="flex items-center justify-between p-2 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors">
-                    <span class="text-sm font-medium text-gray-900">${ejercicio.nombre}</span>
-                    <button 
-                        onclick="eliminarEjercicioDeBiblioteca('${ejercicio.id}')"
-                        class="px-2 py-1 text-xs text-red-600 hover:bg-red-50 rounded"
-                    >
-                        🗑️
-                    </button>
+                <div class="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors gap-2">
+                    <span class="text-sm font-medium text-gray-900 flex-1 truncate">${ejercicio.nombre}</span>
+                    <div class="flex gap-1 sm:gap-2 flex-shrink-0">
+                        <button 
+                            onclick="editarEjercicioDeBiblioteca('${ejercicio.id}')"
+                            class="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium text-blue-600 hover:bg-blue-50 rounded border border-blue-200 transition-colors"
+                            title="Editar ejercicio"
+                        >
+                            ✏️
+                        </button>
+                        <button 
+                            onclick="eliminarEjercicioDeBiblioteca('${ejercicio.id}')"
+                            class="px-2 sm:px-3 py-1 text-xs sm:text-sm font-medium text-red-600 hover:bg-red-50 rounded border border-red-200 transition-colors"
+                            title="Eliminar ejercicio"
+                        >
+                            🗑️
+                        </button>
+                    </div>
                 </div>
             `).join('');
         }
@@ -1606,18 +1621,18 @@
             
             const hayReposicionesDisponibles = reposicionesExistentes < faltas;
             
-            let html = `<div class="grid grid-cols-7 gap-1.5 sm:gap-2" style="min-width: 700px;">`;
+            let html = `<div class="grid grid-cols-7 gap-2" style="min-width: 800px;">`;
             
             // Headers (todos los días de la semana)
             const diasNombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
             diasNombres.forEach(dia => {
-                html += `<div class="text-xs sm:text-sm font-semibold text-gray-700 text-center py-2">${dia}</div>`;
+                html += `<div class="text-sm sm:text-base font-semibold text-gray-700 text-center py-2.5">${dia}</div>`;
             });
             
             // Agregar espacios vacíos al inicio si el mes no empieza en domingo
             const primerDia = days[0].diaSemana;
             for (let i = 0; i < primerDia; i++) {
-                html += `<div class="border border-transparent rounded-lg p-2 h-44 sm:h-48 md:h-52"></div>`;
+                html += `<div class="border border-transparent rounded-lg p-2.5 h-52 sm:h-56 md:h-60"></div>`;
             }
             
             // Obtener fecha actual (solo fecha, sin hora) - usar fecha simulada si existe
@@ -1653,47 +1668,47 @@
                     (asist.rutina.tren === 'superior' ? '💪 Superior' : '🦵 Inferior') : '';
                 
                 html += `
-                    <div class="${borderClasses} rounded-lg p-2 ${asist.asistio ? 'bg-green-50' : (esLaborable ? 'bg-white' : 'bg-gray-100')} ${esLaborable ? '' : 'opacity-60'} h-44 sm:h-48 md:h-52 flex flex-col overflow-hidden ${esDiaActual ? 'relative' : ''}">
-                        <div class="flex justify-between items-start mb-1 flex-shrink-0">
+                    <div class="${borderClasses} rounded-lg p-2.5 ${asist.asistio ? 'bg-green-50' : (esLaborable ? 'bg-white' : 'bg-gray-100')} ${esLaborable ? '' : 'opacity-60'} h-52 sm:h-56 md:h-60 flex flex-col overflow-hidden ${esDiaActual ? 'relative' : ''}">
+                        <div class="flex justify-between items-start mb-1.5 flex-shrink-0">
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-1 flex-wrap">
-                                    <p class="text-xs sm:text-sm ${esLaborable ? 'text-gray-700 font-semibold' : 'text-gray-400'}">${formatDateDisplay(dateStr).split(' ').slice(0,2).join(' ')}</p>
-                                    ${esDiaActual ? '<span class="px-1.5 py-0.5 text-[9px] sm:text-xs font-bold bg-blue-500 text-white rounded">HOY</span>' : ''}
+                                    <p class="text-sm sm:text-base font-semibold ${esLaborable ? 'text-gray-700' : 'text-gray-400'}">${formatDateDisplay(dateStr).split(' ').slice(0,2).join(' ')}</p>
+                                    ${esDiaActual ? '<span class="px-2 py-0.5 text-[10px] sm:text-xs font-bold bg-blue-500 text-white rounded">HOY</span>' : ''}
                                 </div>
-                                ${!esLaborable ? '<p class="text-[10px] sm:text-xs text-gray-400 leading-tight">No laboral</p>' : ''}
+                                ${!esLaborable ? '<p class="text-xs sm:text-sm text-gray-400 leading-tight">No laboral</p>' : ''}
                             </div>
                             <button 
                                 onclick="abrirModalNotaDia('${dateStr}')"
-                                class="text-sm sm:text-base ${tieneRutina ? 'text-blue-600 hover:text-blue-700' : 'text-gray-400 hover:text-gray-600'} flex-shrink-0 ml-1"
+                                class="text-base sm:text-lg ${tieneRutina ? 'text-blue-600 hover:text-blue-700' : 'text-gray-400 hover:text-gray-600'} flex-shrink-0 ml-1"
                                 title="${tieneRutina ? 'Ver/editar rutina' : 'Agregar rutina'}"
                             >
                                 ${tieneRutina ? '🏋️' : '➕'}
                             </button>
                         </div>
                         ${esLaborable ? `
-                            <label class="flex items-center gap-1 text-xs sm:text-sm cursor-pointer mb-1 flex-shrink-0">
+                            <label class="flex items-center gap-1.5 text-sm sm:text-base cursor-pointer mb-1.5 flex-shrink-0">
                                 <input 
                                     type="checkbox" 
                                     ${asist.asistio ? 'checked' : ''}
                                     onchange="toggleAsistencia('${dateStr}')"
-                                    class="rounded border-gray-300 flex-shrink-0 w-3.5 h-3.5 sm:w-4 sm:h-4"
+                                    class="rounded border-gray-300 flex-shrink-0 w-4 h-4 sm:w-5 sm:h-5"
                                 >
                                 <span class="text-gray-900">Asistió</span>
                             </label>
                         ` : `
                             <button 
                                 onclick="toggleReposicion('${dateStr}')"
-                                class="flex items-center gap-1 text-[10px] sm:text-xs ${asist.reposicion ? 'text-blue-700 bg-blue-100 hover:bg-blue-200' : (hayReposicionesDisponibles ? 'text-gray-500 bg-gray-100 hover:bg-gray-200' : 'text-gray-400 bg-gray-50 cursor-not-allowed opacity-50')} px-1.5 sm:px-2 py-1 rounded transition-colors mb-1 flex-shrink-0"
+                                class="flex items-center gap-1 text-xs sm:text-sm ${asist.reposicion ? 'text-blue-700 bg-blue-100 hover:bg-blue-200' : (hayReposicionesDisponibles ? 'text-gray-500 bg-gray-100 hover:bg-gray-200' : 'text-gray-400 bg-gray-50 cursor-not-allowed opacity-50')} px-2 py-1 rounded transition-colors mb-1.5 flex-shrink-0"
                                 title="${asist.reposicion ? 'Quitar reposición' : (hayReposicionesDisponibles ? 'Marcar como reposición' : 'No hay reposiciones disponibles (no hay faltas)')}"
                                 ${!asist.reposicion && !hayReposicionesDisponibles ? 'disabled' : ''}
                             >
                                 <span class="font-semibold">R</span>
-                                <span class="hidden sm:inline">${asist.reposicion ? 'Reposición' : 'Marcar repos.'}</span>
+                                <span>${asist.reposicion ? 'Reposición' : 'Marcar repos.'}</span>
                             </button>
                         `}
                         <div class="flex-1 overflow-hidden min-h-0">
                             ${tieneRutina ? `
-                                <div class="text-[10px] sm:text-xs space-y-0.5 sm:space-y-1">
+                                <div class="text-xs sm:text-sm space-y-1">
                                     ${tieneCalentamiento ? '<p class="text-orange-600 font-medium">🔥 Calentamiento</p>' : ''}
                                     ${trenTexto ? `<p class="text-purple-700 font-semibold">${trenTexto}</p>` : ''}
                                     ${tipos.length > 0 || numEjercicios > 0 ? `<p class="text-gray-700">${tipos.join(' ')} ${numEjercicios} ejercicio${numEjercicios !== 1 ? 's' : ''}</p>` : ''}
@@ -2247,7 +2262,7 @@
         let currentNotaDate = null;
         let ejerciciosCount = 0;
         
-        function agregarEjercicio(nombre = '', series = '', repeticiones = '', peso = '') {
+        function agregarEjercicio(nombre = '', series = '', repeticiones = '', peso = '', unidad = 'kg', nota = '') {
             ejerciciosCount++;
             const lista = document.getElementById('lista-ejercicios');
             const id = `ejercicio-${ejerciciosCount}`;
@@ -2281,7 +2296,7 @@
                             ✕
                         </button>
                     </div>
-                    <div class="grid grid-cols-3 gap-2 sm:gap-3">
+                    <div class="grid grid-cols-4 gap-2 sm:gap-3 mb-2">
                         <div>
                             <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 mb-1">Series</label>
                             <input 
@@ -2305,7 +2320,7 @@
                             >
                         </div>
                         <div>
-                            <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 mb-1">Peso <span class="unidad-peso-label">(kg)</span></label>
+                            <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 mb-1">Peso</label>
                             <input 
                                 type="text" 
                                 inputmode="decimal"
@@ -2314,6 +2329,23 @@
                                 class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-center border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium ejercicio-peso"
                             >
                         </div>
+                        <div>
+                            <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 mb-1">Unidad</label>
+                            <select 
+                                class="w-full px-1 sm:px-2 py-1.5 sm:py-2 text-xs sm:text-sm text-center border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium ejercicio-unidad bg-white"
+                            >
+                                <option value="kg" ${unidad === 'kg' ? 'selected' : ''}>kg</option>
+                                <option value="lb" ${unidad === 'lb' ? 'selected' : ''}>lb</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div>
+                        <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 mb-1">💬 Nota del ejercicio</label>
+                        <textarea 
+                            placeholder="Ej: Muy pesado, aumentar gradualmente..."
+                            class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none ejercicio-nota"
+                            rows="2"
+                        >${nota}</textarea>
                     </div>
                 </div>
             `;
@@ -2338,12 +2370,6 @@
             });
         }
         
-        function actualizarUnidadPeso() {
-            const unidad = document.querySelector('input[name="unidad-peso"]:checked')?.value || 'kg';
-            document.querySelectorAll('.unidad-peso-label').forEach(label => {
-                label.textContent = `(${unidad})`;
-            });
-        }
         
         function abrirModalNotaDia(dateStr) {
             currentNotaDate = dateStr;
@@ -2383,17 +2409,10 @@
                     document.getElementById('tren-inferior').checked = true;
                 }
                 
-                // Cargar unidad de peso
-                if (rutina.unidadPeso === 'lb') {
-                    document.getElementById('peso-lb').checked = true;
-                } else {
-                    document.getElementById('peso-kg').checked = true;
-                }
-                
                 // Cargar ejercicios
                 if (rutina.ejercicios && rutina.ejercicios.length > 0) {
                     rutina.ejercicios.forEach(ej => {
-                        agregarEjercicio(ej.nombre, ej.series, ej.repeticiones, ej.peso);
+                        agregarEjercicio(ej.nombre, ej.series, ej.repeticiones, ej.peso, ej.unidad, ej.nota);
                     });
                 } else {
                     // Agregar un ejercicio vacío por defecto
@@ -2410,15 +2429,9 @@
                 document.getElementById('tren-superior').checked = false;
                 document.getElementById('tren-inferior').checked = false;
                 
-                // Unidad de peso por defecto: kg
-                document.getElementById('peso-kg').checked = true;
-                
                 // Agregar un ejercicio vacío por defecto
                 agregarEjercicio();
             }
-            
-            // Actualizar labels de unidad de peso
-            actualizarUnidadPeso();
             
             document.getElementById('modal-nota-dia').classList.remove('hidden');
         }
@@ -2655,10 +2668,12 @@
                 const series = ejercicioDiv.querySelector('.ejercicio-series').value.trim();
                 const repeticiones = ejercicioDiv.querySelector('.ejercicio-reps').value.trim();
                 const peso = ejercicioDiv.querySelector('.ejercicio-peso').value.trim();
+                const unidad = ejercicioDiv.querySelector('.ejercicio-unidad').value;
+                const nota = ejercicioDiv.querySelector('.ejercicio-nota').value.trim();
                 
                 // Solo agregar si al menos el nombre tiene contenido
                 if (nombre) {
-                    ejercicios.push({ nombre, series, repeticiones, peso });
+                    ejercicios.push({ nombre, series, repeticiones, peso, unidad, nota });
                 }
             });
             
@@ -2670,16 +2685,12 @@
                 tren = 'inferior';
             }
             
-            // Obtener unidad de peso
-            const unidadPeso = document.querySelector('input[name="unidad-peso"]:checked')?.value || 'kg';
-            
             // Crear objeto de rutina
             const rutina = {
                 calentamiento: document.getElementById('calentamiento-check').checked,
                 tipoMaquinas: document.getElementById('tipo-maquinas').checked,
                 tipoCalistenia: document.getElementById('tipo-calistenia').checked,
                 tren: tren,
-                unidadPeso: unidadPeso,
                 ejercicios: ejercicios,
                 nota: document.getElementById('nota-dia-texto').value.trim()
             };
@@ -2772,12 +2783,6 @@
             }
         });
         
-        // Event listeners para cambiar unidad de peso
-        document.addEventListener('change', (e) => {
-            if (e.target.name === 'unidad-peso') {
-                actualizarUnidadPeso();
-            }
-        });
 
         // Cerrar modales con la tecla ESC
         document.addEventListener('keydown', (e) => {
