@@ -1053,7 +1053,10 @@
         let currentCoachId = null;
         let currentPagoId = null; // ID del pago/periodo actualmente seleccionado
         let fechaSimulada = null; // Para pruebas: simular una fecha diferente
-        let currentVistaCalendario = 'mensual'; // Vista actual del calendario: 'mensual', 'semanal', 'lista'
+        
+        // Vista por defecto según el tamaño de pantalla
+        const esMobile = () => window.innerWidth < 640; // 640px = breakpoint 'sm' de Tailwind
+        let currentVistaCalendario = esMobile() ? 'lista' : 'mensual'; // Vista actual del calendario: 'mensual', 'semanal', 'lista'
         
         const monthNames = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
                            'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -1613,6 +1616,7 @@
                     const pagoSeleccionado = pagos.find(p => p.id === currentPagoId);
                     if (pagoSeleccionado) {
                         document.getElementById('contenido-calendario-metricas').classList.remove('hidden');
+                        inicializarVistaCalendario(); // Establecer vista por defecto según dispositivo
                         renderCalendarioPeriodo();
                         renderHistorialPagos();
                     } else {
@@ -1702,23 +1706,32 @@
         // VISTAS DEL CALENDARIO
         // ========================================
         
-        function cambiarVistaCalendario(vista) {
-            currentVistaCalendario = vista;
-            
+        function actualizarBotonesVista() {
             // Actualizar estilos de los botones
             document.querySelectorAll('.vista-calendario-btn').forEach(btn => {
                 btn.classList.remove('bg-white', 'text-gray-900', 'shadow-sm');
                 btn.classList.add('text-gray-600', 'hover:text-gray-900', 'hover:bg-white/50');
             });
             
-            const botonActivo = document.getElementById(`vista-${vista}-btn`);
+            const botonActivo = document.getElementById(`vista-${currentVistaCalendario}-btn`);
             if (botonActivo) {
                 botonActivo.classList.remove('text-gray-600', 'hover:text-gray-900', 'hover:bg-white/50');
                 botonActivo.classList.add('bg-white', 'text-gray-900', 'shadow-sm');
             }
+        }
+        
+        function cambiarVistaCalendario(vista) {
+            currentVistaCalendario = vista;
+            actualizarBotonesVista();
             
             // Re-renderizar calendario con la nueva vista
             renderCalendarioPeriodo();
+        }
+        
+        function inicializarVistaCalendario() {
+            // Establecer vista por defecto según el tamaño de pantalla
+            currentVistaCalendario = esMobile() ? 'lista' : 'mensual';
+            actualizarBotonesVista();
         }
         
         function renderCalendarioPeriodo() {
