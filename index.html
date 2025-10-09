@@ -2,11 +2,35 @@
 <html lang="es-CO">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Panel de administración de coaches">
     <title>Gestión de Coaches - Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
+        /* Prevenir zoom en iOS y scroll horizontal */
+        html, body {
+            overflow-x: hidden;
+            position: relative;
+            width: 100%;
+        }
+        
+        /* Asegurar que los inputs tengan mínimo 16px en iOS para evitar auto-zoom */
+        input, textarea, select {
+            font-size: 16px !important;
+        }
+        
+        /* Para pantallas más grandes, usar tamaños normales */
+        @media (min-width: 640px) {
+            input, textarea, select {
+                font-size: inherit !important;
+            }
+        }
+        
+        /* Prevenir el comportamiento de zoom táctil */
+        * {
+            touch-action: manipulation;
+        }
+        
         .line-clamp-2 {
             display: -webkit-box;
             -webkit-line-clamp: 2;
