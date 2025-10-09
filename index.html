@@ -2915,6 +2915,7 @@
             const data = loadData();
             const coach = data.coaches.find(c => c.id === coachId);
             const asistencias = data.asistencias[coachId] || {};
+            const hoy = getFechaActual();
             
             // Usar finOriginal si existe para calcular programadas
             const fechaFinParaProgramadas = finOriginal || fin;
@@ -2927,14 +2928,21 @@
             const diasLaborablesTotales = getDiasLaborablesPeriodo(inicio, fin, coach.diasLaborables);
             
             let asistidas = 0;
+            let faltas = 0;
             
-            // Contar asistencias en TODOS los días laborables (incluyendo extensión)
+            // Contar asistencias y faltas correctamente
             diasLaborablesTotales.forEach(day => {
                 const asist = asistencias[day];
-                if (asist?.asistio) asistidas++;
+                // Solo contar asistencias regulares (sin reprogramaciones)
+                if (asist?.asistio && !asist?.reprogramacion) {
+                    asistidas++;
+                }
+                
+                // Contar faltas: solo días pasados donde NO asistió
+                if (day <= hoy && !asist?.asistio) {
+                    faltas++;
+                }
             });
-            
-            const faltas = programadas - asistidas;
             
             // Contar reprogramaciones en TODOS los días del periodo
             const todosDias = getTodosDiasPeriodo(inicio, fin);
@@ -2942,15 +2950,18 @@
             
             todosDias.forEach(({fecha}) => {
                 const asist = asistencias[fecha];
-                if (asist?.reprogramacion) reprogramaciones++;
+                if (asist?.reprogramacion && asist?.asistio) {
+                    reprogramaciones++;
+                }
             });
             
-            // Calcular monto proporcional basado en asistencias
-            const porcentajeAsistencia = programadas > 0 ? asistidas / programadas : 1;
+            // Calcular monto proporcional basado en asistencias + reprogramaciones
+            const totalCompletadas = asistidas + reprogramaciones;
+            const porcentajeAsistencia = programadas > 0 ? totalCompletadas / programadas : 1;
             const montoSugerido = montoBase ? Math.round(montoBase * porcentajeAsistencia) : 0;
             
-            // Calcular pendientes
-            const pendientes = Math.max(0, faltas - reprogramaciones);
+            // Calcular pendientes: Programadas - (Asistidas + Reprogramaciones)
+            const pendientes = Math.max(0, programadas - (asistidas + reprogramaciones));
             
             return {
                 programadas,
