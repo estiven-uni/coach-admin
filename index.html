@@ -199,36 +199,43 @@
 
                 <!-- Selector de periodo (solo visible si hay pagos) -->
                 <div id="contenido-con-pagos" class="hidden">
-                    <div class="flex items-center justify-between gap-4">
-                        <div class="flex items-center gap-3 flex-1">
-                            <span class="text-2xl">📅</span>
-                            <div class="flex-1">
-                                <label for="select-periodo-pago" class="block text-xs font-medium text-gray-500 mb-1">Periodo visualizado</label>
+                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                        <div class="flex items-center gap-3 w-full sm:w-auto">
+                            <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center shadow-lg">
+                                <svg class="w-7 h-7 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                </svg>
+                            </div>
+                            <div class="flex-1 sm:flex-initial">
+                                <label for="select-periodo-pago" class="block text-xs font-medium text-gray-500 mb-1.5">Periodo visualizado</label>
                                 <select 
                                     id="select-periodo-pago"
-                                    class="w-full px-3 py-2 text-base font-semibold text-blue-900 border border-blue-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 bg-blue-50"
+                                    class="w-full sm:w-auto sm:min-w-[320px] px-3 py-2 text-sm font-semibold text-blue-900 border-2 border-blue-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 bg-white hover:border-blue-400 transition-colors shadow-sm"
                                 >
                                     <!-- Se llena dinámicamente -->
                                 </select>
                             </div>
                         </div>
-                        <div class="flex gap-2">
+                        <div class="flex gap-2 w-full sm:w-auto flex-wrap sm:flex-nowrap">
                             <button 
                                 id="btn-ver-historial"
                                 onclick="toggleHistorialPagos()"
-                                class="px-4 py-2 text-sm font-medium text-white bg-green-600 rounded-lg hover:bg-green-700 flex items-center gap-2"
+                                class="flex-1 sm:flex-initial px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-green-600 to-emerald-600 rounded-lg hover:from-green-700 hover:to-emerald-700 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all"
                             >
                                 <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                                 </svg>
-                                Gestionar periodos
+                                <span>Gestionar</span>
                             </button>
                             <button 
                                 id="btn-registrar-pago"
-                                class="px-4 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
+                                class="flex-1 sm:flex-initial px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-blue-600 to-indigo-600 rounded-lg hover:from-blue-700 hover:to-indigo-700 flex items-center justify-center gap-2 shadow-md hover:shadow-lg transition-all"
                             >
-                                + Nuevo periodo
+                                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                                </svg>
+                                <span>Nuevo periodo</span>
                             </button>
                         </div>
                     </div>
