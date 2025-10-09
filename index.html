@@ -1111,16 +1111,16 @@
 
     <!-- Modal Nota del Día (Edición) -->
     <div id="modal-nota-dia" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden overflow-y-auto p-2 sm:p-4">
-        <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl my-4 sm:my-8 max-h-[95vh] sm:max-h-[90vh] flex flex-col">
-            <div class="border-b border-gray-200 flex-shrink-0">
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-2xl w-full max-w-3xl my-4 sm:my-8 max-h-[95vh] sm:max-h-[90vh] flex flex-col">
+            <div class="border-b border-gray-200 dark:border-gray-700 flex-shrink-0">
                 <div class="flex justify-between items-center p-3 sm:p-5">
                     <div class="flex items-center gap-2">
-                        <svg class="w-6 h-6 text-gray-700 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <svg class="w-6 h-6 text-gray-700 dark:text-gray-300 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
                         </svg>
                         <div>
                             <h2 class="text-lg sm:text-xl font-bold text-gray-900 dark:text-white">Rutina del día</h2>
-                            <p id="nota-fecha-display" class="text-xs sm:text-sm text-gray-500 mt-1"></p>
+                            <p id="nota-fecha-display" class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1"></p>
                         </div>
                     </div>
                     <button onclick="cerrarModalNotaDia()" class="text-gray-400 dark:text-gray-500 hover:text-gray-600 dark:hover:text-gray-300">
@@ -1133,7 +1133,7 @@
                     <button 
                         type="button"
                         onclick="abrirModalBibliotecaEjercicios()"
-                        class="px-3 py-2 text-xs sm:text-sm font-medium text-purple-700 bg-purple-50 border-2 border-purple-300 rounded-lg hover:bg-purple-100 transition-colors flex items-center justify-center gap-1.5"
+                        class="px-3 py-2 text-xs sm:text-sm font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 border-2 border-purple-300 dark:border-purple-700 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors flex items-center justify-center gap-1.5"
                         title="Ver biblioteca de ejercicios"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1144,7 +1144,7 @@
                     <button 
                         type="button"
                         onclick="agregarEjercicio()"
-                        class="px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5"
+                        class="px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors flex items-center justify-center gap-1.5"
                         title="Agregar ejercicio a la rutina"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1155,7 +1155,7 @@
                     <button 
                         type="submit"
                         form="form-nota-dia"
-                        class="px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 transition-colors flex items-center justify-center gap-1.5"
+                        class="px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-green-600 dark:bg-green-500 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center justify-center gap-1.5"
                         title="Guardar rutina"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1166,7 +1166,7 @@
                     <button 
                         type="button"
                         onclick="eliminarNotaDia()"
-                        class="px-3 py-2 text-xs sm:text-sm font-medium text-red-600 bg-red-50 border-2 border-red-300 rounded-lg hover:bg-red-100 transition-colors flex items-center justify-center gap-1.5"
+                        class="px-3 py-2 text-xs sm:text-sm font-medium text-red-600 dark:text-red-400 bg-red-50 dark:bg-red-900/30 border-2 border-red-300 dark:border-red-700 rounded-lg hover:bg-red-100 dark:hover:bg-red-900/50 transition-colors flex items-center justify-center gap-1.5"
                         title="Eliminar rutina"
                     >
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1179,8 +1179,8 @@
             <form id="form-nota-dia" class="p-3 sm:p-4 space-y-3 sm:space-y-4 overflow-y-auto flex-1">
                 <!-- Grid compacto de configuración -->
                 <!-- Lista de ejercicios -->
-                <div class="bg-gray-100 border-2 border-gray-300 rounded-xl p-3 sm:p-4">
-                    <label class="text-xs sm:text-sm font-bold text-gray-900 mb-3 block">Ejercicios realizados</label>
+                <div class="bg-gray-100 dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-xl p-3 sm:p-4">
+                    <label class="text-xs sm:text-sm font-bold text-gray-900 dark:text-white mb-3 block">Ejercicios realizados</label>
                     <div id="lista-ejercicios" class="space-y-3">
                         <!-- Se llena dinámicamente -->
                     </div>
@@ -1189,41 +1189,41 @@
                 <!-- Configuración de rutina -->
                 <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
                     <!-- Calentamiento -->
-                    <label class="flex items-center gap-2 p-2.5 sm:p-3 bg-orange-50 border-2 border-orange-200 rounded-lg cursor-pointer hover:bg-orange-100 transition-colors">
+                    <label class="flex items-center gap-2 p-2.5 sm:p-3 bg-orange-50 dark:bg-orange-900/30 border-2 border-orange-200 dark:border-orange-700 rounded-lg cursor-pointer hover:bg-orange-100 dark:hover:bg-orange-900/50 transition-colors">
                         <input 
                             type="checkbox" 
                             id="calentamiento-check"
-                            class="w-4 h-4 rounded border-gray-300 text-orange-600 focus:ring-orange-500"
+                            class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-orange-600 focus:ring-orange-500"
                             checked
                         >
-                        <span class="text-xs sm:text-sm font-semibold text-orange-900">Calentamiento</span>
+                        <span class="text-xs sm:text-sm font-semibold text-orange-900 dark:text-orange-300">Calentamiento</span>
                     </label>
 
                     <!-- Máquinas -->
-                    <label class="flex items-center gap-2 p-2.5 sm:p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors has-[:checked]:border-blue-500 has-[:checked]:bg-blue-50">
+                    <label class="flex items-center gap-2 p-2.5 sm:p-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-colors has-[:checked]:border-blue-500 dark:has-[:checked]:border-blue-400 has-[:checked]:bg-blue-50 dark:has-[:checked]:bg-blue-900/30">
                         <input 
                             type="checkbox" 
                             id="tipo-maquinas"
-                            class="w-4 h-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500"
+                            class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-blue-600 focus:ring-blue-500"
                             checked
                         >
-                        <span class="text-xs sm:text-sm font-semibold text-gray-700">Máquinas</span>
+                        <span class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">Máquinas</span>
                     </label>
 
                     <!-- Calistenia -->
-                    <label class="flex items-center gap-2 p-2.5 sm:p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-green-50 transition-colors has-[:checked]:border-green-500 has-[:checked]:bg-green-50">
+                    <label class="flex items-center gap-2 p-2.5 sm:p-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-green-50 dark:hover:bg-green-900/30 transition-colors has-[:checked]:border-green-500 dark:has-[:checked]:border-green-400 has-[:checked]:bg-green-50 dark:has-[:checked]:bg-green-900/30">
                         <input 
                             type="checkbox" 
                             id="tipo-calistenia"
-                            class="w-4 h-4 rounded border-gray-300 text-green-600 focus:ring-green-500"
+                            class="w-4 h-4 rounded border-gray-300 dark:border-gray-600 text-green-600 focus:ring-green-500"
                         >
-                        <span class="text-xs sm:text-sm font-semibold text-gray-700">Calistenia</span>
+                        <span class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">Calistenia</span>
                     </label>
                 </div>
 
                 <!-- Tren trabajado -->
                 <div class="grid grid-cols-2 gap-2">
-                    <label class="flex items-center gap-2 p-2.5 sm:p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-purple-50 transition-colors has-[:checked]:border-purple-500 has-[:checked]:bg-purple-50">
+                    <label class="flex items-center gap-2 p-2.5 sm:p-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-purple-50 dark:hover:bg-purple-900/30 transition-colors has-[:checked]:border-purple-500 dark:has-[:checked]:border-purple-400 has-[:checked]:bg-purple-50 dark:has-[:checked]:bg-purple-900/30">
                         <input 
                             type="radio" 
                             name="tren"
@@ -1231,9 +1231,9 @@
                             value="superior"
                             class="w-4 h-4 text-purple-600 focus:ring-purple-500"
                         >
-                        <span class="text-xs sm:text-sm font-semibold text-gray-700">Tren Superior</span>
+                        <span class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">Tren Superior</span>
                     </label>
-                    <label class="flex items-center gap-2 p-2.5 sm:p-3 border-2 border-gray-200 rounded-lg cursor-pointer hover:bg-indigo-50 transition-colors has-[:checked]:border-indigo-500 has-[:checked]:bg-indigo-50">
+                    <label class="flex items-center gap-2 p-2.5 sm:p-3 border-2 border-gray-200 dark:border-gray-700 rounded-lg cursor-pointer hover:bg-indigo-50 dark:hover:bg-indigo-900/30 transition-colors has-[:checked]:border-indigo-500 dark:has-[:checked]:border-indigo-400 has-[:checked]:bg-indigo-50 dark:has-[:checked]:bg-indigo-900/30">
                         <input 
                             type="radio" 
                             name="tren"
@@ -1241,7 +1241,7 @@
                             value="inferior"
                             class="w-4 h-4 text-indigo-600 focus:ring-indigo-500"
                         >
-                        <span class="text-xs sm:text-sm font-semibold text-gray-700">Tren Inferior</span>
+                        <span class="text-xs sm:text-sm font-semibold text-gray-700 dark:text-gray-300">Tren Inferior</span>
                     </label>
                 </div>
 
@@ -1252,7 +1252,7 @@
                         id="nota-dia-texto" 
                         rows="2"
                         maxlength="200"
-                        class="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 resize-none"
+                        class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                         placeholder="Observaciones, sensaciones, logros..."
                     ></textarea>
                 </div>
@@ -1493,12 +1493,12 @@
             mensaje?.classList.add('hidden');
             
             lista.innerHTML = ejerciciosFiltrados.map(ejercicio => `
-                <div class="flex items-center justify-between p-2 sm:p-3 bg-gray-50 rounded-lg hover:bg-gray-100 transition-colors gap-2">
-                    <span class="text-sm font-medium text-gray-900 flex-1 truncate">${ejercicio.nombre}</span>
+                <div class="flex items-center justify-between p-2 sm:p-3 bg-gray-50 dark:bg-gray-900 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors gap-2">
+                    <span class="text-sm font-medium text-gray-900 dark:text-white flex-1 truncate">${ejercicio.nombre}</span>
                     <div class="flex gap-1 sm:gap-2 flex-shrink-0">
                         <button 
                             onclick="editarEjercicioDeBiblioteca('${ejercicio.id}')"
-                            class="p-2 text-blue-600 hover:bg-blue-50 rounded border border-blue-200 transition-colors"
+                            class="p-2 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded border border-blue-200 dark:border-blue-600 transition-colors"
                             title="Editar ejercicio"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1507,7 +1507,7 @@
                         </button>
                         <button 
                             onclick="eliminarEjercicioDeBiblioteca('${ejercicio.id}')"
-                            class="p-2 text-red-600 hover:bg-red-50 rounded border border-red-200 transition-colors"
+                            class="p-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded border border-red-200 dark:border-red-600 transition-colors"
                             title="Eliminar ejercicio"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -1549,7 +1549,7 @@
             
             sugerenciasDiv.innerHTML = sugerencias.map(ejercicio => `
                 <div 
-                    class="px-3 py-2 hover:bg-blue-50 cursor-pointer text-sm"
+                    class="px-3 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/30 cursor-pointer text-sm text-gray-900 dark:text-gray-100"
                     onclick="seleccionarEjercicio('${ejercicioId}', '${ejercicio.nombre.replace(/'/g, "\\'")}')"
                 >
                     ${ejercicio.nombre}
@@ -2724,7 +2724,7 @@
             const lista = document.getElementById('lista-pagos');
             
             if (pagos.length === 0) {
-                lista.innerHTML = '<p class="text-sm text-gray-500 text-center py-4">No hay periodos registrados</p>';
+                lista.innerHTML = '<p class="text-sm text-gray-500 dark:text-gray-400 text-center py-4">No hay periodos registrados</p>';
                 return;
             }
             
@@ -2733,19 +2733,19 @@
                 const stats = calcularEstadisticasPeriodo(pago.periodoInicio, pago.periodoFin, currentCoachId, pago.montoBase, pago.periodoFinOriginal);
                 
                 return `
-                <div class="bg-white border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div class="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg p-4 hover:shadow-md transition-shadow">
                     <div class="flex justify-between items-start mb-3">
                         <div class="flex gap-3 flex-1">
-                            <span class="flex-shrink-0 w-7 h-7 rounded-full ${index === 0 ? 'bg-green-600' : 'bg-gray-500'} text-white text-xs font-bold flex items-center justify-center">
+                            <span class="flex-shrink-0 w-7 h-7 rounded-full ${index === 0 ? 'bg-green-600 dark:bg-green-500' : 'bg-gray-500 dark:bg-gray-600'} text-white text-xs font-bold flex items-center justify-center">
                                 ${index + 1}
                             </span>
                             <div class="flex-1">
                                 <div class="flex items-center gap-2 mb-1">
-                                    <p class="text-xl font-bold text-gray-900">${formatCurrency(pago.monto)}</p>
-                                    ${index === 0 ? '<span class="px-2 py-1 text-xs font-semibold bg-green-100 text-green-700 rounded-md">Más reciente</span>' : ''}
+                                    <p class="text-xl font-bold text-gray-900 dark:text-white">${formatCurrency(pago.monto)}</p>
+                                    ${index === 0 ? '<span class="px-2 py-1 text-xs font-semibold bg-green-100 dark:bg-green-900 text-green-700 dark:text-green-300 rounded-md">Más reciente</span>' : ''}
                                 </div>
-                                <p class="text-xs text-gray-600">📅 Pagado: ${formatDateDisplay(pago.fecha)}</p>
-                                <p class="text-xs text-blue-600 font-medium mt-1">
+                                <p class="text-xs text-gray-600 dark:text-gray-400">📅 Pagado: ${formatDateDisplay(pago.fecha)}</p>
+                                <p class="text-xs text-blue-600 dark:text-blue-400 font-medium mt-1">
                                     📆 ${formatDateDisplay(pago.periodoInicio)} - ${formatDateDisplay(pago.periodoFin)}
                                 </p>
                                 ${pago.montoBase ? `<p class="text-xs text-gray-500 dark:text-gray-400 mt-1">💵 Base: ${formatCurrency(pago.montoBase)}</p>` : ''}
@@ -2754,7 +2754,7 @@
                         <div class="flex flex-col gap-2">
                             <button 
                                 onclick="editarPeriodoDesdeModal('${pago.id}')"
-                                class="text-xs text-blue-600 hover:text-blue-700 hover:bg-blue-50 rounded px-3 py-1 transition-colors border border-blue-300 font-medium flex items-center gap-1.5"
+                                class="text-xs text-blue-600 dark:text-blue-400 hover:text-blue-700 dark:hover:text-blue-300 hover:bg-blue-50 dark:hover:bg-blue-900/30 rounded px-3 py-1 transition-colors border border-blue-300 dark:border-blue-600 font-medium flex items-center gap-1.5"
                                 title="Editar periodo"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2764,7 +2764,7 @@
                             </button>
                             <button 
                                 onclick="eliminarPago('${pago.id}')"
-                                class="text-xs text-red-600 hover:text-red-700 hover:bg-red-50 rounded px-3 py-1 transition-colors border border-red-300 font-medium flex items-center gap-1.5"
+                                class="text-xs text-red-600 dark:text-red-400 hover:text-red-700 dark:hover:text-red-300 hover:bg-red-50 dark:hover:bg-red-900/30 rounded px-3 py-1 transition-colors border border-red-300 dark:border-red-600 font-medium flex items-center gap-1.5"
                                 title="Eliminar periodo"
                             >
                                 <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -2774,34 +2774,34 @@
                             </button>
                         </div>
                     </div>
-                    <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 text-xs mt-3 pt-3 border-t border-gray-200">
+                    <div class="grid grid-cols-3 sm:grid-cols-5 gap-2 text-xs mt-3 pt-3 border-t border-gray-200 dark:border-gray-700">
                         <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-gray-500"></span>
-                            <span class="text-gray-600">Prog:</span>
-                            <span class="font-bold text-gray-900">${stats.programadas}</span>
+                            <span class="w-2 h-2 rounded-full bg-gray-500 dark:bg-gray-400"></span>
+                            <span class="text-gray-600 dark:text-gray-400">Prog:</span>
+                            <span class="font-bold text-gray-900 dark:text-white">${stats.programadas}</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-green-500"></span>
-                            <span class="text-green-700">Asist:</span>
-                            <span class="font-bold text-green-900">${stats.asistidas}</span>
+                            <span class="w-2 h-2 rounded-full bg-green-500 dark:bg-green-400"></span>
+                            <span class="text-green-700 dark:text-green-400">Asist:</span>
+                            <span class="font-bold text-green-900 dark:text-green-300">${stats.asistidas}</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-red-500"></span>
-                            <span class="text-red-600">Faltas:</span>
-                            <span class="font-bold text-red-900">${stats.faltas}</span>
+                            <span class="w-2 h-2 rounded-full bg-red-500 dark:bg-red-400"></span>
+                            <span class="text-red-600 dark:text-red-400">Faltas:</span>
+                            <span class="font-bold text-red-900 dark:text-red-300">${stats.faltas}</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-blue-500"></span>
-                            <span class="text-blue-600">Reprog:</span>
-                            <span class="font-bold text-blue-900">${stats.reprogramaciones}/${stats.faltas}</span>
+                            <span class="w-2 h-2 rounded-full bg-blue-500 dark:bg-blue-400"></span>
+                            <span class="text-blue-600 dark:text-blue-400">Reprog:</span>
+                            <span class="font-bold text-blue-900 dark:text-blue-300">${stats.reprogramaciones}/${stats.faltas}</span>
                         </div>
                         <div class="flex items-center gap-2">
-                            <span class="w-2 h-2 rounded-full bg-orange-500"></span>
-                            <span class="text-orange-600">Pend:</span>
-                            <span class="font-bold text-orange-900">${stats.pendientes}</span>
+                            <span class="w-2 h-2 rounded-full bg-orange-500 dark:bg-orange-400"></span>
+                            <span class="text-orange-600 dark:text-orange-400">Pend:</span>
+                            <span class="font-bold text-orange-900 dark:text-orange-300">${stats.pendientes}</span>
                         </div>
                     </div>
-                    ${pago.nota ? `<p class="text-xs text-gray-600 mt-3 p-2 bg-gray-50 rounded italic">"${pago.nota}"</p>` : ''}
+                    ${pago.nota ? `<p class="text-xs text-gray-600 dark:text-gray-400 mt-3 p-2 bg-gray-50 dark:bg-gray-900 rounded italic">"${pago.nota}"</p>` : ''}
                 </div>
             `;
             }).join('');
@@ -3072,9 +3072,9 @@
             const numeroEjercicio = lista.children.length + 1;
             
             const ejercicioHTML = `
-                <div class="bg-white border-2 border-gray-200 rounded-lg p-2 sm:p-3 hover:border-blue-300 transition-colors" id="${id}">
+                <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-lg p-2 sm:p-3 hover:border-blue-300 dark:hover:border-blue-600 transition-colors" id="${id}">
                     <div class="flex gap-2 mb-2 sm:mb-3">
-                        <div class="flex-shrink-0 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 text-white rounded-full font-bold text-xs sm:text-sm">
+                        <div class="flex-shrink-0 flex items-center justify-center w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 dark:bg-blue-500 text-white rounded-full font-bold text-xs sm:text-sm">
                             ${numeroEjercicio}
                         </div>
                         <div class="flex-1 relative">
@@ -3082,16 +3082,16 @@
                                 type="text" 
                                 placeholder="🔍 Nombre del ejercicio..."
                                 value="${nombre}"
-                                class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 ejercicio-nombre"
+                                class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm font-medium border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 ejercicio-nombre bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                                 oninput="mostrarSugerenciasEjercicios(this, '${id}')"
                                 onfocus="mostrarSugerenciasEjercicios(this, '${id}')"
                             >
-                            <div id="sugerencias-${id}" class="hidden absolute z-10 w-full mt-1 bg-white border border-gray-300 rounded-lg shadow-lg max-h-48 overflow-y-auto"></div>
+                            <div id="sugerencias-${id}" class="hidden absolute z-10 w-full mt-1 bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-600 rounded-lg shadow-lg max-h-48 overflow-y-auto"></div>
                         </div>
                         <button 
                             type="button"
                             onclick="eliminarEjercicio('${id}')"
-                            class="px-2 sm:px-3 py-1.5 sm:py-2 text-red-600 hover:bg-red-50 rounded-lg text-xs sm:text-sm font-bold border-2 border-red-200 hover:border-red-300 transition-colors"
+                            class="px-2 sm:px-3 py-1.5 sm:py-2 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/30 rounded-lg text-xs sm:text-sm font-bold border-2 border-red-200 dark:border-red-600 hover:border-red-300 dark:hover:border-red-500 transition-colors"
                             title="Eliminar ejercicio"
                         >
                             ✕
@@ -3099,41 +3099,41 @@
                     </div>
                     <div class="grid grid-cols-4 gap-2 sm:gap-3 mb-2">
                         <div>
-                            <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 mb-1">Series</label>
+                            <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Series</label>
                             <input 
                                 type="text" 
                                 inputmode="numeric"
                                 pattern="[0-9]*"
                                 placeholder="3"
                                 value="${series}"
-                                class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-center border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium ejercicio-series"
+                                class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-center border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-medium ejercicio-series bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                             >
                         </div>
                         <div>
-                            <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 mb-1">Reps</label>
+                            <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Reps</label>
                             <input 
                                 type="text" 
                                 inputmode="numeric"
                                 pattern="[0-9]*"
                                 placeholder="12"
                                 value="${repeticiones}"
-                                class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-center border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium ejercicio-reps"
+                                class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-center border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-medium ejercicio-reps bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                             >
                         </div>
                         <div>
-                            <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 mb-1">Peso</label>
+                            <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Peso</label>
                             <input 
                                 type="text" 
                                 inputmode="decimal"
                                 placeholder="50"
                                 value="${peso}"
-                                class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-center border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium ejercicio-peso"
+                                class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm text-center border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-medium ejercicio-peso bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                             >
                         </div>
                         <div>
-                            <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 mb-1">Unidad</label>
+                            <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">Unidad</label>
                             <select 
-                                class="w-full px-1 sm:px-2 py-1.5 sm:py-2 text-xs sm:text-sm text-center border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 font-medium ejercicio-unidad bg-white"
+                                class="w-full px-1 sm:px-2 py-1.5 sm:py-2 text-xs sm:text-sm text-center border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 font-medium ejercicio-unidad bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
                             >
                                 <option value="kg" ${unidad === 'kg' ? 'selected' : ''}>kg</option>
                                 <option value="lb" ${unidad === 'lb' ? 'selected' : ''}>lb</option>
@@ -3141,10 +3141,10 @@
                         </div>
                     </div>
                     <div>
-                        <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 mb-1">💬 Nota del ejercicio</label>
+                        <label class="block text-[10px] sm:text-xs font-semibold text-gray-600 dark:text-gray-400 mb-1">💬 Nota del ejercicio</label>
                         <textarea 
                             placeholder="Ej: Muy pesado, aumentar gradualmente..."
-                            class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border-2 border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 resize-none ejercicio-nota"
+                            class="w-full px-2 sm:px-3 py-1.5 sm:py-2 text-xs sm:text-sm border-2 border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 focus:border-blue-500 dark:focus:border-blue-400 resize-none ejercicio-nota bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                             rows="2"
                         >${nota}</textarea>
                     </div>
