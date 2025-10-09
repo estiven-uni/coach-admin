@@ -172,15 +172,15 @@
         <div id="vista-dashboard-coach" class="hidden">
             
             <!-- Info del coach y selector de periodo -->
-            <div class="bg-white rounded-xl border-2 border-blue-300 shadow-sm p-6 mb-6">
+            <div class="bg-white rounded-xl border-2 border-blue-300 shadow-sm p-4 sm:p-6 mb-6">
                 <!-- Info del coach -->
-                <div class="flex items-start justify-between mb-5 pb-5 border-b border-gray-200">
+                <div class="flex flex-col sm:flex-row items-start justify-between gap-4">
                     <div class="flex-1">
                         <div class="flex items-center gap-3 mb-3">
-                            <h2 id="coach-nombre" class="text-2xl font-bold text-gray-900"></h2>
+                            <h2 id="coach-nombre" class="text-xl sm:text-2xl font-bold text-gray-900"></h2>
                             <span id="coach-estado-badge" class="px-3 py-1 text-xs font-semibold rounded"></span>
                         </div>
-                        <div class="flex items-center gap-6">
+                        <div class="flex items-center gap-4 sm:gap-6 flex-wrap">
                             <div>
                                 <p class="text-xs text-gray-500">Días laborables</p>
                                 <p id="coach-dias" class="text-sm font-medium text-gray-900 mt-1"></p>
@@ -195,48 +195,41 @@
                             </div>
                         </div>
                     </div>
-                </div>
-
-                <!-- Selector de periodo (solo visible si hay pagos) -->
-                <div id="contenido-con-pagos" class="hidden">
-                    <div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 justify-end">
+                    
+                    <!-- Botones de acción -->
+                    <div class="flex-shrink-0 flex gap-2">
                         <button 
                             id="btn-ver-historial"
                             onclick="toggleHistorialPagos()"
-                            class="px-4 py-2 text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 flex items-center justify-center gap-2 transition-colors"
+                            class="hidden px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-green-600 rounded-lg hover:bg-green-700 items-center gap-1.5 transition-colors"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
                             </svg>
-                            <span>Gestionar</span>
+                            <span class="hidden sm:inline">Gestionar</span>
                         </button>
                         <button 
                             id="btn-registrar-pago"
-                            class="px-4 py-2 text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center justify-center gap-2 transition-colors"
+                            class="px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 flex items-center gap-1.5 transition-colors"
                         >
                             <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                             </svg>
-                            <span>Nuevo periodo</span>
+                            <span class="hidden sm:inline">Nuevo</span>
                         </button>
                     </div>
                 </div>
 
                 <!-- Mensaje sin pagos -->
-                <div id="mensaje-sin-pagos" class="text-center py-4">
+                <div id="mensaje-sin-pagos" class="text-center py-8 border-t border-gray-200 mt-4">
                     <div class="flex justify-center mb-3">
-                        <svg class="w-12 h-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                        <svg class="w-16 h-16 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                         </svg>
                     </div>
-                    <p class="text-sm text-gray-600 mb-3">No hay periodos registrados</p>
-                    <button 
-                        id="btn-registrar-pago-inicio"
-                        class="px-5 py-2 text-sm font-medium text-white bg-blue-600 rounded-lg hover:bg-blue-700"
-                    >
-                        + Registrar primer periodo
-                    </button>
+                    <p class="text-sm text-gray-500">No hay periodos registrados todavía</p>
+                    <p class="text-xs text-gray-400 mt-1">Usa el botón "Nuevo" de arriba para crear el primer periodo</p>
                 </div>
             </div>
 
@@ -1588,14 +1581,16 @@
 
             // Verificar si hay pagos
             if (pagos.length === 0) {
-                // Sin pagos: mostrar mensaje
+                // Sin pagos: mostrar mensaje y ocultar botón gestionar
                 document.getElementById('mensaje-sin-pagos').classList.remove('hidden');
-                document.getElementById('contenido-con-pagos').classList.add('hidden');
+                document.getElementById('btn-ver-historial').classList.add('hidden');
+                document.getElementById('btn-ver-historial').classList.remove('flex');
                 document.getElementById('contenido-calendario-metricas').classList.add('hidden');
             } else {
-                // Con pagos: mostrar contenido
+                // Con pagos: mostrar contenido y botón gestionar
                 document.getElementById('mensaje-sin-pagos').classList.add('hidden');
-                document.getElementById('contenido-con-pagos').classList.remove('hidden');
+                document.getElementById('btn-ver-historial').classList.remove('hidden');
+                document.getElementById('btn-ver-historial').classList.add('flex');
                 
                 // Cargar selector de periodos
                 cargarSelectorPeriodos();
@@ -3074,9 +3069,6 @@
                 document.getElementById('contenido-calendario-metricas').classList.add('hidden');
             }
         });
-        
-        // Botón registrar primer pago
-        document.getElementById('btn-registrar-pago-inicio').addEventListener('click', abrirModalPago);
         
         // Event listeners de pago se registran en inicializarEventListeners()
         
