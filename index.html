@@ -839,16 +839,43 @@
     <!-- Modal Nota del Día (Edición) -->
     <div id="modal-nota-dia" class="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 hidden overflow-y-auto p-2 sm:p-4">
         <div class="bg-white rounded-xl shadow-2xl w-full max-w-3xl my-4 sm:my-8 max-h-[95vh] sm:max-h-[90vh] flex flex-col">
-            <div class="flex justify-between items-center p-3 sm:p-5 border-b border-gray-200 flex-shrink-0">
-                <div>
-                    <h2 class="text-lg sm:text-xl font-bold text-gray-900">🏋️ Rutina del día</h2>
-                    <p id="nota-fecha-display" class="text-xs sm:text-sm text-gray-500 mt-1"></p>
+            <div class="border-b border-gray-200 flex-shrink-0">
+                <div class="flex justify-between items-center p-3 sm:p-5">
+                    <div>
+                        <h2 class="text-lg sm:text-xl font-bold text-gray-900">🏋️ Rutina del día</h2>
+                        <p id="nota-fecha-display" class="text-xs sm:text-sm text-gray-500 mt-1"></p>
+                    </div>
+                    <button onclick="cerrarModalNotaDia()" class="text-gray-400 hover:text-gray-600">
+                        <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                    </button>
                 </div>
-                <button onclick="cerrarModalNotaDia()" class="text-gray-400 hover:text-gray-600">
-                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
-                    </svg>
-                </button>
+                <div class="flex gap-2 px-3 sm:px-5 pb-3 sm:pb-4">
+                    <button 
+                        type="button"
+                        onclick="abrirModalBibliotecaEjercicios()"
+                        class="flex-1 sm:flex-initial px-3 py-2 text-xs sm:text-sm font-medium text-purple-700 bg-purple-50 border-2 border-purple-300 rounded-lg hover:bg-purple-100 transition-colors flex items-center justify-center gap-1.5"
+                        title="Ver biblioteca de ejercicios"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                        </svg>
+                        <span class="hidden sm:inline">Ver biblioteca</span>
+                        <span class="sm:hidden">Biblioteca</span>
+                    </button>
+                    <button 
+                        type="button"
+                        onclick="agregarEjercicio()"
+                        class="flex-1 sm:flex-initial px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5 shadow-sm"
+                        title="Agregar ejercicio a la rutina"
+                    >
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span>Agregar ejercicio</span>
+                    </button>
+                </div>
             </div>
             <form id="form-nota-dia" class="p-3 sm:p-4 space-y-3 sm:space-y-4 overflow-y-auto flex-1">
                 <!-- Grid compacto de configuración -->
@@ -912,38 +939,10 @@
 
                 <!-- Lista de ejercicios -->
                 <div>
-                    <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-2 mb-3">
-                        <label class="text-xs sm:text-sm font-bold text-gray-900">Ejercicios realizados</label>
-                        <div class="flex gap-2 w-full sm:w-auto">
-                            <button 
-                                type="button"
-                                onclick="abrirModalBibliotecaEjercicios()"
-                                class="flex-1 sm:flex-initial px-3 py-2 text-xs sm:text-sm font-medium text-purple-700 bg-purple-50 border-2 border-purple-300 rounded-lg hover:bg-purple-100 transition-colors flex items-center justify-center gap-1.5"
-                                title="Ver biblioteca de ejercicios"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                </svg>
-                                <span class="hidden sm:inline">Ver biblioteca</span>
-                                <span class="sm:hidden">Biblioteca</span>
-                            </button>
-                            <button 
-                                type="button"
-                                onclick="agregarEjercicio()"
-                                class="flex-1 sm:flex-initial px-4 py-2 text-xs sm:text-sm font-semibold text-white bg-blue-600 rounded-lg hover:bg-blue-700 transition-colors flex items-center justify-center gap-1.5 shadow-sm"
-                                title="Agregar ejercicio a la rutina"
-                            >
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                                </svg>
-                                <span>Agregar ejercicio</span>
-                            </button>
-                        </div>
-                    </div>
+                    <label class="text-xs sm:text-sm font-bold text-gray-900 mb-3 block">Ejercicios realizados</label>
                     <div id="lista-ejercicios" class="space-y-3">
                         <!-- Se llena dinámicamente -->
                     </div>
-                    <p class="text-xs text-gray-400 mt-2">💡 Tip: Usa la biblioteca para guardar y reutilizar tus ejercicios favoritos</p>
                 </div>
 
                 <!-- Nota adicional (opcional) -->
