@@ -7,6 +7,7 @@
     <meta name="description" content="Panel de administración de coaches">
     <title>Gestión de Coaches - Panel</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
         tailwind.config = {
             darkMode: 'class'
@@ -67,6 +68,71 @@
             line-height: 1.3;
             max-height: 3.9em;
             /* 3 líneas x 1.3em */
+        }
+
+        /* SweetAlert2 Dark Mode Styles */
+        .dark .swal2-popup {
+            background: rgb(31 41 55) !important;
+            border: 1px solid rgb(55 65 81) !important;
+        }
+
+        .dark .swal2-title {
+            color: rgb(243 244 246) !important;
+        }
+
+        .dark .swal2-html-container {
+            color: rgb(209 213 219) !important;
+        }
+
+        .dark .swal2-input,
+        .dark .swal2-textarea {
+            background: rgb(17 24 39) !important;
+            border-color: rgb(75 85 99) !important;
+            color: rgb(243 244 246) !important;
+        }
+
+        .dark .swal2-input::placeholder,
+        .dark .swal2-textarea::placeholder {
+            color: rgb(107 114 128) !important;
+        }
+
+        .dark .swal2-validation-message {
+            background: rgb(127 29 29) !important;
+            color: rgb(254 226 226) !important;
+        }
+
+        /* Botones personalizados */
+        .swal2-confirm {
+            background-color: rgb(37 99 235) !important;
+            border-radius: 0.5rem !important;
+            padding: 0.625rem 1.25rem !important;
+            font-weight: 600 !important;
+        }
+
+        .swal2-confirm:hover {
+            background-color: rgb(29 78 216) !important;
+        }
+
+        .swal2-cancel {
+            background-color: rgb(107 114 128) !important;
+            border-radius: 0.5rem !important;
+            padding: 0.625rem 1.25rem !important;
+            font-weight: 600 !important;
+        }
+
+        .swal2-cancel:hover {
+            background-color: rgb(75 85 99) !important;
+        }
+
+        .swal2-deny {
+            background-color: rgb(220 38 38) !important;
+            border-radius: 0.5rem !important;
+            padding: 0.625rem 1.25rem !important;
+            font-weight: 600 !important;
+        }
+
+        .swal2-deny:hover {
+            background-color: rgb(185 28 28) !important;
         }
     </style>
 </head>
@@ -1473,7 +1539,12 @@
             const nombre = input.value.trim();
 
             if (!nombre) {
-                alert('Por favor ingresa el nombre del ejercicio');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Campo vacío',
+                    text: 'Por favor ingresa el nombre del ejercicio',
+                    confirmButtonText: 'Entendido'
+                });
                 return;
             }
 
@@ -1481,7 +1552,12 @@
 
             // Verificar si ya existe
             if (ejercicios.some(e => e.nombre.toLowerCase() === nombre.toLowerCase())) {
-                alert('Este ejercicio ya existe en la biblioteca');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ejercicio duplicado',
+                    text: 'Este ejercicio ya existe en la biblioteca',
+                    confirmButtonText: 'Entendido'
+                });
                 return;
             }
 
@@ -1498,21 +1574,39 @@
             renderBibliotecaEjercicios();
         }
 
-        function editarEjercicioDeBiblioteca(id) {
+        async function editarEjercicioDeBiblioteca(id) {
             let ejercicios = loadEjercicios();
             const ejercicio = ejercicios.find(e => e.id === id);
 
             if (!ejercicio) return;
 
-            const nuevoNombre = prompt('Editar nombre del ejercicio:', ejercicio.nombre);
+            const { value: nuevoNombre } = await Swal.fire({
+                title: 'Editar ejercicio',
+                input: 'text',
+                inputLabel: 'Nombre del ejercicio',
+                inputValue: ejercicio.nombre,
+                showCancelButton: true,
+                confirmButtonText: 'Guardar',
+                cancelButtonText: 'Cancelar',
+                inputValidator: (value) => {
+                    if (!value || !value.trim()) {
+                        return 'El nombre no puede estar vacío';
+                    }
+                }
+            });
 
-            if (!nuevoNombre || nuevoNombre.trim() === '') return;
+            if (!nuevoNombre) return;
 
             const nombreTrimmed = nuevoNombre.trim();
 
             // Verificar si ya existe otro ejercicio con ese nombre (excepto el actual)
             if (ejercicios.some(e => e.id !== id && e.nombre.toLowerCase() === nombreTrimmed.toLowerCase())) {
-                alert('Ya existe un ejercicio con ese nombre');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Ejercicio duplicado',
+                    text: 'Ya existe un ejercicio con ese nombre',
+                    confirmButtonText: 'Entendido'
+                });
                 return;
             }
 
@@ -1522,13 +1616,31 @@
             renderBibliotecaEjercicios();
         }
 
-        function eliminarEjercicioDeBiblioteca(id) {
-            if (!confirm('¿Eliminar este ejercicio de la biblioteca?')) return;
+        async function eliminarEjercicioDeBiblioteca(id) {
+            const result = await Swal.fire({
+                title: '¿Eliminar ejercicio?',
+                text: '¿Estás seguro de eliminar este ejercicio de la biblioteca?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#dc2626'
+            });
+
+            if (!result.isConfirmed) return;
 
             let ejercicios = loadEjercicios();
             ejercicios = ejercicios.filter(e => e.id !== id);
             saveEjercicios(ejercicios);
             renderBibliotecaEjercicios();
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Ejercicio eliminado',
+                text: 'El ejercicio ha sido eliminado de la biblioteca',
+                timer: 2000,
+                showConfirmButton: false
+            });
         }
 
         function renderBibliotecaEjercicios() {
@@ -2595,7 +2707,7 @@
             renderCalendarioPeriodo();
         }
 
-        function toggleReprogramacion(dateStr) {
+        async function toggleReprogramacion(dateStr) {
             const data = loadData();
             const coach = data.coaches.find(c => c.id === currentCoachId);
             const pago = (data.pagos[currentCoachId] || []).find(p => p.id === currentPagoId);
@@ -2635,28 +2747,39 @@
 
                 // Verificar si hay faltas disponibles para reponer
                 if (diasFaltados.length === 0) {
-                    alert('No hay faltas disponibles para reponer.\n\nSolo puedes marcar reprogramaciones cuando tienes días en los que no asististe.');
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'No hay faltas disponibles',
+                        text: 'Solo puedes marcar reprogramaciones cuando tienes días en los que no asististe.',
+                        confirmButtonText: 'Entendido'
+                    });
                     return;
                 }
 
-                // Mostrar diálogo para seleccionar qué día está reponiendo
-                let mensaje = '¿Qué día estás reponiendo con esta clase?\n\nSelecciona el número del día:\n\n';
-                diasFaltados.forEach((dia, index) => {
-                    mensaje += `${index + 1}. ${formatDateDisplay(dia)}\n`;
+                // Crear opciones para el select
+                const opcionesDias = {};
+                diasFaltados.forEach((dia) => {
+                    opcionesDias[dia] = formatDateDisplay(dia);
                 });
 
-                const seleccion = prompt(mensaje);
-                
-                if (!seleccion) return; // Usuario canceló
+                // Mostrar diálogo para seleccionar qué día está reponiendo
+                const { value: diaRepuesto } = await Swal.fire({
+                    title: '¿Qué día estás reponiendo?',
+                    text: 'Selecciona el día que deseas reponer con esta clase',
+                    input: 'select',
+                    inputOptions: opcionesDias,
+                    inputPlaceholder: 'Selecciona un día',
+                    showCancelButton: true,
+                    confirmButtonText: 'Confirmar',
+                    cancelButtonText: 'Cancelar',
+                    inputValidator: (value) => {
+                        if (!value) {
+                            return 'Debes seleccionar un día';
+                        }
+                    }
+                });
 
-                const indice = parseInt(seleccion) - 1;
-                
-                if (isNaN(indice) || indice < 0 || indice >= diasFaltados.length) {
-                    alert('Selección inválida. Por favor intenta de nuevo.');
-                    return;
-                }
-
-                const diaRepuesto = diasFaltados[indice];
+                if (!diaRepuesto) return; // Usuario canceló
 
                 // Marcar la reprogramación con el día que está reponiendo
                 data.asistencias[currentCoachId][dateStr].reprogramacion = true;
@@ -2913,8 +3036,18 @@
             abrirModalEditarPeriodo();
         }
 
-        function eliminarPago(pagoId) {
-            if (!confirm('¿Estás seguro de eliminar este periodo? Se perderán todas las asistencias registradas en él.')) return;
+        async function eliminarPago(pagoId) {
+            const result = await Swal.fire({
+                title: '¿Eliminar periodo?',
+                text: '¿Estás seguro de eliminar este periodo? Se perderán todas las asistencias registradas en él.',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#dc2626'
+            });
+
+            if (!result.isConfirmed) return;
 
             const data = loadData();
 
@@ -2936,6 +3069,14 @@
             // Eliminar el periodo
             data.pagos[currentCoachId] = data.pagos[currentCoachId].filter(p => p.id !== pagoId);
             saveData(data);
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Periodo eliminado',
+                text: 'El periodo y sus asistencias han sido eliminados',
+                timer: 2000,
+                showConfirmButton: false
+            });
 
             // Si era el pago seleccionado, limpiar selección
             if (currentPagoId === pagoId) {
@@ -2997,15 +3138,23 @@
         }
 
         // Eliminar coach desde la lista
-        function eliminarCoachDesdeLista(coachId) {
+        async function eliminarCoachDesdeLista(coachId) {
             const data = loadData();
             const coach = data.coaches.find(c => c.id === coachId);
 
             if (!coach) return;
 
-            if (!confirm(`¿Estás seguro de eliminar al coach "${coach.nombre}"?\n\nSe eliminarán todos sus periodos y asistencias registradas.`)) {
-                return;
-            }
+            const result = await Swal.fire({
+                title: '¿Eliminar coach?',
+                html: `¿Estás seguro de eliminar al coach <strong>"${coach.nombre}"</strong>?<br><br>Se eliminarán todos sus periodos y asistencias registradas.`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#dc2626'
+            });
+
+            if (!result.isConfirmed) return;
 
             // Eliminar coach y sus datos asociados
             data.coaches = data.coaches.filter(c => c.id !== coachId);
@@ -3014,6 +3163,14 @@
 
             saveData(data);
             renderCoachesList();
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Coach eliminado',
+                text: `${coach.nombre} y todos sus datos han sido eliminados`,
+                timer: 2000,
+                showConfirmButton: false
+            });
         }
 
         // ========================================
@@ -3123,7 +3280,12 @@
 
         function abrirModalEditarPeriodo() {
             if (!currentPagoId) {
-                alert('Selecciona un periodo primero');
+                Swal.fire({
+                    icon: 'info',
+                    title: 'No hay periodo seleccionado',
+                    text: 'Selecciona un periodo primero',
+                    confirmButtonText: 'Entendido'
+                });
                 return;
             }
 
@@ -3440,10 +3602,20 @@
             ejerciciosCount = 0;
         }
 
-        function eliminarNotaDia() {
+        async function eliminarNotaDia() {
             if (!currentNotaDate) return;
 
-            if (!confirm('¿Eliminar la rutina de este día?')) return;
+            const result = await Swal.fire({
+                title: '¿Eliminar rutina?',
+                text: '¿Estás seguro de eliminar la rutina de este día?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#dc2626'
+            });
+
+            if (!result.isConfirmed) return;
 
             const data = loadData();
 
@@ -3454,6 +3626,14 @@
             }
 
             cerrarModalNotaDia();
+
+            Swal.fire({
+                icon: 'success',
+                title: 'Rutina eliminada',
+                text: 'La rutina ha sido eliminada correctamente',
+                timer: 2000,
+                showConfirmButton: false
+            });
         }
 
         // ========================================
@@ -3476,7 +3656,12 @@
                 .sort((a, b) => (a === 0 ? 7 : a) - (b === 0 ? 7 : b));
 
             if (diasLaborables.length === 0) {
-                alert('Selecciona al menos un día laborable');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Días laborables requeridos',
+                    text: 'Selecciona al menos un día laborable',
+                    confirmButtonText: 'Entendido'
+                });
                 return;
             }
 
@@ -3545,7 +3730,12 @@
             });
 
             if (haySolapamiento) {
-                alert('❌ Error: Ya existe un periodo con fechas que se solapan con las que intentas registrar.\n\nPor favor, verifica los periodos existentes y elige fechas diferentes.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error: Solapamiento de fechas',
+                    text: 'Ya existe un periodo con fechas que se solapan con las que intentas registrar. Por favor, verifica los periodos existentes y elige fechas diferentes.',
+                    confirmButtonText: 'Entendido'
+                });
                 return;
             }
 
@@ -3599,7 +3789,12 @@
 
             // Validar que la nueva fecha sea posterior o igual a la ORIGINAL
             if (new Date(nuevaFechaFin) < new Date(pago.periodoFinOriginal)) {
-                alert('La nueva fecha de fin debe ser posterior o igual a la fecha original del periodo');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Fecha inválida',
+                    text: 'La nueva fecha de fin debe ser posterior o igual a la fecha original del periodo',
+                    confirmButtonText: 'Entendido'
+                });
                 return;
             }
 
@@ -3614,7 +3809,12 @@
             });
 
             if (haySolapamiento) {
-                alert('❌ Error: La extensión del periodo se solaparía con otro periodo existente.\n\nPor favor, elige una fecha que no se solape con otros periodos.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error: Solapamiento de fechas',
+                    text: 'La extensión del periodo se solaparía con otro periodo existente. Por favor, elige una fecha que no se solape con otros periodos.',
+                    confirmButtonText: 'Entendido'
+                });
                 return;
             }
 
@@ -3865,12 +4065,22 @@
         function aplicarFechaSimulada() {
             const fecha = document.getElementById('fecha-simulada').value;
             if (!fecha) {
-                alert('Por favor selecciona una fecha');
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Fecha requerida',
+                    text: 'Por favor selecciona una fecha',
+                    confirmButtonText: 'Entendido'
+                });
                 return;
             }
 
             fechaSimulada = fecha;
-            alert(`Fecha simulada aplicada: ${formatDateDisplay(fecha)}\n\nEl sistema ahora actúa como si fuera ese día.`);
+            Swal.fire({
+                icon: 'success',
+                title: 'Fecha simulada aplicada',
+                text: `El sistema ahora actúa como si fuera ${formatDateDisplay(fecha)}`,
+                confirmButtonText: 'Entendido'
+            });
 
             // Actualizar la vista si estamos en un dashboard
             if (currentCoachId && currentPagoId) {
@@ -3881,7 +4091,13 @@
         function resetearFecha() {
             fechaSimulada = null;
             document.getElementById('fecha-simulada').value = '';
-            alert('Fecha reseteada. El sistema ahora usa la fecha real.');
+            Swal.fire({
+                icon: 'info',
+                title: 'Fecha reseteada',
+                text: 'El sistema ahora usa la fecha real',
+                timer: 2000,
+                showConfirmButton: false
+            });
 
             // Actualizar la vista si estamos en un dashboard
             if (currentCoachId && currentPagoId) {
@@ -4023,27 +4239,42 @@
                 console.log('✅ Backup descargado exitosamente');
             } catch (error) {
                 console.error('❌ Error al descargar backup:', error);
-                alert('Error al crear el backup. Revisa la consola para más detalles.');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al crear el backup',
+                    text: 'Revisa la consola para más detalles',
+                    confirmButtonText: 'Entendido'
+                });
             }
         }
 
         function importarBackup(file) {
             // Validar que sea un archivo JSON
             if (!file.name.endsWith('.json')) {
-                alert('❌ Por favor selecciona un archivo JSON válido');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Archivo inválido',
+                    text: 'Por favor selecciona un archivo JSON válido',
+                    confirmButtonText: 'Entendido'
+                });
                 return;
             }
 
             const reader = new FileReader();
 
-            reader.onload = (e) => {
+            reader.onload = async (e) => {
                 try {
                     // Parsear el JSON
                     const contenido = JSON.parse(e.target.result);
 
                     // Validar estructura del backup
                     if (!contenido.datos) {
-                        alert('❌ El archivo no tiene el formato correcto de backup');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Formato incorrecto',
+                            text: 'El archivo no tiene el formato correcto de backup',
+                            confirmButtonText: 'Entendido'
+                        });
                         return;
                     }
 
@@ -4052,7 +4283,12 @@
 
                     // Validar que tenga las propiedades esperadas
                     if (!datos.coaches || !datos.pagos || !datos.asistencias) {
-                        alert('❌ El backup no contiene todos los datos necesarios (coaches, pagos, asistencias)');
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Backup incompleto',
+                            text: 'El backup no contiene todos los datos necesarios (coaches, pagos, asistencias)',
+                            confirmButtonText: 'Entendido'
+                        });
                         return;
                     }
 
@@ -4063,17 +4299,23 @@
                     const modoPruebasTexto = configuracion.modoPruebas ? 'Activado' : 'Desactivado';
 
                     // Confirmar antes de importar
-                    const confirmacion = confirm(
-                        `⚠️ ADVERTENCIA: Esta acción sobrescribirá TODOS los datos actuales.\n\n` +
-                        `Información del backup:\n` +
-                        `• Fecha: ${fechaBackup}\n` +
-                        `• Coaches: ${numCoaches}\n` +
-                        `• Periodos: ${numPagos}\n` +
-                        `• Modo de pruebas: ${modoPruebasTexto}\n\n` +
-                        `¿Estás seguro de que deseas continuar?`
-                    );
+                    const confirmacion = await Swal.fire({
+                        title: '⚠️ ADVERTENCIA',
+                        html: `Esta acción sobrescribirá <strong>TODOS</strong> los datos actuales.<br><br>` +
+                            `<strong>Información del backup:</strong><br>` +
+                            `• Fecha: ${fechaBackup}<br>` +
+                            `• Coaches: ${numCoaches}<br>` +
+                            `• Periodos: ${numPagos}<br>` +
+                            `• Modo de pruebas: ${modoPruebasTexto}<br><br>` +
+                            `¿Estás seguro de que deseas continuar?`,
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonText: 'Sí, importar',
+                        cancelButtonText: 'Cancelar',
+                        confirmButtonColor: '#dc2626'
+                    });
 
-                    if (!confirmacion) {
+                    if (!confirmacion.isConfirmed) {
                         console.log('❌ Importación cancelada por el usuario');
                         return;
                     }
@@ -4090,7 +4332,12 @@
                     });
 
                     // Mostrar confirmación
-                    alert(`✅ Backup importado exitosamente!\n\n• ${numCoaches} coaches\n• ${numPagos} periodos de pago\n• Modo de pruebas: ${modoPruebasTexto}`);
+                    await Swal.fire({
+                        icon: 'success',
+                        title: 'Backup importado exitosamente',
+                        html: `• ${numCoaches} coaches<br>• ${numPagos} periodos de pago<br>• Modo de pruebas: ${modoPruebasTexto}`,
+                        confirmButtonText: 'Entendido'
+                    });
 
                     // Actualizar visibilidad del panel de pruebas
                     actualizarVisibilidadPanelPruebas();
@@ -4102,13 +4349,23 @@
 
                 } catch (error) {
                     console.error('❌ Error al importar backup:', error);
-                    alert('❌ Error al procesar el archivo JSON. Asegúrate de que sea un backup válido.\n\n' + error.message);
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error al procesar el archivo',
+                        text: 'Asegúrate de que sea un backup válido. ' + error.message,
+                        confirmButtonText: 'Entendido'
+                    });
                 }
             };
 
             reader.onerror = () => {
                 console.error('❌ Error al leer el archivo');
-                alert('❌ Error al leer el archivo');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error al leer el archivo',
+                    text: 'No se pudo leer el archivo seleccionado',
+                    confirmButtonText: 'Entendido'
+                });
             };
 
             // Leer el archivo como texto
