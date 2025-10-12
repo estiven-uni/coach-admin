@@ -2251,6 +2251,9 @@
                 const trenTexto = tieneRutina && asist.rutina.tren ?
                     (asist.rutina.tren === 'superior' ? 'Tren Superior' : 'Tren Inferior') : '';
 
+                // Verificar si este día faltado ya fue repuesto por una reprogramación
+                const diaRepuesto = esLaborable && dateStr <= hoy && !asist?.asistio && Object.values(asistencias).some(a => a.reprogramacionDe === dateStr);
+
                 html += `
                     <div class="${borderClasses} rounded-lg p-3 ${asist.asistio ? 'bg-green-50 dark:bg-green-900/20' : (esLaborable ? 'bg-white dark:bg-gray-800' : 'bg-gray-100 dark:bg-gray-900')} ${esLaborable ? '' : 'opacity-60'} h-48 sm:h-52 md:h-56 flex flex-col overflow-hidden ${esDiaActual ? 'relative' : ''}">
                         <div class="flex justify-between items-start mb-2 flex-shrink-0">
@@ -2258,6 +2261,7 @@
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     <p class="text-base sm:text-lg font-bold ${esLaborable ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-600'}">${formatDateDisplay(dateStr).split(' ').slice(0, 2).join(' ')}</p>
                                     ${esDiaActual ? '<span class="px-2 py-1 text-xs sm:text-sm font-bold bg-blue-500 dark:bg-blue-600 text-white rounded">HOY</span>' : ''}
+                                    ${diaRepuesto ? '<span class="px-1.5 py-0.5 text-[10px] font-bold bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">✓ Repuesta</span>' : ''}
                                 </div>
                                 ${!esLaborable ? '<p class="text-sm sm:text-base text-gray-400 dark:text-gray-600 leading-tight">No laboral</p>' : ''}
                             </div>
@@ -2282,12 +2286,12 @@
                         ` : `
                             <button 
                                 onclick="toggleReprogramacion('${dateStr}')"
-                                class="flex items-center gap-1.5 text-sm sm:text-base ${asist.reprogramacion ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70' : (hayReprogramacionesDisponibles ? 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' : 'text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-50')} px-2.5 py-1.5 rounded transition-colors mb-2 flex-shrink-0"
+                                class="flex flex-col gap-0.5 text-xs sm:text-sm ${asist.reprogramacion ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70' : (hayReprogramacionesDisponibles ? 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' : 'text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-50')} px-2.5 py-1.5 rounded transition-colors mb-2 flex-shrink-0"
                                 title="${asist.reprogramacion ? 'Quitar reprogramación' : (hayReprogramacionesDisponibles ? 'Marcar como reprogramación' : 'No hay reprogramaciones disponibles (no hay faltas)')}"
                                 ${!asist.reprogramacion && !hayReprogramacionesDisponibles ? 'disabled' : ''}
                             >
-                                <span class="font-semibold">R</span>
-                                <span>${asist.reprogramacion ? 'Reprogramación' : 'Reprogramar'}</span>
+                                <span class="font-semibold flex items-center gap-1"><span>R</span> ${asist.reprogramacion ? 'Reprogramación' : 'Reprogramar'}</span>
+                                ${asist.reprogramacion && asist.reprogramacionDe ? `<span class="text-[10px] font-normal opacity-75">Repone: ${formatDateDisplay(asist.reprogramacionDe).split(' ').slice(0, 2).join(' ')}</span>` : ''}
                             </button>
                         `}
                         <div class="flex-1 overflow-hidden min-h-0">
@@ -2392,6 +2396,9 @@
                     const trenTexto = tieneRutina && asist.rutina.tren ?
                         (asist.rutina.tren === 'superior' ? 'Tren Superior' : 'Tren Inferior') : '';
 
+                    // Verificar si este día faltado ya fue repuesto por una reprogramación
+                    const diaRepuesto = esLaborable && dateStr <= hoy && !asist?.asistio && Object.values(asistencias).some(a => a.reprogramacionDe === dateStr);
+
                     html += `
                         <div class="p-4 ${asist.asistio ? 'bg-green-50 dark:bg-green-900/20' : (esLaborable ? 'bg-white dark:bg-gray-800' : 'bg-gray-100 dark:bg-gray-900')} ${esDiaActual ? 'border-l-4 border-blue-500 dark:border-blue-400' : ''}">
                             <div class="flex justify-between items-start mb-3">
@@ -2399,6 +2406,7 @@
                                     <p class="text-sm font-semibold text-gray-500 dark:text-gray-400">${diasNombres[diaSemana]}</p>
                                     <p class="text-lg font-bold ${esLaborable ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600'}">${formatDateDisplay(dateStr).split(' ')[0]}</p>
                                     ${esDiaActual ? '<span class="inline-block px-2 py-0.5 text-xs font-bold bg-blue-500 dark:bg-blue-600 text-white rounded mt-1">HOY</span>' : ''}
+                                    ${diaRepuesto ? '<span class="inline-block px-1.5 py-0.5 text-[10px] font-bold bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded mt-1">✓ Repuesta</span>' : ''}
                                     ${!esLaborable ? '<p class="text-xs text-gray-400 dark:text-gray-600 mt-1">No laboral</p>' : ''}
                                 </div>
                                 <button 
@@ -2422,11 +2430,11 @@
                             ` : `
                                 <button 
                                     onclick="toggleReprogramacion('${dateStr}')"
-                                    class="flex items-center gap-1.5 text-sm ${asist.reprogramacion ? 'text-blue-700 bg-blue-100 hover:bg-blue-200' : (hayReprogramacionesDisponibles ? 'text-gray-500 bg-gray-100 hover:bg-gray-200' : 'text-gray-400 bg-gray-50 cursor-not-allowed opacity-50')} px-2.5 py-1.5 rounded transition-colors mb-3 w-full justify-center"
+                                    class="flex flex-col gap-0.5 text-sm ${asist.reprogramacion ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70' : (hayReprogramacionesDisponibles ? 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' : 'text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-50')} px-2.5 py-1.5 rounded transition-colors mb-3 w-full items-center"
                                     ${!asist.reprogramacion && !hayReprogramacionesDisponibles ? 'disabled' : ''}
                                 >
-                                    <span class="font-semibold">R</span>
-                                    <span>${asist.reprogramacion ? 'Reprogramación' : 'Reprogramar'}</span>
+                                    <span class="font-semibold flex items-center gap-1"><span>R</span> ${asist.reprogramacion ? 'Reprogramación' : 'Reprogramar'}</span>
+                                    ${asist.reprogramacion && asist.reprogramacionDe ? `<span class="text-xs font-normal opacity-75">Repone: ${formatDateDisplay(asist.reprogramacionDe).split(' ').slice(0, 2).join(' ')}</span>` : ''}
                                 </button>
                             `}
                             ${tieneRutina ? `
@@ -2507,17 +2515,21 @@
                 const trenTexto = tieneRutina && asist.rutina.tren ?
                     (asist.rutina.tren === 'superior' ? 'Tren Superior' : 'Tren Inferior') : '';
 
+                // Verificar si este día faltado ya fue repuesto por una reprogramación
+                const diaRepuesto = esLaborable && dateStr <= hoy && !asist?.asistio && Object.values(asistencias).some(a => a.reprogramacionDe === dateStr);
+
                 html += `
                     <div class="bg-white dark:bg-gray-800 border ${esDiaActual ? 'border-blue-500 dark:border-blue-400 border-2' : 'border-gray-200 dark:border-gray-700'} rounded-lg p-4 ${asist.asistio ? 'bg-green-50 dark:bg-green-900/20' : (esLaborable ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900')}">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div class="flex-1">
-                                <div class="flex items-center gap-3 mb-2">
+                                <div class="flex items-center gap-2 mb-2 flex-wrap">
                                     <div>
                                         <p class="text-lg font-bold text-gray-900 dark:text-white">${formatDateDisplay(dateStr)}</p>
                                         <p class="text-sm text-gray-600 dark:text-gray-400">${diasNombres[diaSemana]}</p>
                                     </div>
                                     ${esDiaActual ? '<span class="px-2 py-1 text-xs font-bold bg-blue-500 dark:bg-blue-600 text-white rounded">HOY</span>' : ''}
                                     ${!esLaborable ? '<span class="px-2 py-1 text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded">No laboral</span>' : ''}
+                                    ${diaRepuesto ? '<span class="px-2 py-1 text-xs font-bold bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">✓ Repuesta</span>' : ''}
                                 </div>
                                 
                                 ${esLaborable ? `
@@ -2533,11 +2545,11 @@
                                 ` : `
                                     <button 
                                         onclick="toggleReprogramacion('${dateStr}')"
-                                        class="inline-flex items-center gap-1.5 text-sm ${asist.reprogramacion ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70' : (hayReprogramacionesDisponibles ? 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' : 'text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-50')} px-3 py-1.5 rounded transition-colors mb-2"
+                                        class="inline-flex flex-col gap-0.5 text-sm ${asist.reprogramacion ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70' : (hayReprogramacionesDisponibles ? 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' : 'text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-50')} px-3 py-1.5 rounded transition-colors mb-2 items-start"
                                         ${!asist.reprogramacion && !hayReprogramacionesDisponibles ? 'disabled' : ''}
                                     >
-                                        <span class="font-semibold">R</span>
-                                        <span>${asist.reprogramacion ? 'Reprogramación' : 'Reprogramar'}</span>
+                                        <span class="font-semibold flex items-center gap-1"><span>R</span> ${asist.reprogramacion ? 'Reprogramación' : 'Reprogramar'}</span>
+                                        ${asist.reprogramacion && asist.reprogramacionDe ? `<span class="text-xs font-normal opacity-75">Repone: ${formatDateDisplay(asist.reprogramacionDe)}</span>` : ''}
                                     </button>
                                 `}
                                 
@@ -2605,38 +2617,57 @@
                 // Calcular faltas y reprogramaciones actuales
                 const daysLaborables = getDiasLaborablesPeriodo(pago.periodoInicio, pago.periodoFin, coach.diasLaborables);
                 const asistencias = data.asistencias[currentCoachId] || {};
+                const hoy = getFechaActual();
 
-                let asistidas = 0;
+                // Obtener lista de días que faltó (solo días pasados)
+                const diasFaltados = [];
                 daysLaborables.forEach(day => {
                     const asist = asistencias[day];
-                    if (asist?.asistio) asistidas++;
-                });
-
-                const programadas = daysLaborables.length;
-                const faltas = programadas - asistidas;
-
-                // Contar reprogramaciones ya existentes
-                const todosDias = getTodosDiasPeriodo(pago.periodoInicio, pago.periodoFin);
-                let reprogramacionesExistentes = 0;
-                todosDias.forEach(({ fecha }) => {
-                    const asist = asistencias[fecha];
-                    if (asist?.reprogramacion) reprogramacionesExistentes++;
+                    // Solo considerar faltas: días pasados donde NO asistió y NO tiene reprogramación asociada
+                    if (day <= hoy && !asist?.asistio) {
+                        // Verificar si este día ya fue repuesto por otra reprogramación
+                        const yaRepuesto = Object.values(asistencias).some(a => a.reprogramacionDe === day);
+                        if (!yaRepuesto) {
+                            diasFaltados.push(day);
+                        }
+                    }
                 });
 
                 // Verificar si hay faltas disponibles para reponer
-                if (reprogramacionesExistentes >= faltas) {
-                    alert(`No puedes marcar más reprogramaciones.\n\nFaltas en el periodo: ${faltas}\nReprogramaciones ya registradas: ${reprogramacionesExistentes}\n\nSolo puedes reponer las clases que faltaste.`);
+                if (diasFaltados.length === 0) {
+                    alert('No hay faltas disponibles para reponer.\n\nSolo puedes marcar reprogramaciones cuando tienes días en los que no asististe.');
                     return;
                 }
+
+                // Mostrar diálogo para seleccionar qué día está reponiendo
+                let mensaje = '¿Qué día estás reponiendo con esta clase?\n\nSelecciona el número del día:\n\n';
+                diasFaltados.forEach((dia, index) => {
+                    mensaje += `${index + 1}. ${formatDateDisplay(dia)}\n`;
+                });
+
+                const seleccion = prompt(mensaje);
+                
+                if (!seleccion) return; // Usuario canceló
+
+                const indice = parseInt(seleccion) - 1;
+                
+                if (isNaN(indice) || indice < 0 || indice >= diasFaltados.length) {
+                    alert('Selección inválida. Por favor intenta de nuevo.');
+                    return;
+                }
+
+                const diaRepuesto = diasFaltados[indice];
+
+                // Marcar la reprogramación con el día que está reponiendo
+                data.asistencias[currentCoachId][dateStr].reprogramacion = true;
+                data.asistencias[currentCoachId][dateStr].reprogramacionDe = diaRepuesto;
+                data.asistencias[currentCoachId][dateStr].asistio = true;
+            } else {
+                // Si está quitando la reprogramación
+                data.asistencias[currentCoachId][dateStr].reprogramacion = false;
+                data.asistencias[currentCoachId][dateStr].reprogramacionDe = null;
+                data.asistencias[currentCoachId][dateStr].asistio = false;
             }
-
-            // Alternar reprogramación
-            const nuevaReprogramacion = !data.asistencias[currentCoachId][dateStr].reprogramacion;
-            data.asistencias[currentCoachId][dateStr].reprogramacion = nuevaReprogramacion;
-
-            // Si se marca reprogramación, automáticamente marca asistencia
-            // Si se quita reprogramación, automáticamente quita asistencia
-            data.asistencias[currentCoachId][dateStr].asistio = nuevaReprogramacion;
 
             saveData(data);
             renderCalendarioPeriodo();
