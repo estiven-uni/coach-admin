@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <meta name="description" content="Panel de administración de coaches">
     <title>Gestión de Coaches - Panel</title>
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cdefs%3E%3ClinearGradient id='grad' x1='0%25' y1='0%25' x2='100%25' y2='100%25'%3E%3Cstop offset='0%25' style='stop-color:%232563eb;stop-opacity:1' /%3E%3Cstop offset='100%25' style='stop-color:%233b82f6;stop-opacity:1' /%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='100' height='100' rx='22' fill='url(%23grad)'/%3E%3Ccircle cx='50' cy='32' r='8' fill='white'/%3E%3Cpath d='M50 42 L38 55 L38 72 L44 72 L44 58 L50 52 L56 58 L56 72 L62 72 L62 55 Z' fill='white'/%3E%3Cpath d='M32 48 L68 48 L68 52 L32 52 Z' fill='white'/%3E%3Ccircle cx='28' cy='50' r='5' fill='white'/%3E%3Ccircle cx='72' cy='50' r='5' fill='white'/%3E%3C/svg%3E">
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script>
@@ -143,12 +144,37 @@
     <header class="sticky top-0 z-50 bg-white dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700 shadow-sm">
         <div class="container mx-auto px-3 py-3 sm:px-4 sm:py-4 md:px-6 md:py-5">
             <div class="flex items-center justify-between gap-2">
-                <div class="min-w-0 flex-1">
-                    <h1
-                        class="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white truncate">
-                        Gestión de Coaches</h1>
-                    <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 hidden sm:block">Administra tus
-                        entrenamientos y pagos</p>
+                <div class="min-w-0 flex-1 flex items-center gap-3">
+                    <!-- Logo -->
+                    <div class="flex-shrink-0">
+                        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" class="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 transition-transform hover:scale-105">
+                            <defs>
+                                <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                                    <stop offset="0%" style="stop-color:#2563eb;stop-opacity:1" />
+                                    <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:1" />
+                                </linearGradient>
+                            </defs>
+                            <!-- Fondo con bordes redondeados -->
+                            <rect width="100" height="100" rx="22" fill="url(#logoGrad)"/>
+                            <!-- Cabeza de la persona -->
+                            <circle cx="50" cy="32" r="8" fill="white"/>
+                            <!-- Cuerpo y piernas de la persona levantando -->
+                            <path d="M50 42 L38 55 L38 72 L44 72 L44 58 L50 52 L56 58 L56 72 L62 72 L62 55 Z" fill="white"/>
+                            <!-- Barra de pesas -->
+                            <path d="M32 48 L68 48 L68 52 L32 52 Z" fill="white"/>
+                            <!-- Discos de pesas -->
+                            <circle cx="28" cy="50" r="5" fill="white"/>
+                            <circle cx="72" cy="50" r="5" fill="white"/>
+                        </svg>
+                    </div>
+                    <!-- Título -->
+                    <div class="min-w-0 flex-1">
+                        <h1
+                            class="text-lg sm:text-xl md:text-2xl lg:text-3xl font-bold text-gray-900 dark:text-white truncate">
+                            Gestión de Coaches</h1>
+                        <p class="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1 hidden sm:block">Administra tus
+                            entrenamientos y pagos</p>
+                    </div>
                 </div>
                 <div class="flex items-center gap-2 sm:gap-3 flex-shrink-0">
                     <!-- Input file oculto para importar -->
