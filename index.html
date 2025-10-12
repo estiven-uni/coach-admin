@@ -135,6 +135,27 @@
         .swal2-deny:hover {
             background-color: rgb(185 28 28) !important;
         }
+
+        /* Checkbox personalizado de asistencia */
+        .asistencia-check:checked ~ div {
+            background-color: rgb(34 197 94) !important;
+            border-color: rgb(34 197 94) !important;
+        }
+
+        .asistencia-check:checked ~ div .check-icon {
+            opacity: 1 !important;
+            transform: scale(1) !important;
+        }
+
+        .asistencia-check:not(:checked) ~ div .check-icon {
+            opacity: 0 !important;
+            transform: scale(0) !important;
+        }
+
+        .dark .asistencia-check:checked ~ div {
+            background-color: rgb(34 197 94) !important;
+            border-color: rgb(34 197 94) !important;
+        }
     </style>
 </head>
 
@@ -2430,17 +2451,13 @@
                 const trenTexto = tieneRutina && asist.rutina.tren ?
                     (asist.rutina.tren === 'superior' ? 'Tren Superior' : 'Tren Inferior') : '';
 
-                // Verificar si este día faltado ya fue repuesto por una reprogramación
-                const diaRepuesto = esLaborable && dateStr <= hoy && !asist?.asistio && Object.values(asistencias).some(a => a.reprogramacionDe === dateStr);
-
                 html += `
-                    <div class="${borderClasses} rounded-lg p-3 ${asist.asistio ? 'bg-green-50 dark:bg-green-900/20' : (esLaborable ? 'bg-white dark:bg-gray-800' : 'bg-gray-100 dark:bg-gray-900')} ${esLaborable ? '' : 'opacity-60'} h-48 sm:h-52 md:h-56 flex flex-col overflow-hidden ${esDiaActual ? 'relative' : ''}">
+                    <div class="${borderClasses} rounded-lg p-3 ${asist.asistio ? 'bg-green-50 dark:bg-green-900/20' : (esLaborable && dateStr <= fechaActual ? 'bg-red-50 dark:bg-red-900/10' : (esLaborable ? 'bg-white dark:bg-gray-800' : 'bg-gray-100 dark:bg-gray-900'))} ${esLaborable ? '' : 'opacity-60'} h-48 sm:h-52 md:h-56 flex flex-col overflow-hidden ${esDiaActual ? 'relative' : ''}">
                         <div class="flex justify-between items-start mb-2 flex-shrink-0">
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     <p class="text-base sm:text-lg font-bold ${esLaborable ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-600'}">${formatDateDisplay(dateStr).split(' ').slice(0, 2).join(' ')}</p>
                                     ${esDiaActual ? '<span class="px-2 py-1 text-xs sm:text-sm font-bold bg-blue-500 dark:bg-blue-600 text-white rounded">HOY</span>' : ''}
-                                    ${diaRepuesto ? '<span class="px-1.5 py-0.5 text-[10px] font-bold bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">✓ Repuesta</span>' : ''}
                                 </div>
                                 ${!esLaborable ? '<p class="text-sm sm:text-base text-gray-400 dark:text-gray-600 leading-tight">No laboral</p>' : ''}
                             </div>
@@ -2453,14 +2470,39 @@
                             </button>
                         </div>
                         ${esLaborable ? `
-                            <label class="flex items-center gap-2 text-base sm:text-lg cursor-pointer mb-2 flex-shrink-0">
-                                <input 
-                                    type="checkbox" 
-                                    ${asist.asistio ? 'checked' : ''}
-                                    onchange="toggleAsistencia('${dateStr}')"
-                                    class="rounded border-gray-300 dark:border-gray-600 flex-shrink-0 w-5 h-5 sm:w-6 sm:h-6"
-                                >
-                                <span class="text-gray-900 dark:text-gray-100 font-medium">Asistió</span>
+                            <label class="flex items-center gap-2 cursor-pointer mb-2 flex-shrink-0 group">
+                                <div class="relative flex-shrink-0">
+                                    <input 
+                                        type="checkbox" 
+                                        ${asist.asistio ? 'checked' : ''}
+                                        onchange="toggleAsistencia('${dateStr}')"
+                                        class="asistencia-check sr-only"
+                                    >
+                                    <div class="w-5 h-5 sm:w-6 sm:h-6 rounded border-2 flex items-center justify-center transition-all relative
+                                        ${dateStr <= fechaActual && !asist.asistio 
+                                            ? 'bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-600' 
+                                            : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'}
+                                        group-hover:scale-110 group-hover:shadow-sm">
+                                        <!-- Check verde cuando asistió -->
+                                        <svg class="check-icon w-4 h-4 sm:w-5 sm:h-5 text-white transition-all opacity-0 scale-0 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
+                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                        </svg>
+                                        <!-- X roja cuando NO asistió (día pasado) -->
+                                        ${dateStr <= fechaActual && !asist.asistio ? `
+                                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-red-500 dark:text-red-400 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                            </svg>
+                                        ` : ''}
+                                    </div>
+                                </div>
+                                <span class="text-sm sm:text-base font-medium transition-colors
+                                    ${asist.asistio 
+                                        ? 'text-green-700 dark:text-green-400' 
+                                        : (dateStr <= fechaActual 
+                                            ? 'text-red-600 dark:text-red-400' 
+                                            : 'text-gray-500 dark:text-gray-400')}">
+                                    Asistió
+                                </span>
                             </label>
                         ` : `
                             <button 
@@ -2575,17 +2617,13 @@
                     const trenTexto = tieneRutina && asist.rutina.tren ?
                         (asist.rutina.tren === 'superior' ? 'Tren Superior' : 'Tren Inferior') : '';
 
-                    // Verificar si este día faltado ya fue repuesto por una reprogramación
-                    const diaRepuesto = esLaborable && dateStr <= hoy && !asist?.asistio && Object.values(asistencias).some(a => a.reprogramacionDe === dateStr);
-
                     html += `
-                        <div class="p-4 ${asist.asistio ? 'bg-green-50 dark:bg-green-900/20' : (esLaborable ? 'bg-white dark:bg-gray-800' : 'bg-gray-100 dark:bg-gray-900')} ${esDiaActual ? 'border-l-4 border-blue-500 dark:border-blue-400' : ''}">
+                        <div class="p-4 ${asist.asistio ? 'bg-green-50 dark:bg-green-900/20' : (esLaborable && dateStr <= fechaActual ? 'bg-red-50 dark:bg-red-900/10' : (esLaborable ? 'bg-white dark:bg-gray-800' : 'bg-gray-100 dark:bg-gray-900'))} ${esDiaActual ? 'border-l-4 border-blue-500 dark:border-blue-400' : ''}">
                             <div class="flex justify-between items-start mb-3">
                                 <div>
                                     <p class="text-sm font-semibold text-gray-500 dark:text-gray-400">${diasNombres[diaSemana]}</p>
                                     <p class="text-lg font-bold ${esLaborable ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600'}">${formatDateDisplay(dateStr).split(' ')[0]}</p>
                                     ${esDiaActual ? '<span class="inline-block px-2 py-0.5 text-xs font-bold bg-blue-500 dark:bg-blue-600 text-white rounded mt-1">HOY</span>' : ''}
-                                    ${diaRepuesto ? '<span class="inline-block px-1.5 py-0.5 text-[10px] font-bold bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded mt-1">✓ Repuesta</span>' : ''}
                                     ${!esLaborable ? '<p class="text-xs text-gray-400 dark:text-gray-600 mt-1">No laboral</p>' : ''}
                                 </div>
                                 <button 
@@ -2597,14 +2635,39 @@
                                 </button>
                             </div>
                             ${esLaborable ? `
-                                <label class="flex items-center gap-2 cursor-pointer mb-3">
-                                    <input 
-                                        type="checkbox" 
-                                        ${asist.asistio ? 'checked' : ''}
-                                        onchange="toggleAsistencia('${dateStr}')"
-                                        class="rounded border-gray-300 w-5 h-5"
-                                    >
-                                    <span class="text-sm font-medium text-gray-900">Asistió</span>
+                                <label class="flex items-center gap-2 cursor-pointer mb-3 group">
+                                    <div class="relative flex-shrink-0">
+                                        <input 
+                                            type="checkbox" 
+                                            ${asist.asistio ? 'checked' : ''}
+                                            onchange="toggleAsistencia('${dateStr}')"
+                                            class="asistencia-check sr-only"
+                                        >
+                                        <div class="w-5 h-5 rounded border-2 flex items-center justify-center transition-all relative
+                                            ${dateStr <= fechaActual && !asist.asistio 
+                                                ? 'bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-600' 
+                                                : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'}
+                                            group-hover:scale-110 group-hover:shadow-sm">
+                                            <!-- Check verde cuando asistió -->
+                                            <svg class="check-icon w-4 h-4 text-white transition-all opacity-0 scale-0 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                            <!-- X roja cuando NO asistió (día pasado) -->
+                                            ${dateStr <= fechaActual && !asist.asistio ? `
+                                                <svg class="w-4 h-4 text-red-500 dark:text-red-400 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                                </svg>
+                                            ` : ''}
+                                        </div>
+                                    </div>
+                                    <span class="text-sm font-medium transition-colors
+                                        ${asist.asistio 
+                                            ? 'text-green-700 dark:text-green-400' 
+                                            : (dateStr <= fechaActual 
+                                                ? 'text-red-600 dark:text-red-400' 
+                                                : 'text-gray-500 dark:text-gray-400')}">
+                                        Asistió
+                                    </span>
                                 </label>
                             ` : `
                                 <button 
@@ -2694,11 +2757,8 @@
                 const trenTexto = tieneRutina && asist.rutina.tren ?
                     (asist.rutina.tren === 'superior' ? 'Tren Superior' : 'Tren Inferior') : '';
 
-                // Verificar si este día faltado ya fue repuesto por una reprogramación
-                const diaRepuesto = esLaborable && dateStr <= hoy && !asist?.asistio && Object.values(asistencias).some(a => a.reprogramacionDe === dateStr);
-
                 html += `
-                    <div class="bg-white dark:bg-gray-800 border ${esDiaActual ? 'border-blue-500 dark:border-blue-400 border-2' : 'border-gray-200 dark:border-gray-700'} rounded-lg p-4 ${asist.asistio ? 'bg-green-50 dark:bg-green-900/20' : (esLaborable ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900')}">
+                    <div class="bg-white dark:bg-gray-800 border ${esDiaActual ? 'border-blue-500 dark:border-blue-400 border-2' : 'border-gray-200 dark:border-gray-700'} rounded-lg p-4 ${asist.asistio ? 'bg-green-50 dark:bg-green-900/20' : (esLaborable && dateStr <= fechaActual ? 'bg-red-50 dark:bg-red-900/10' : (esLaborable ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'))}">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div class="flex-1">
                                 <div class="flex items-center gap-2 mb-2 flex-wrap">
@@ -2708,18 +2768,42 @@
                                     </div>
                                     ${esDiaActual ? '<span class="px-2 py-1 text-xs font-bold bg-blue-500 dark:bg-blue-600 text-white rounded">HOY</span>' : ''}
                                     ${!esLaborable ? '<span class="px-2 py-1 text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded">No laboral</span>' : ''}
-                                    ${diaRepuesto ? '<span class="px-2 py-1 text-xs font-bold bg-green-100 dark:bg-green-900/50 text-green-700 dark:text-green-300 rounded">✓ Repuesta</span>' : ''}
                                 </div>
                                 
                                 ${esLaborable ? `
-                                    <label class="flex items-center gap-2 cursor-pointer mb-2">
-                                        <input 
-                                            type="checkbox" 
-                                            ${asist.asistio ? 'checked' : ''}
-                                            onchange="toggleAsistencia('${dateStr}')"
-                                            class="rounded border-gray-300 dark:border-gray-600 w-5 h-5"
-                                        >
-                                        <span class="text-sm font-medium text-gray-900 dark:text-gray-100">Asistió</span>
+                                    <label class="flex items-center gap-2 cursor-pointer mb-2 group">
+                                        <div class="relative flex-shrink-0">
+                                            <input 
+                                                type="checkbox" 
+                                                ${asist.asistio ? 'checked' : ''}
+                                                onchange="toggleAsistencia('${dateStr}')"
+                                                class="asistencia-check sr-only"
+                                            >
+                                            <div class="w-5 h-5 rounded border-2 flex items-center justify-center transition-all relative
+                                                ${dateStr <= fechaActual && !asist.asistio 
+                                                    ? 'bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-600' 
+                                                    : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'}
+                                                group-hover:scale-110 group-hover:shadow-sm">
+                                                <!-- Check verde cuando asistió -->
+                                                <svg class="check-icon w-4 h-4 text-white transition-all opacity-0 scale-0 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                                <!-- X roja cuando NO asistió (día pasado) -->
+                                                ${dateStr <= fechaActual && !asist.asistio ? `
+                                                    <svg class="w-4 h-4 text-red-500 dark:text-red-400 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
+                                                    </svg>
+                                                ` : ''}
+                                            </div>
+                                        </div>
+                                        <span class="text-sm font-medium transition-colors
+                                            ${asist.asistio 
+                                                ? 'text-green-700 dark:text-green-400' 
+                                                : (dateStr <= fechaActual 
+                                                    ? 'text-red-600 dark:text-red-400' 
+                                                    : 'text-gray-500 dark:text-gray-400')}">
+                                            Asistió
+                                        </span>
                                     </label>
                                 ` : `
                                     <button 
