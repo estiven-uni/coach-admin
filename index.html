@@ -2501,7 +2501,7 @@
                                         : (dateStr <= fechaActual 
                                             ? 'text-red-600 dark:text-red-400' 
                                             : 'text-gray-500 dark:text-gray-400')}">
-                                    Asistió
+                                    ${asist.asistio ? 'Asistió' : (dateStr <= fechaActual ? 'No Asistió' : 'Asistió')}
                                 </span>
                             </label>
                         ` : `
@@ -2666,7 +2666,7 @@
                                             : (dateStr <= fechaActual 
                                                 ? 'text-red-600 dark:text-red-400' 
                                                 : 'text-gray-500 dark:text-gray-400')}">
-                                        Asistió
+                                        ${asist.asistio ? 'Asistió' : (dateStr <= fechaActual ? 'No Asistió' : 'Asistió')}
                                     </span>
                                 </label>
                             ` : `
@@ -2802,7 +2802,7 @@
                                                 : (dateStr <= fechaActual 
                                                     ? 'text-red-600 dark:text-red-400' 
                                                     : 'text-gray-500 dark:text-gray-400')}">
-                                            Asistió
+                                            ${asist.asistio ? 'Asistió' : (dateStr <= fechaActual ? 'No Asistió' : 'Asistió')}
                                         </span>
                                     </label>
                                 ` : `
