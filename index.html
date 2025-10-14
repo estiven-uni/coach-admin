@@ -6616,16 +6616,79 @@ EJEMPLO de "nota" correcta:
                     </div>
                 `;
                 
+                // Guardar la rutina automáticamente
+                const data = loadData();
+                
+                if (!data.asistencias[currentCoachId]) {
+                    data.asistencias[currentCoachId] = {};
+                }
+                
+                if (!data.asistencias[currentCoachId][currentNotaDate]) {
+                    data.asistencias[currentCoachId][currentNotaDate] = {
+                        asistio: null,
+                        reprogramacion: false,
+                        rutina: null,
+                        nota: ''
+                    };
+                }
+                
+                // Recopilar ejercicios del modal
+                const ejercicios = [];
+                document.querySelectorAll('#lista-ejercicios > div').forEach(ejercicioDiv => {
+                    const nombre = ejercicioDiv.querySelector('.ejercicio-nombre').value.trim();
+                    const series = ejercicioDiv.querySelector('.ejercicio-series').value.trim();
+                    const repeticiones = ejercicioDiv.querySelector('.ejercicio-reps').value.trim();
+                    const peso = ejercicioDiv.querySelector('.ejercicio-peso').value.trim();
+                    const unidad = ejercicioDiv.querySelector('.ejercicio-unidad').value;
+                    const nota = ejercicioDiv.querySelector('.ejercicio-nota').value.trim();
+                    
+                    if (nombre) {
+                        ejercicios.push({ nombre, series, repeticiones, peso, unidad, nota });
+                    }
+                });
+                
+                // Obtener tren trabajado
+                let tren = null;
+                if (document.getElementById('tren-superior').checked) {
+                    tren = 'superior';
+                } else if (document.getElementById('tren-inferior').checked) {
+                    tren = 'inferior';
+                }
+                
+                // Crear objeto de rutina
+                const rutina = {
+                    calentamiento: document.getElementById('calentamiento-check').checked,
+                    tipoMaquinas: document.getElementById('tipo-maquinas').checked,
+                    tipoCalistenia: document.getElementById('tipo-calistenia').checked,
+                    tren: tren,
+                    enfoqueMusculo: document.getElementById('enfoque-musculo-hidden')?.value || null,
+                    ejercicios: ejercicios,
+                    nota: document.getElementById('nota-dia-texto').value.trim(),
+                    generadaPorIA: true
+                };
+                
+                // Guardar rutina
+                data.asistencias[currentCoachId][currentNotaDate].rutina = rutina;
+                saveData(data);
+                renderCalendarioPeriodo();
+                
+                // Cerrar modal de edición
+                cerrarModalNotaDia();
+                
+                // Mostrar mensaje de éxito y luego abrir modal de vista
                 Swal.fire({
                     icon: 'success',
                     title: '🎉 ¡Tu rutina está lista!',
                     html: resumenHTML,
-                    confirmButtonText: '¡Vamos a entrenar! 💪',
+                    confirmButtonText: 'Ver mi rutina 💪',
                     confirmButtonColor: '#10b981',
                     width: '600px',
                     customClass: {
                         popup: 'text-left'
                     }
+                }).then(() => {
+                    // Abrir modal de vista de rutina
+                    abrirModalVistaRutina(currentNotaDate);
                 });
                 
             } catch (error) {
