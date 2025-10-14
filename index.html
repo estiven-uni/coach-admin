@@ -7188,18 +7188,28 @@ EJEMPLO de "nota" correcta:
                 svg.classList.add('animate-spin');
                 btn.disabled = true;
                 
-                // Primero descargar de la nube (por si hay cambios en otro dispositivo)
+                console.log('🔄 SINCRONIZACIÓN MANUAL INICIADA');
+                console.log('⬇️ Paso 1/2: Descargando desde la nube...');
+                
+                // 1️⃣ PRIMERO: Descargar de la nube (por si hay cambios en otro dispositivo)
                 const descargado = await descargarDesdeNube();
                 
-                // Luego subir cambios locales
-                await sincronizarConNube();
-                
-                // Si descargamos datos nuevos, recargar la vista
                 if (descargado) {
+                    console.log('✅ Datos descargados desde la nube');
+                    // Recargar la vista con los datos actualizados
                     currentCoachId = null;
                     currentPagoId = null;
                     mostrarVistaLista();
+                } else {
+                    console.log('ℹ️ No hay datos en la nube o es la primera sincronización');
                 }
+                
+                console.log('⬆️ Paso 2/2: Subiendo datos locales a la nube...');
+                
+                // 2️⃣ SEGUNDO: Subir cambios locales a la nube
+                await sincronizarConNube();
+                
+                console.log('✅ SINCRONIZACIÓN COMPLETADA');
                 
                 // Remover animación
                 svg.classList.remove('animate-spin');
