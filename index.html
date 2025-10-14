@@ -875,6 +875,54 @@
                         </button>
                     </div>
                 </div>
+
+                <!-- Sincronización en la Nube -->
+                <div class="border-t border-gray-200 dark:border-gray-700 pt-4">
+                    <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3">☁️ Sincronización en la Nube</h3>
+                    
+                    <div class="bg-cyan-50 dark:bg-cyan-900/30 border border-cyan-200 dark:border-cyan-700 rounded-lg p-4 space-y-3">
+                        <div>
+                            <label class="block text-xs font-semibold text-cyan-900 dark:text-cyan-300 mb-2">
+                                ID de tu Nube (Bin ID):
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="text" id="input-bin-id" readonly
+                                    class="flex-1 px-3 py-2 text-xs bg-white dark:bg-gray-700 border border-cyan-300 dark:border-cyan-600 rounded-lg text-gray-700 dark:text-gray-300 font-mono"
+                                    placeholder="No configurado aún">
+                                <button id="btn-copiar-bin-id"
+                                    class="px-3 py-2 bg-cyan-600 hover:bg-cyan-700 text-white rounded-lg text-xs font-semibold transition-colors"
+                                    title="Copiar ID">
+                                    📋
+                                </button>
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-semibold text-cyan-900 dark:text-cyan-300 mb-2">
+                                ¿Tienes un ID de otro dispositivo? Pégalo aquí:
+                            </label>
+                            <div class="flex gap-2">
+                                <input type="text" id="input-nuevo-bin-id"
+                                    class="flex-1 px-3 py-2 text-xs bg-white dark:bg-gray-700 border border-cyan-300 dark:border-cyan-600 rounded-lg text-gray-700 dark:text-gray-300 font-mono"
+                                    placeholder="Pega el Bin ID aquí">
+                                <button id="btn-aplicar-bin-id"
+                                    class="px-3 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-semibold transition-colors">
+                                    Aplicar
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="bg-cyan-100 dark:bg-cyan-900/50 border border-cyan-300 dark:border-cyan-600 rounded-lg p-3">
+                            <p class="text-xs text-cyan-900 dark:text-cyan-200">
+                                <strong>💡 Cómo sincronizar entre dispositivos:</strong><br>
+                                1. En el primer dispositivo, copia el "ID de tu Nube"<br>
+                                2. En otros dispositivos, pega ese ID y haz clic en "Aplicar"<br>
+                                3. Haz clic en el botón ☁️ del header para sincronizar<br>
+                                ¡Todos tus dispositivos usarán la misma nube!
+                            </p>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <div class="border-t border-gray-200 dark:border-gray-700 p-3 sm:p-4 flex-shrink-0">
@@ -5304,7 +5352,14 @@
                 estadoTexto.textContent = config.modoPruebas ? 'Activado' : 'Desactivado';
             }
 
-            console.log('✅ Modal de configuración abierto. Modo pruebas:', config.modoPruebas);
+            // Mostrar Bin ID actual
+            const binId = localStorage.getItem(JSONBIN_BIN_ID_KEY);
+            const inputBinId = document.getElementById('input-bin-id');
+            if (inputBinId) {
+                inputBinId.value = binId || 'No configurado aún';
+            }
+
+            console.log('✅ Modal de configuración abierto. Modo pruebas:', config.modoPruebas, 'Bin ID:', binId);
         }
 
         function cerrarModalConfiguracion() {
@@ -7313,6 +7368,116 @@ EJEMPLO de "nota" correcta:
                     importarBackup(file);
                 }
                 e.target.value = '';
+            });
+
+            // Botón copiar Bin ID
+            document.getElementById('btn-copiar-bin-id')?.addEventListener('click', () => {
+                const inputBinId = document.getElementById('input-bin-id');
+                const binId = inputBinId.value;
+                
+                if (!binId || binId === 'No configurado aún') {
+                    Swal.fire({
+                        icon: 'info',
+                        title: 'No hay ID aún',
+                        text: 'Primero debes sincronizar para crear tu ID de nube',
+                        confirmButtonText: 'Entendido'
+                    });
+                    return;
+                }
+                
+                // Copiar al portapapeles
+                navigator.clipboard.writeText(binId).then(() => {
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'ID copiado',
+                        text: 'Ahora puedes pegarlo en otros dispositivos',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                }).catch(() => {
+                    // Fallback: seleccionar el texto
+                    inputBinId.select();
+                    document.execCommand('copy');
+                    Swal.fire({
+                        icon: 'success',
+                        title: 'ID copiado',
+                        timer: 1500,
+                        showConfirmButton: false
+                    });
+                });
+            });
+
+            // Botón aplicar Bin ID
+            document.getElementById('btn-aplicar-bin-id')?.addEventListener('click', async () => {
+                const inputNuevoBinId = document.getElementById('input-nuevo-bin-id');
+                const nuevoBinId = inputNuevoBinId.value.trim();
+                
+                if (!nuevoBinId) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'ID vacío',
+                        text: 'Por favor pega el ID de tu otro dispositivo',
+                        confirmButtonText: 'Entendido'
+                    });
+                    return;
+                }
+                
+                // Confirmar antes de cambiar
+                const confirmacion = await Swal.fire({
+                    title: '¿Cambiar ID de nube?',
+                    html: `Esto conectará este dispositivo con la nube:<br><code>${nuevoBinId}</code><br><br>Se descargarán los datos de esa nube.`,
+                    icon: 'question',
+                    showCancelButton: true,
+                    confirmButtonText: 'Sí, cambiar',
+                    cancelButtonText: 'Cancelar'
+                });
+                
+                if (!confirmacion.isConfirmed) {
+                    return;
+                }
+                
+                // Guardar el nuevo Bin ID
+                localStorage.setItem(JSONBIN_BIN_ID_KEY, nuevoBinId);
+                
+                // Actualizar el input de visualización
+                document.getElementById('input-bin-id').value = nuevoBinId;
+                inputNuevoBinId.value = '';
+                
+                // Cerrar modal
+                cerrarModalConfiguracion();
+                
+                // Intentar descargar datos de ese bin
+                Swal.fire({
+                    title: 'Sincronizando...',
+                    text: 'Descargando datos de la nube',
+                    allowOutsideClick: false,
+                    didOpen: () => {
+                        Swal.showLoading();
+                    }
+                });
+                
+                const descargado = await descargarDesdeNube();
+                
+                if (descargado) {
+                    // Recargar la vista con los datos descargados
+                    currentCoachId = null;
+                    currentPagoId = null;
+                    mostrarVistaLista();
+                    
+                    Swal.fire({
+                        icon: 'success',
+                        title: '¡Sincronizado!',
+                        text: 'Tus datos han sido descargados de la nube',
+                        confirmButtonText: 'Perfecto'
+                    });
+                } else {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'ID configurado',
+                        text: 'El ID ha sido guardado. Haz clic en el botón ☁️ para sincronizar',
+                        confirmButtonText: 'Entendido'
+                    });
+                }
             });
 
             // Buscar coach
