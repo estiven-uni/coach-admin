@@ -1545,19 +1545,27 @@
                         </svg>
                     </div>
                     <div class="flex-1 bg-white dark:bg-gray-800 rounded-lg p-3 sm:p-4 shadow-sm border border-gray-200 dark:border-gray-700">
-                        <p class="text-sm sm:text-base text-gray-800 dark:text-gray-200">
-                            ¡Hola! 👋 Soy tu asistente de IA. Puedo ayudarte a responder preguntas sobre tus entrenamientos, 
-                            estadísticas de coaches, pagos, asistencias y más. 
+                        <p class="text-sm sm:text-base text-gray-800 dark:text-gray-200 font-semibold mb-2">
+                            ¡Hola! 👋 Soy tu asistente personal de entrenamiento con IA
                         </p>
-                        <p class="text-sm text-gray-600 dark:text-gray-400 mt-2">
-                            Por ejemplo, puedes preguntarme:
+                        <p class="text-sm text-gray-700 dark:text-gray-300 mb-3">
+                            Tengo acceso completo a tu historial de entrenamientos y puedo ayudarte de varias formas:
                         </p>
-                        <ul class="text-sm text-gray-600 dark:text-gray-400 mt-1 list-disc list-inside space-y-1">
-                            <li>¿Cuántas clases he asistido este mes?</li>
-                            <li>¿Cuál es el costo promedio por clase?</li>
-                            <li>¿Qué ejercicios hago más frecuentemente?</li>
-                            <li>Resume mis entrenamientos recientes</li>
-                        </ul>
+                        
+                        <div class="bg-gradient-to-r from-purple-50 to-blue-50 dark:from-purple-900/20 dark:to-blue-900/20 rounded-lg p-3 mb-3">
+                            <p class="text-xs font-semibold text-purple-700 dark:text-purple-300 mb-1">🏋️ Generar Rutinas</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">"Dame la rutina para hoy" o "Actúa como mi coach y dame una rutina de pecho"</p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-green-50 to-teal-50 dark:from-green-900/20 dark:to-teal-900/20 rounded-lg p-3 mb-3">
+                            <p class="text-xs font-semibold text-green-700 dark:text-green-300 mb-1">📊 Analizar Progreso</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">"¿Cómo ha sido mi progreso en sentadillas?" o "Muestra mi tasa de asistencia"</p>
+                        </div>
+                        
+                        <div class="bg-gradient-to-r from-amber-50 to-orange-50 dark:from-amber-900/20 dark:to-orange-900/20 rounded-lg p-3">
+                            <p class="text-xs font-semibold text-amber-700 dark:text-amber-300 mb-1">💡 Consultas Generales</p>
+                            <p class="text-xs text-gray-600 dark:text-gray-400">"¿Qué ejercicios hago más?" o "Resume mis últimos entrenamientos"</p>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -4621,18 +4629,25 @@
                 const mensajes = [
                     {
                         role: 'system',
-                        content: `Eres un asistente inteligente para una aplicación de gestión de entrenamientos personales con coaches. 
+                        content: `Eres un asistente personal de entrenamiento inteligente. Tienes acceso a todo el historial de entrenamientos del usuario.
 
-Tu trabajo es responder ÚNICAMENTE preguntas relacionadas con los datos de entrenamientos, coaches, pagos, asistencias y ejercicios del usuario.
+TUS CAPACIDADES:
+1. Analizar el historial completo de entrenamientos
+2. Actuar como el coach del usuario cuando te lo pida
+3. Generar rutinas de entrenamiento basadas en el historial previo
+4. Responder preguntas sobre estadísticas, pagos, asistencias y progresión
+5. Dar recomendaciones basadas en datos reales
 
 IMPORTANTE:
-- Solo responde preguntas sobre los datos de la aplicación
-- Si te preguntan algo no relacionado con entrenamientos o la aplicación, responde cortésmente que solo puedes ayudar con temas de entrenamientos
-- Sé conciso y claro en tus respuestas
-- Usa formato legible y organizado
-- Los montos de dinero están en la moneda local
+- Cuando te pidan actuar como el coach, analiza los entrenamientos previos y genera rutinas similares
+- Adapta las rutinas según el progreso mostrado en el historial
+- Usa los ejercicios que el usuario ya ha realizado
+- Mantén el formato y estructura de los entrenamientos históricos
+- Si preguntan algo no relacionado con entrenamientos, indica que solo ayudas con temas de fitness
+- Sé específico: incluye ejercicios, series, repeticiones y pesos cuando generes rutinas
+- Usa formato claro y organizado
 
-Contexto de datos del usuario:
+Contexto completo de datos del usuario:
 ${contexto}`
                     },
                     ...conversationHistory.slice(-10), // Últimos 10 mensajes de conversación
@@ -4654,7 +4669,7 @@ ${contexto}`
                         model: 'deepseek-chat',
                         messages: mensajes,
                         temperature: 0.7,
-                        max_tokens: 2000
+                        max_tokens: 3000
                     })
                 });
 
@@ -4699,59 +4714,149 @@ ${contexto}`
             const asistencias = data.asistencias || {};
             const pagos = data.pagos || {};
 
-            let contexto = `=== RESUMEN DE DATOS ===\n\n`;
+            let contexto = `=== INFORMACIÓN COMPLETA DEL USUARIO ===\n\n`;
+            contexto += `Fecha actual: ${new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n`;
             contexto += `Total de coaches: ${coaches.length}\n\n`;
 
             coaches.forEach((coach, idx) => {
-                contexto += `COACH ${idx + 1}: ${coach.nombre}\n`;
-                contexto += `- Estado: ${coach.activo ? 'Activo' : 'Inactivo'}\n`;
-                contexto += `- Días de entrenamiento: ${coach.diasLaborables?.join(', ') || 'No especificado'}\n`;
+                contexto += `${'='.repeat(60)}\n`;
+                contexto += `COACH: ${coach.nombre.toUpperCase()}\n`;
+                contexto += `${'='.repeat(60)}\n`;
+                contexto += `Estado: ${coach.activo ? '✅ Activo' : '❌ Inactivo'}\n`;
+                contexto += `Días de entrenamiento: ${coach.diasLaborables?.join(', ') || 'No especificado'}\n`;
 
                 // Información de pagos
                 const pagosCoach = pagos[coach.id] || [];
                 if (pagosCoach.length > 0) {
-                    contexto += `- Total de periodos pagados: ${pagosCoach.length}\n`;
+                    contexto += `\n--- INFORMACIÓN DE PAGOS ---\n`;
+                    contexto += `Total de periodos pagados: ${pagosCoach.length}\n`;
                     const totalPagado = pagosCoach.reduce((sum, p) => sum + (p.monto || 0), 0);
-                    contexto += `- Total pagado: $${totalPagado.toLocaleString()}\n`;
+                    contexto += `Total pagado: $${totalPagado.toLocaleString()}\n`;
                     
-                    // Último periodo
                     const ultimoPago = pagosCoach[pagosCoach.length - 1];
                     if (ultimoPago) {
-                        contexto += `- Último periodo: ${ultimoPago.fechaInicio} a ${ultimoPago.fechaFin}\n`;
-                        contexto += `- Monto último periodo: $${ultimoPago.monto?.toLocaleString() || 0}\n`;
+                        contexto += `Último periodo: ${ultimoPago.fechaInicio} a ${ultimoPago.fechaFin}\n`;
+                        contexto += `Monto último periodo: $${ultimoPago.monto?.toLocaleString() || 0}\n`;
                     }
                 }
 
-                // Información de asistencias
+                // Información detallada de asistencias y entrenamientos
                 const asistenciasCoach = asistencias[coach.id] || {};
-                const totalClases = Object.keys(asistenciasCoach).length;
-                const clasesAsistidas = Object.values(asistenciasCoach).filter(a => a.asistio).length;
+                const fechasOrdenadas = Object.keys(asistenciasCoach).sort();
+                const totalClases = fechasOrdenadas.length;
+                const clasesAsistidas = fechasOrdenadas.filter(fecha => asistenciasCoach[fecha].asistio).length;
+                
                 if (totalClases > 0) {
-                    contexto += `- Total de clases programadas: ${totalClases}\n`;
-                    contexto += `- Clases asistidas: ${clasesAsistidas}\n`;
-                    contexto += `- Tasa de asistencia: ${((clasesAsistidas / totalClases) * 100).toFixed(1)}%\n`;
+                    contexto += `\n--- RESUMEN DE ASISTENCIAS ---\n`;
+                    contexto += `Total de clases programadas: ${totalClases}\n`;
+                    contexto += `Clases asistidas: ${clasesAsistidas}\n`;
+                    contexto += `Clases faltadas: ${totalClases - clasesAsistidas}\n`;
+                    contexto += `Tasa de asistencia: ${((clasesAsistidas / totalClases) * 100).toFixed(1)}%\n`;
+
+                    // HISTORIAL COMPLETO DE ENTRENAMIENTOS
+                    contexto += `\n--- HISTORIAL COMPLETO DE ENTRENAMIENTOS ---\n`;
+                    contexto += `(Mostrando los últimos 30 entrenamientos más recientes)\n\n`;
                     
-                    // Ejercicios más recientes
-                    const clasesConEjercicios = Object.values(asistenciasCoach)
-                        .filter(a => a.ejercicios && a.ejercicios.length > 0)
-                        .slice(-5);
+                    // Tomar los últimos 30 entrenamientos
+                    const ultimasClases = fechasOrdenadas.slice(-30);
                     
-                    if (clasesConEjercicios.length > 0) {
-                        contexto += `- Ejercicios recientes realizados:\n`;
-                        const ejerciciosUnicos = new Set();
-                        clasesConEjercicios.forEach(clase => {
-                            clase.ejercicios.forEach(ej => {
-                                ejerciciosUnicos.add(ej.nombre);
+                    ultimasClases.forEach((fecha, idx) => {
+                        const clase = asistenciasCoach[fecha];
+                        const fechaObj = new Date(fecha + 'T12:00:00');
+                        const nombreDia = fechaObj.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' });
+                        
+                        contexto += `📅 ${nombreDia.toUpperCase()}\n`;
+                        contexto += `   Fecha: ${fecha}\n`;
+                        contexto += `   Asistencia: ${clase.asistio ? '✅ Asistió' : '❌ No asistió'}\n`;
+                        
+                        if (clase.asistio && clase.ejercicios && clase.ejercicios.length > 0) {
+                            contexto += `   \n   🏋️ RUTINA DEL DÍA:\n`;
+                            
+                            clase.ejercicios.forEach((ejercicio, ejIdx) => {
+                                contexto += `   ${ejIdx + 1}. ${ejercicio.nombre}\n`;
+                                
+                                if (ejercicio.series && ejercicio.series.length > 0) {
+                                    ejercicio.series.forEach((serie, serieIdx) => {
+                                        contexto += `      Serie ${serieIdx + 1}: `;
+                                        const detalles = [];
+                                        if (serie.repeticiones) detalles.push(`${serie.repeticiones} reps`);
+                                        if (serie.peso) detalles.push(`${serie.peso} kg`);
+                                        if (serie.tiempo) detalles.push(`${serie.tiempo} seg`);
+                                        if (serie.distancia) detalles.push(`${serie.distancia} m`);
+                                        contexto += detalles.join(', ') || 'Sin detalles';
+                                        contexto += `\n`;
+                                    });
+                                }
+                                
+                                if (ejercicio.notas) {
+                                    contexto += `      📝 Notas: ${ejercicio.notas}\n`;
+                                }
                             });
-                        });
-                        ejerciciosUnicos.forEach(ej => {
-                            contexto += `  • ${ej}\n`;
+                        }
+                        
+                        if (clase.nota) {
+                            contexto += `   \n   💭 NOTA DEL ENTRENAMIENTO: ${clase.nota}\n`;
+                        }
+                        
+                        contexto += `\n`;
+                    });
+
+                    // Análisis de ejercicios más frecuentes
+                    const ejerciciosFrecuencia = {};
+                    fechasOrdenadas.forEach(fecha => {
+                        const clase = asistenciasCoach[fecha];
+                        if (clase.asistio && clase.ejercicios) {
+                            clase.ejercicios.forEach(ej => {
+                                if (!ejerciciosFrecuencia[ej.nombre]) {
+                                    ejerciciosFrecuencia[ej.nombre] = {
+                                        count: 0,
+                                        pesoMax: 0,
+                                        ultimaVez: fecha
+                                    };
+                                }
+                                ejerciciosFrecuencia[ej.nombre].count++;
+                                ejerciciosFrecuencia[ej.nombre].ultimaVez = fecha;
+                                
+                                // Buscar el peso máximo
+                                if (ej.series) {
+                                    ej.series.forEach(serie => {
+                                        if (serie.peso && serie.peso > ejerciciosFrecuencia[ej.nombre].pesoMax) {
+                                            ejerciciosFrecuencia[ej.nombre].pesoMax = serie.peso;
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+
+                    // Mostrar ejercicios más frecuentes
+                    const ejerciciosOrdenados = Object.entries(ejerciciosFrecuencia)
+                        .sort((a, b) => b[1].count - a[1].count)
+                        .slice(0, 15);
+                    
+                    if (ejerciciosOrdenados.length > 0) {
+                        contexto += `\n--- TOP 15 EJERCICIOS MÁS FRECUENTES ---\n`;
+                        ejerciciosOrdenados.forEach(([nombre, datos], idx) => {
+                            contexto += `${idx + 1}. ${nombre}\n`;
+                            contexto += `   - Veces realizado: ${datos.count}\n`;
+                            if (datos.pesoMax > 0) {
+                                contexto += `   - Peso máximo alcanzado: ${datos.pesoMax} kg\n`;
+                            }
+                            contexto += `   - Última vez: ${datos.ultimaVez}\n`;
                         });
                     }
                 }
 
                 contexto += `\n`;
             });
+
+            contexto += `\n${'='.repeat(60)}\n`;
+            contexto += `INSTRUCCIONES FINALES:\n`;
+            contexto += `- Cuando el usuario te pida una rutina, usa los ejercicios que ya ha realizado\n`;
+            contexto += `- Adapta los pesos según su progreso histórico\n`;
+            contexto += `- Mantén el estilo y estructura de entrenamientos previos\n`;
+            contexto += `- Sé específico con series, repeticiones y pesos\n`;
+            contexto += `${'='.repeat(60)}\n`;
 
             return contexto;
         }
