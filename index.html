@@ -915,14 +915,21 @@
             </div>
 
             <div class="p-4 sm:p-6 space-y-4 overflow-y-auto flex-1">
-                <!-- Medidas Corporales -->
-                <div class="bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30 border border-teal-200 dark:border-teal-700 rounded-lg p-4">
-                    <div class="flex items-center gap-2 mb-3">
-                        <span class="text-2xl">📏</span>
-                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Medidas Corporales</h3>
+                <!-- Formulario de Medidas Corporales (oculto por defecto) -->
+                <div id="form-medidas-container" class="hidden bg-gradient-to-r from-teal-50 to-emerald-50 dark:from-teal-900/30 dark:to-emerald-900/30 border border-teal-200 dark:border-teal-700 rounded-lg p-4">
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">📏</span>
+                            <h3 class="text-sm font-bold text-gray-900 dark:text-white" id="form-medidas-titulo">Nueva Medida</h3>
+                        </div>
+                        <button onclick="ocultarFormularioMedidas()" 
+                            class="px-2 py-1 text-xs font-semibold text-gray-600 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700 rounded transition-colors"
+                            title="Cancelar">
+                            Cancelar
+                        </button>
                     </div>
                     <p class="text-xs text-gray-600 dark:text-gray-400 mb-4">
-                        El Coach IA usará esta información para personalizar tus rutinas y recomendaciones.
+                        Completa los campos para registrar tus medidas en este periodo.
                     </p>
                     
                     <div class="grid grid-cols-2 gap-3">
@@ -1017,6 +1024,15 @@
                             <option value="experto">Experto/Competidor</option>
                         </select>
                     </div>
+
+                    <!-- Botón guardar -->
+                    <button 
+                        id="btn-guardar-medida"
+                        onclick="guardarMedidasCorporales()"
+                        class="mt-4 w-full px-4 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 rounded-lg hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg"
+                    >
+                        💾 Guardar Medida
+                    </button>
 
                     <!-- IMC (se mostrará después de guardar) -->
                     <div id="imc-resultado" class="hidden mt-4 p-3 bg-white/50 dark:bg-gray-800/50 rounded-lg border border-teal-200 dark:border-teal-700">
@@ -1532,6 +1548,14 @@
                     </svg>
                     Editar Rutina
                 </button>
+                <button type="button" onclick="eliminarNotaDia()"
+                    class="px-4 py-2.5 sm:py-3 text-sm font-semibold text-white bg-red-600 dark:bg-red-500 rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors flex items-center justify-center gap-2">
+                    <svg class="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    Eliminar
+                </button>
                 <button type="button" onclick="cerrarModalVistaRutina()"
                     class="px-4 py-2.5 sm:py-3 text-sm font-semibold text-gray-700 dark:text-gray-300 bg-gray-100 dark:bg-gray-700 rounded-lg hover:bg-gray-200 dark:hover:bg-gray-600 transition-colors">
                     Cerrar
@@ -1572,7 +1596,7 @@
                         </svg>
                     </button>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 px-3 sm:px-5 pb-3 sm:pb-4">
+                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 px-3 sm:px-5 pb-3 sm:pb-4">
                     <button type="button" onclick="abrirModalBibliotecaEjercicios()"
                         class="px-3 py-2 text-xs sm:text-sm font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 border-2 border-purple-300 dark:border-purple-700 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors flex items-center justify-center gap-1.5"
                         title="Ver biblioteca de ejercicios">
@@ -1605,6 +1629,15 @@
                             <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
                         </svg>
                         <span>Coach IA</span>
+                    </button>
+                    <button type="button" onclick="eliminarNotaDia()"
+                        class="px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-red-600 dark:bg-red-500 rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors flex items-center justify-center gap-1.5"
+                        title="Eliminar rutina del día">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        <span>Eliminar</span>
                     </button>
                 </div>
             </div>
