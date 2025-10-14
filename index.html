@@ -1596,39 +1596,33 @@
                         </svg>
                     </button>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-5 gap-2 px-3 sm:px-5 pb-3 sm:pb-4">
-                    <button type="button" onclick="abrirModalBibliotecaEjercicios()"
-                        class="px-3 py-2 text-xs sm:text-sm font-medium text-purple-700 dark:text-purple-300 bg-purple-50 dark:bg-purple-900/30 border-2 border-purple-300 dark:border-purple-700 rounded-lg hover:bg-purple-100 dark:hover:bg-purple-900/50 transition-colors flex items-center justify-center gap-1.5"
-                        title="Ver biblioteca de ejercicios">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                        <span>Biblioteca</span>
-                    </button>
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 px-3 sm:px-5 pb-3 sm:pb-4">
                     <button type="button" onclick="agregarEjercicio()"
                         class="px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors flex items-center justify-center gap-1.5"
-                        title="Agregar ejercicio a la rutina">
+                        title="Añadir otro ejercicio a la rutina">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
                         </svg>
-                        <span>Agregar</span>
+                        <span class="hidden sm:inline">Añadir Ejercicio</span>
+                        <span class="sm:hidden">Añadir</span>
                     </button>
                     <button type="submit" form="form-nota-dia"
                         class="px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-green-600 dark:bg-green-500 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center justify-center gap-1.5"
-                        title="Guardar rutina">
+                        title="Guardar rutina del día">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
                         </svg>
-                        <span>Guardar</span>
+                        <span class="hidden sm:inline">Guardar Rutina</span>
+                        <span class="sm:hidden">Guardar</span>
                     </button>
                     <button type="button" onclick="generarRutinaConIA()"
                         class="px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-500 dark:to-teal-500 rounded-lg hover:from-emerald-700 hover:to-teal-700 dark:hover:from-emerald-600 dark:hover:to-teal-600 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-1.5 border border-emerald-500/30"
-                        title="🏋️ Generar rutina con Coach IA">
+                        title="El Coach IA creará la rutina de este día automáticamente">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
                         </svg>
-                        <span>Coach IA</span>
+                        <span class="hidden sm:inline">Generar con IA</span>
+                        <span class="sm:hidden">IA</span>
                     </button>
                     <button type="button" onclick="eliminarNotaDia()"
                         class="px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-red-600 dark:bg-red-500 rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors flex items-center justify-center gap-1.5"
@@ -1637,7 +1631,8 @@
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
                                 d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
                         </svg>
-                        <span>Eliminar</span>
+                        <span class="hidden sm:inline">Eliminar Rutina</span>
+                        <span class="sm:hidden">Eliminar</span>
                     </button>
                 </div>
             </div>
