@@ -4441,8 +4441,9 @@
                 data.asistencias[currentCoachId][currentNotaDate].rutina = null;
                 saveData(data);
                 
-                // Cerrar el modal inmediatamente después de eliminar
+                // Cerrar ambos modales (edición y visualización)
                 cerrarModalNotaDia();
+                cerrarModalVistaRutina(false); // false para no limpiar currentNotaDate
                 
                 // Actualizar el calendario
                 renderCalendarioPeriodo();
