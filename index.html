@@ -5332,30 +5332,9 @@ ${contexto}`
                 // Generar contexto específico para la rutina
                 const medidas = loadMedidasCorporales();
                 
-                let contexto = `=== HISTORIAL DE ENTRENAMIENTOS ===\n\n`;
-                contexto += `Coach: ${coach.nombre}\n`;
-                contexto += `Fecha para la rutina: ${currentNotaDate}\n\n`;
-                
-                // Agregar perfil del usuario si existe
-                if (medidas.peso || medidas.altura || medidas.edad) {
-                    contexto += `--- PERFIL DEL ATLETA ---\n`;
-                    if (medidas.peso) contexto += `Peso: ${medidas.peso} kg\n`;
-                    if (medidas.altura) contexto += `Altura: ${medidas.altura} cm\n`;
-                    if (medidas.edad) contexto += `Edad: ${medidas.edad} años\n`;
-                    if (medidas.genero) contexto += `Género: ${medidas.genero}\n`;
-                    if (medidas.objetivo) contexto += `Objetivo: ${medidas.objetivo}\n`;
-                    if (medidas.nivel) contexto += `Nivel de experiencia: ${medidas.nivel}\n`;
-                    
-                    if (medidas.peso && medidas.altura) {
-                        const alturaMetros = medidas.altura / 100;
-                        const imc = (medidas.peso / (alturaMetros * alturaMetros)).toFixed(1);
-                        contexto += `IMC: ${imc}\n`;
-                    }
-                    contexto += `\n`;
-                }
-                
+                // Analizar el historial para detectar patrones
                 const fechasOrdenadas = Object.keys(asistenciasCoach).sort();
-                const ultimasClases = fechasOrdenadas.slice(-15); // Últimos 15 entrenamientos
+                const ultimasClases = fechasOrdenadas.slice(-20); // Últimos 20 entrenamientos para mejor análisis
                 
                 if (ultimasClases.length === 0) {
                     Swal.fire({
@@ -5367,21 +5346,138 @@ ${contexto}`
                     return;
                 }
                 
-                contexto += `--- ÚLTIMOS 15 ENTRENAMIENTOS ---\n\n`;
+                // Analizar patrones de trenes y ejercicios
+                let ultimoTren = null;
+                let contador = 0;
+                const ejerciciosPorTren = {
+                    superior: {},
+                    inferior: {},
+                    completo: {}
+                };
                 
+                // Analizar el historial para obtener estadísticas
                 ultimasClases.forEach((fecha) => {
+                    const clase = asistenciasCoach[fecha];
+                    if (clase.asistio && clase.rutina && clase.rutina.ejercicios && clase.rutina.ejercicios.length > 0) {
+                        const tren = clase.rutina.tren || 'completo';
+                        ultimoTren = tren;
+                        contador++;
+                        
+                        // Contar ejercicios por tren
+                        clase.rutina.ejercicios.forEach((ej) => {
+                            if (!ejerciciosPorTren[tren][ej.nombre]) {
+                                ejerciciosPorTren[tren][ej.nombre] = {
+                                    frecuencia: 0,
+                                    seriesPromedio: 0,
+                                    repsPromedio: 0,
+                                    pesoPromedio: 0,
+                                    totalPeso: 0,
+                                    totalSeries: 0,
+                                    totalReps: 0,
+                                    count: 0,
+                                    maxPeso: 0
+                                };
+                            }
+                            const stats = ejerciciosPorTren[tren][ej.nombre];
+                            stats.frecuencia++;
+                            stats.count++;
+                            if (ej.series) {
+                                stats.totalSeries += parseInt(ej.series);
+                            }
+                            if (ej.repeticiones) {
+                                stats.totalReps += parseInt(ej.repeticiones);
+                            }
+                            if (ej.peso) {
+                                const peso = parseFloat(ej.peso);
+                                stats.totalPeso += peso;
+                                stats.maxPeso = Math.max(stats.maxPeso, peso);
+                            }
+                        });
+                    }
+                });
+                
+                // Calcular promedios
+                Object.keys(ejerciciosPorTren).forEach(tren => {
+                    Object.keys(ejerciciosPorTren[tren]).forEach(ejercicio => {
+                        const stats = ejerciciosPorTren[tren][ejercicio];
+                        stats.seriesPromedio = Math.round(stats.totalSeries / stats.count);
+                        stats.repsPromedio = Math.round(stats.totalReps / stats.count);
+                        stats.pesoPromedio = (stats.totalPeso / stats.count).toFixed(1);
+                    });
+                });
+                
+                // Determinar qué tren toca hoy (alternando con el último)
+                let trenHoy = 'superior';
+                if (ultimoTren === 'superior') {
+                    trenHoy = 'inferior';
+                } else if (ultimoTren === 'inferior') {
+                    trenHoy = 'superior';
+                }
+                
+                // Generar contexto para la IA
+                let contexto = `=== PERFIL Y CONTEXTO DEL ATLETA ===\n\n`;
+                contexto += `Coach: ${coach.nombre}\n`;
+                contexto += `Fecha para la rutina: ${currentNotaDate}\n\n`;
+                
+                // Agregar perfil del usuario
+                if (medidas.peso || medidas.altura || medidas.edad) {
+                    contexto += `--- DATOS PERSONALES ---\n`;
+                    if (medidas.peso) contexto += `Peso: ${medidas.peso} kg\n`;
+                    if (medidas.altura) contexto += `Altura: ${medidas.altura} cm\n`;
+                    if (medidas.edad) contexto += `Edad: ${medidas.edad} años\n`;
+                    if (medidas.genero) contexto += `Género: ${medidas.genero}\n`;
+                    if (medidas.objetivo) contexto += `Objetivo: ${medidas.objetivo}\n`;
+                    if (medidas.nivel) contexto += `Nivel: ${medidas.nivel}\n`;
+                    
+                    if (medidas.peso && medidas.altura) {
+                        const alturaMetros = medidas.altura / 100;
+                        const imc = (medidas.peso / (alturaMetros * alturaMetros)).toFixed(1);
+                        contexto += `IMC: ${imc}\n`;
+                    }
+                    contexto += `\n`;
+                }
+                
+                // Análisis de patrones
+                contexto += `--- ANÁLISIS DEL HISTORIAL ---\n`;
+                contexto += `Total entrenamientos recientes: ${contador}\n`;
+                contexto += `Último tren trabajado: ${ultimoTren || 'No registrado'}\n`;
+                contexto += `Tren que corresponde HOY: ${trenHoy}\n`;
+                contexto += `\n`;
+                
+                // Ejercicios frecuentes por tren
+                const trenParaHoy = ejerciciosPorTren[trenHoy] || {};
+                const ejerciciosOrdenados = Object.keys(trenParaHoy)
+                    .sort((a, b) => trenParaHoy[b].frecuencia - trenParaHoy[a].frecuencia);
+                
+                if (ejerciciosOrdenados.length > 0) {
+                    contexto += `--- EJERCICIOS DE TREN ${trenHoy.toUpperCase()} EN TU HISTORIAL ---\n`;
+                    contexto += `(Ordenados por frecuencia de uso)\n\n`;
+                    
+                    ejerciciosOrdenados.slice(0, 15).forEach((ejercicio, idx) => {
+                        const stats = trenParaHoy[ejercicio];
+                        contexto += `${idx + 1}. ${ejercicio}\n`;
+                        contexto += `   - Usado ${stats.frecuencia} veces\n`;
+                        contexto += `   - Promedio: ${stats.seriesPromedio}s × ${stats.repsPromedio}r`;
+                        if (stats.maxPeso > 0) {
+                            contexto += ` × ${stats.pesoPromedio}kg (máx: ${stats.maxPeso}kg)`;
+                        }
+                        contexto += `\n\n`;
+                    });
+                }
+                
+                // Historial detallado de últimos entrenamientos
+                contexto += `\n--- ÚLTIMOS 10 ENTRENAMIENTOS COMPLETOS ---\n\n`;
+                
+                ultimasClases.slice(-10).forEach((fecha) => {
                     const clase = asistenciasCoach[fecha];
                     if (clase.asistio && clase.rutina && clase.rutina.ejercicios && clase.rutina.ejercicios.length > 0) {
                         const fechaObj = new Date(fecha + 'T12:00:00');
                         const nombreDia = fechaObj.toLocaleDateString('es-CO', { weekday: 'long', day: 'numeric', month: 'short' });
                         
-                        contexto += `📅 ${nombreDia}\n`;
-                        if (clase.rutina.tren) {
-                            contexto += `Tren: ${clase.rutina.tren}\n`;
-                        }
+                        contexto += `📅 ${nombreDia} - TREN ${(clase.rutina.tren || 'completo').toUpperCase()}\n`;
                         
                         clase.rutina.ejercicios.forEach((ej, idx) => {
-                            contexto += `${idx + 1}. ${ej.nombre}`;
+                            contexto += `   ${idx + 1}. ${ej.nombre}`;
                             const detalles = [];
                             if (ej.series) detalles.push(`${ej.series}s`);
                             if (ej.repeticiones) detalles.push(`${ej.repeticiones}r`);
@@ -5389,8 +5485,15 @@ ${contexto}`
                             if (detalles.length > 0) {
                                 contexto += ` (${detalles.join(' × ')})`;
                             }
+                            if (ej.nota) {
+                                contexto += ` - ${ej.nota}`;
+                            }
                             contexto += `\n`;
                         });
+                        
+                        if (clase.notas) {
+                            contexto += `   💬 Notas: ${clase.notas}\n`;
+                        }
                         contexto += `\n`;
                     }
                 });
@@ -5407,35 +5510,45 @@ ${contexto}`
                         messages: [
                             {
                                 role: 'system',
-                                content: `Eres un entrenador personal experto. Tu trabajo es generar UNA RUTINA DE ENTRENAMIENTO basándote en el historial del usuario.
+                                content: `Eres el Coach Bairon, un entrenador personal experto. Tu trabajo es generar UNA RUTINA DE ENTRENAMIENTO personalizada basándote ESTRICTAMENTE en el historial real del atleta.
 
-IMPORTANTE - FORMATO DE RESPUESTA:
-Debes responder ÚNICAMENTE en este formato JSON exacto, sin texto adicional antes o después:
+🎯 REGLAS FUNDAMENTALES:
+1. SOLO usa ejercicios que aparecen en el historial del atleta para el tren correspondiente
+2. RESPETA el tren que se indica (si dice TREN INFERIOR, NO pongas ejercicios de tren superior)
+3. ALTERNA los trenes: si el último fue superior, el siguiente debe ser inferior (y viceversa)
+4. Usa los pesos, series y repeticiones similares a los históricos, con pequeñas progresiones
+5. Genera entre 6-9 ejercicios variados del mismo tren
+
+📋 FORMATO DE RESPUESTA:
+Responde ÚNICAMENTE con este JSON exacto, sin texto adicional:
 
 {
   "tren": "superior" o "inferior",
   "ejercicios": [
     {
-      "nombre": "Nombre del ejercicio",
+      "nombre": "Nombre EXACTO del ejercicio (del historial)",
       "series": número,
       "repeticiones": número,
-      "peso": número (opcional),
+      "peso": número,
       "nota": "observación opcional"
     }
   ]
 }
 
-INSTRUCCIONES:
-1. Analiza el historial para identificar patrones
-2. Genera entre 6-8 ejercicios
-3. Varía los ejercicios pero mantén la estructura similar
-4. Ajusta pesos progresivamente si es posible
-5. Respeta el estilo de entrenamiento del historial
-6. SOLO JSON, sin explicaciones adicionales`
+✅ INSTRUCCIONES DETALLADAS:
+1. Lee el análisis del historial para saber qué tren corresponde HOY
+2. Selecciona 6-9 ejercicios SOLO de la lista de ejercicios frecuentes del tren correspondiente
+3. VARÍA los ejercicios - no repitas la misma rutina del último entrenamiento
+4. Usa los promedios históricos de series/reps/peso como base
+5. Aplica progresión gradual: +0.5 a +2kg respecto al promedio (si aplica)
+6. Considera el objetivo del atleta (perder peso, ganar masa, etc.)
+7. Ajusta intensidad según el nivel de experiencia
+8. NO inventes ejercicios - SOLO usa los del historial
+9. RESPONDE SOLO CON JSON VÁLIDO, sin markdown ni explicaciones`
                             },
                             {
                                 role: 'user',
-                                content: `Genera una rutina de entrenamiento para hoy basándote en mi historial:\n\n${contexto}`
+                                content: `Genera mi rutina de entrenamiento para hoy siguiendo mi historial con el Coach Bairon:\n\n${contexto}\n\n⚠️ IMPORTANTE: Solo usa ejercicios de mi historial para el tren que corresponde HOY.`
                             }
                         ],
                         temperature: 0.8,
