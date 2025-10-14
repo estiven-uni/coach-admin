@@ -1082,15 +1082,15 @@
         </div>
     </footer>
 
-    <!-- Panel de pruebas (solo para desarrollo) -->
+    <!-- Panel de pruebas (solo para desarrollo) - Posicionado en esquina inferior izquierda -->
     <div id="panel-pruebas"
-        class="fixed bottom-2 right-2 sm:bottom-4 sm:right-4 bg-purple-600 dark:bg-purple-500 text-white p-1.5 sm:p-2 rounded-lg shadow-lg z-50 cursor-pointer text-xs sm:text-sm"
+        class="fixed bottom-2 left-2 sm:bottom-4 sm:left-4 bg-purple-600 dark:bg-purple-500 text-white p-1.5 sm:p-2 rounded-lg shadow-lg z-50 cursor-pointer text-xs sm:text-sm"
         onclick="togglePanelPruebas()">
         🧪 Modo Prueba
     </div>
 
     <div id="contenido-panel-pruebas"
-        class="hidden fixed bottom-12 right-2 sm:bottom-16 sm:right-4 bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-3 sm:p-4 z-50 border-2 border-purple-300 dark:border-purple-600 w-[calc(100vw-1rem)] max-w-xs sm:w-80">
+        class="hidden fixed bottom-12 left-2 sm:bottom-16 sm:left-4 bg-white dark:bg-gray-800 rounded-xl shadow-2xl p-3 sm:p-4 z-50 border-2 border-purple-300 dark:border-purple-600 w-[calc(100vw-1rem)] max-w-xs sm:w-80">
         <div class="flex justify-between items-center mb-3">
             <h3 class="font-bold text-gray-900 dark:text-white">🧪 Panel de Pruebas</h3>
             <button onclick="togglePanelPruebas()"
@@ -3113,7 +3113,7 @@
                                 ${tieneRutina ? '<svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>' : '<svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>'}
                             </button>
                         </div>
-                        ${esLaborable ? `
+                        ${esLaborable && mostrarCheckAsistencia ? `
                             <button onclick="toggleAsistencia('${dateStr}')" class="flex items-center gap-2 cursor-pointer mb-2 flex-shrink-0 group">
                                 <div class="relative flex-shrink-0">
                                     <div class="w-5 h-5 sm:w-6 sm:h-6 rounded border-2 flex items-center justify-center transition-all relative
@@ -3147,7 +3147,8 @@
                                     ${asist.asistio === true ? 'Asistió ✓' : (asist.asistio === false ? 'No Asistió ✗' : 'Sin marcar')}
                                 </span>
                             </button>
-                        ` : `
+                        ` : ''}
+                        ${!esLaborable ? `
                             <button 
                                 onclick="toggleReprogramacion('${dateStr}')"
                                 class="flex flex-col gap-0.5 text-xs sm:text-sm ${asist.reprogramacion ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70' : (hayReprogramacionesDisponibles ? 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' : 'text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-50')} px-2.5 py-1.5 rounded transition-colors mb-2 flex-shrink-0"
@@ -3162,7 +3163,7 @@
                                 </span>
                                 ${asist.reprogramacion && asist.reprogramacionDe ? `<span class="text-[10px] font-normal opacity-75">📅 Recupera falta del: ${formatDateDisplay(asist.reprogramacionDe).split(' ').slice(0, 2).join(' ')}</span>` : ''}
                             </button>
-                        `}
+                        ` : ''}
                         <div class="flex-1 overflow-hidden min-h-0">
                             ${tieneRutina ? `
                                 <div class="space-y-1.5">
@@ -3210,6 +3211,10 @@
             // Obtener fecha actual
             const hoy = fechaSimulada ? new Date(fechaSimulada) : new Date();
             const fechaActual = formatDate(hoy);
+            
+            // Cargar configuración para verificar modo de pruebas
+            const config = loadConfig();
+            const modoPruebas = config.modoPruebas || false;
 
             // Agrupar días por semanas
             const semanas = [];
@@ -3247,6 +3252,8 @@
                     const asist = asistencias[dateStr] || { asistio: null, reprogramacion: false, nota: '' };
                     const esLaborable = coach.diasLaborables.includes(diaSemana);
                     const esDiaActual = dateStr === fechaActual;
+                    const esDiaFuturo = dateStr > fechaActual;
+                    const mostrarCheckAsistencia = !esDiaFuturo || modoPruebas; // Mostrar si NO es futuro O si está en modo pruebas
 
                     const tieneRutina = asist.rutina && (asist.rutina.ejercicios?.length > 0 || asist.rutina.nota);
                     const numEjercicios = tieneRutina ? (asist.rutina.ejercicios?.length || 0) : 0;
@@ -3282,7 +3289,7 @@
                                     ${tieneRutina ? '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>' : '<svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" /></svg>'}
                                 </button>
                             </div>
-                            ${esLaborable ? `
+                            ${esLaborable && mostrarCheckAsistencia ? `
                                 <button onclick="toggleAsistencia('${dateStr}')" class="flex items-center gap-2 cursor-pointer mb-3 group">
                                     <div class="relative flex-shrink-0">
                                         <div class="w-5 h-5 rounded border-2 flex items-center justify-center transition-all relative
@@ -3315,7 +3322,8 @@
                                         ${asist.asistio === true ? 'Asistió ✓' : (asist.asistio === false ? 'No Asistió ✗' : 'Sin marcar')}
                                     </span>
                                 </button>
-                            ` : `
+                            ` : ''}
+                            ${!esLaborable ? `
                                 <button 
                                     onclick="toggleReprogramacion('${dateStr}')"
                                     class="flex flex-col gap-0.5 text-sm ${asist.reprogramacion ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70' : (hayReprogramacionesDisponibles ? 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' : 'text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-50')} px-2.5 py-1.5 rounded transition-colors mb-3 w-full items-center"
@@ -3330,7 +3338,7 @@
                                     </span>
                                     ${asist.reprogramacion && asist.reprogramacionDe ? `<span class="text-xs font-normal opacity-75">📅 Recupera falta del: ${formatDateDisplay(asist.reprogramacionDe).split(' ').slice(0, 2).join(' ')}</span>` : ''}
                                 </button>
-                            `}
+                            ` : ''}
                             ${tieneRutina ? `
                                 <div class="space-y-2 text-sm">
                                     ${tieneCalentamiento ? '<div class="inline-block px-2 py-0.5 text-xs font-semibold bg-orange-100 text-orange-700 rounded">Calentamiento</div>' : ''}
@@ -3382,6 +3390,10 @@
             // Obtener fecha actual
             const hoy = fechaSimulada ? new Date(fechaSimulada) : new Date();
             const fechaActual = formatDate(hoy);
+            
+            // Cargar configuración para verificar modo de pruebas
+            const config = loadConfig();
+            const modoPruebas = config.modoPruebas || false;
 
             const diasNombres = ['Domingo', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado'];
 
@@ -3391,6 +3403,8 @@
                 const asist = asistencias[dateStr] || { asistio: null, reprogramacion: false, nota: '' };
                 const esLaborable = coach.diasLaborables.includes(diaSemana);
                 const esDiaActual = dateStr === fechaActual;
+                const esDiaFuturo = dateStr > fechaActual;
+                const mostrarCheckAsistencia = !esDiaFuturo || modoPruebas; // Mostrar si NO es futuro O si está en modo pruebas
 
                 const tieneRutina = asist.rutina && (asist.rutina.ejercicios?.length > 0 || asist.rutina.nota);
                 const numEjercicios = tieneRutina ? (asist.rutina.ejercicios?.length || 0) : 0;
@@ -3422,7 +3436,7 @@
                                     ${!esLaborable ? '<span class="px-2 py-1 text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded">🛌 Día de descanso</span>' : ''}
                                 </div>
                                 
-                                ${esLaborable ? `
+                                ${esLaborable && mostrarCheckAsistencia ? `
                                     <button onclick="toggleAsistencia('${dateStr}')" class="flex items-center gap-2 cursor-pointer mb-2 group">
                                         <div class="relative flex-shrink-0">
                                             <div class="w-5 h-5 rounded border-2 flex items-center justify-center transition-all relative
@@ -3455,16 +3469,23 @@
                                             ${asist.asistio === true ? 'Asistió ✓' : (asist.asistio === false ? 'No Asistió ✗' : 'Sin marcar')}
                                         </span>
                                     </button>
-                                ` : `
+                                ` : ''}
+                                ${!esLaborable ? `
                                     <button 
                                         onclick="toggleReprogramacion('${dateStr}')"
                                         class="inline-flex flex-col gap-0.5 text-sm ${asist.reprogramacion ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70' : (hayReprogramacionesDisponibles ? 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' : 'text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-50')} px-3 py-1.5 rounded transition-colors mb-2 items-start"
+                                        title="${asist.reprogramacion ? 'Quitar reagendamiento' : (hayReprogramacionesDisponibles ? 'Reagendar una clase perdida en este día' : 'No hay clases pendientes por reagendar')}"
                                         ${!asist.reprogramacion && !hayReprogramacionesDisponibles ? 'disabled' : ''}
                                     >
-                                        <span class="font-semibold flex items-center gap-1"><span>R</span> ${asist.reprogramacion ? 'Reprogramación' : 'Reprogramar'}</span>
-                                        ${asist.reprogramacion && asist.reprogramacionDe ? `<span class="text-xs font-normal opacity-75">Repone: ${formatDateDisplay(asist.reprogramacionDe)}</span>` : ''}
+                                        <span class="font-semibold flex items-center gap-1">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                            </svg>
+                                            ${asist.reprogramacion ? 'Clase reagendada' : 'Reagendar clase'}
+                                        </span>
+                                        ${asist.reprogramacion && asist.reprogramacionDe ? `<span class="text-xs font-normal opacity-75">📅 Recupera falta del: ${formatDateDisplay(asist.reprogramacionDe)}</span>` : ''}
                                     </button>
-                                `}
+                                ` : ''}
                                 
                                 ${tieneRutina ? `
                                     <div class="flex items-center gap-2 flex-wrap mt-2">
