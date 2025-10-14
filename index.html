@@ -2922,6 +2922,7 @@
         }
 
         function mostrarVistaDashboard(coachId) {
+            console.log('🔵 mostrarVistaDashboard - coachId:', coachId);
             currentCoachId = coachId;
             currentPagoId = null; // Limpiar selección de periodo (el usuario debe seleccionar manualmente)
             document.getElementById('vista-lista-coaches').classList.add('hidden');
@@ -3179,10 +3180,14 @@
         // ========================================
 
         function renderDashboard() {
+            console.log('🔵 renderDashboard - currentCoachId:', currentCoachId);
             const data = loadData();
+            console.log('🔵 data cargada:', data);
             const coach = data.coaches.find(c => c.id === currentCoachId);
+            console.log('🔵 coach encontrado:', coach);
 
             if (!coach) {
+                console.log('❌ Coach no encontrado, volviendo a lista');
                 mostrarVistaLista();
                 return;
             }
@@ -3212,15 +3217,20 @@
             }
 
             const pagos = data.pagos[currentCoachId] || [];
+            console.log('🔵 pagos del coach:', pagos);
+            console.log('🔵 cantidad de pagos:', pagos.length);
 
             // Verificar si hay pagos
             if (pagos.length === 0) {
+                console.log('⚠️ No hay pagos registrados');
+
                 // Sin pagos: mostrar mensaje y ocultar botón gestionar
                 document.getElementById('mensaje-sin-pagos').classList.remove('hidden');
                 document.getElementById('btn-ver-historial').classList.add('hidden');
                 document.getElementById('btn-ver-historial').classList.remove('flex');
                 document.getElementById('contenido-calendario-metricas').classList.add('hidden');
             } else {
+                console.log('✅ Hay pagos, mostrando contenido');
                 // Con pagos: mostrar contenido y botón gestionar
                 document.getElementById('mensaje-sin-pagos').classList.add('hidden');
                 document.getElementById('btn-ver-historial').classList.remove('hidden');
@@ -3231,31 +3241,42 @@
 
                 // Buscar periodo que contenga la fecha actual
                 const fechaActual = fechaSimulada || formatDate(new Date());
+                console.log('🔵 fechaActual:', fechaActual);
                 let periodoActual = pagos.find(pago => {
+                    console.log('🔵 Comparando:', fechaActual, '>=', pago.periodoInicio, '&&', fechaActual, '<=', pago.periodoFin);
                     return fechaActual >= pago.periodoInicio && fechaActual <= pago.periodoFin;
                 });
+                console.log('🔵 periodoActual encontrado:', periodoActual);
 
                 // Si hay un periodo actual, seleccionarlo automáticamente
                 if (periodoActual && !currentPagoId) {
+                    console.log('✅ Seleccionando periodo automáticamente:', periodoActual.id);
                     currentPagoId = periodoActual.id;
                     const selector = document.getElementById('select-periodo-pago');
                     if (selector) selector.value = currentPagoId;
+                } else {
+                    console.log('⚠️ No se seleccionó periodo automáticamente - periodoActual:', periodoActual, 'currentPagoId:', currentPagoId);
                 }
 
                 // Solo renderizar si hay un periodo seleccionado
                 if (currentPagoId) {
+                    console.log('✅ Hay periodo seleccionado:', currentPagoId);
                     const pagoSeleccionado = pagos.find(p => p.id === currentPagoId);
+                    console.log('🔵 pagoSeleccionado:', pagoSeleccionado);
                     if (pagoSeleccionado) {
+                        console.log('✅ Renderizando calendario y métricas');
                         document.getElementById('contenido-calendario-metricas').classList.remove('hidden');
                         inicializarVistaCalendario(); // Establecer vista por defecto según dispositivo
                         renderCalendarioPeriodo();
                         renderHistorialPagos();
                     } else {
+                        console.log('❌ El periodo seleccionado no existe, limpiando');
                         // Si el periodo no existe, limpiar selección
                         currentPagoId = null;
                         document.getElementById('contenido-calendario-metricas').classList.add('hidden');
                     }
                 } else {
+                    console.log('⚠️ No hay periodo seleccionado - mostrando opción por defecto');
                     // No hay periodo seleccionado, ocultar calendario y métricas
                     document.getElementById('contenido-calendario-metricas').classList.add('hidden');
                 }
@@ -3263,10 +3284,12 @@
         }
 
         function cargarSelectorPeriodos() {
+            console.log('🔵 cargarSelectorPeriodos - currentCoachId:', currentCoachId);
             const data = loadData();
             const pagos = (data.pagos[currentCoachId] || []).sort((a, b) =>
                 new Date(a.periodoInicio) - new Date(b.periodoInicio)
             );
+            console.log('🔵 Periodos ordenados para selector:', pagos);
 
             const selector = document.getElementById('select-periodo-pago');
 
