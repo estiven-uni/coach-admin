@@ -6950,6 +6950,8 @@ EJEMPLO de "nota" correcta:
                 // Obtener todos los datos del localStorage
                 const data = loadData();
                 const config = loadConfig();
+                const medidas = JSON.parse(localStorage.getItem(MEDIDAS_KEY) || '{}');
+                const ejercicios = JSON.parse(localStorage.getItem(EJERCICIOS_KEY) || '[]');
 
                 // Crear un objeto con metadatos adicionales
                 const backup = {
@@ -6957,7 +6959,9 @@ EJEMPLO de "nota" correcta:
                     fecha_backup: new Date().toISOString(),
                     fecha_backup_legible: formatDateDisplay(formatDate(new Date())) + ' ' + new Date().toLocaleTimeString('es-CO'),
                     datos: data,
-                    configuracion: config
+                    configuracion: config,
+                    medidas: medidas,
+                    ejercicios: ejercicios
                 };
 
                 // Convertir a JSON con formato legible
@@ -7071,6 +7075,16 @@ EJEMPLO de "nota" correcta:
                     // Guardar los datos y configuración en localStorage
                     localStorage.setItem(STORAGE_KEY, JSON.stringify(datos));
                     localStorage.setItem(CONFIG_KEY, JSON.stringify(configuracion));
+                    
+                    // Importar medidas si existen en el backup
+                    if (contenido.medidas) {
+                        localStorage.setItem(MEDIDAS_KEY, JSON.stringify(contenido.medidas));
+                    }
+                    
+                    // Importar ejercicios si existen en el backup
+                    if (contenido.ejercicios) {
+                        localStorage.setItem(EJERCICIOS_KEY, JSON.stringify(contenido.ejercicios));
+                    }
 
                     console.log('✅ Backup importado exitosamente:', {
                         coaches: numCoaches,
@@ -7079,11 +7093,15 @@ EJEMPLO de "nota" correcta:
                         modoPruebas: configuracion.modoPruebas
                     });
 
+                    // 🔄 SINCRONIZAR con la nube automáticamente
+                    console.log('🔄 Sincronizando backup importado con la nube...');
+                    await sincronizarConNube();
+
                     // Mostrar confirmación
                     await Swal.fire({
                         icon: 'success',
-                        title: 'Backup importado exitosamente',
-                        html: `• ${numCoaches} coaches<br>• ${numPagos} periodos de pago<br>• Modo de pruebas: ${modoPruebasTexto}`,
+                        title: 'Backup importado y sincronizado',
+                        html: `• ${numCoaches} coaches<br>• ${numPagos} periodos de pago<br>• Modo de pruebas: ${modoPruebasTexto}<br><br>✅ Sincronizado con la nube`,
                         confirmButtonText: 'Entendido'
                     });
 
@@ -7170,7 +7188,18 @@ EJEMPLO de "nota" correcta:
                 svg.classList.add('animate-spin');
                 btn.disabled = true;
                 
+                // Primero descargar de la nube (por si hay cambios en otro dispositivo)
+                const descargado = await descargarDesdeNube();
+                
+                // Luego subir cambios locales
                 await sincronizarConNube();
+                
+                // Si descargamos datos nuevos, recargar la vista
+                if (descargado) {
+                    currentCoachId = null;
+                    currentPagoId = null;
+                    mostrarVistaLista();
+                }
                 
                 // Remover animación
                 svg.classList.remove('animate-spin');
@@ -7296,6 +7325,9 @@ EJEMPLO de "nota" correcta:
             const descargado = await descargarDesdeNube();
             if (descargado) {
                 console.log('📱 Datos sincronizados desde la nube al iniciar');
+                // Recargar la vista con los datos descargados
+                currentCoachId = null;
+                currentPagoId = null;
             } else {
                 console.log('💾 Usando datos locales (primera vez o sin conexión)');
             }
