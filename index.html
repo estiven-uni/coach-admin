@@ -4769,33 +4769,46 @@ ${contexto}`
                         contexto += `   Fecha: ${fecha}\n`;
                         contexto += `   Asistencia: ${clase.asistio ? '✅ Asistió' : '❌ No asistió'}\n`;
                         
-                        if (clase.asistio && clase.ejercicios && clase.ejercicios.length > 0) {
+                        // Los ejercicios están en clase.rutina.ejercicios
+                        if (clase.asistio && clase.rutina && clase.rutina.ejercicios && clase.rutina.ejercicios.length > 0) {
                             contexto += `   \n   🏋️ RUTINA DEL DÍA:\n`;
                             
-                            clase.ejercicios.forEach((ejercicio, ejIdx) => {
+                            // Información del entrenamiento
+                            if (clase.rutina.calentamiento) {
+                                contexto += `   ✅ Incluye calentamiento\n`;
+                            }
+                            if (clase.rutina.tren) {
+                                contexto += `   🎯 Tren trabajado: ${clase.rutina.tren === 'superior' ? 'Superior' : 'Inferior'}\n`;
+                            }
+                            if (clase.rutina.tipoMaquinas) {
+                                contexto += `   🏋️ Tipo: Máquinas\n`;
+                            }
+                            if (clase.rutina.tipoCalistenia) {
+                                contexto += `   🤸 Tipo: Calistenia\n`;
+                            }
+                            contexto += `\n`;
+                            
+                            clase.rutina.ejercicios.forEach((ejercicio, ejIdx) => {
                                 contexto += `   ${ejIdx + 1}. ${ejercicio.nombre}\n`;
                                 
-                                if (ejercicio.series && ejercicio.series.length > 0) {
-                                    ejercicio.series.forEach((serie, serieIdx) => {
-                                        contexto += `      Serie ${serieIdx + 1}: `;
-                                        const detalles = [];
-                                        if (serie.repeticiones) detalles.push(`${serie.repeticiones} reps`);
-                                        if (serie.peso) detalles.push(`${serie.peso} kg`);
-                                        if (serie.tiempo) detalles.push(`${serie.tiempo} seg`);
-                                        if (serie.distancia) detalles.push(`${serie.distancia} m`);
-                                        contexto += detalles.join(', ') || 'Sin detalles';
-                                        contexto += `\n`;
-                                    });
+                                // Los ejercicios tienen series, repeticiones y peso directamente
+                                const detalles = [];
+                                if (ejercicio.series) detalles.push(`${ejercicio.series} series`);
+                                if (ejercicio.repeticiones) detalles.push(`${ejercicio.repeticiones} reps`);
+                                if (ejercicio.peso) detalles.push(`${ejercicio.peso} ${ejercicio.unidad || 'kg'}`);
+                                
+                                if (detalles.length > 0) {
+                                    contexto += `      ${detalles.join(' × ')}\n`;
                                 }
                                 
-                                if (ejercicio.notas) {
-                                    contexto += `      📝 Notas: ${ejercicio.notas}\n`;
+                                if (ejercicio.nota) {
+                                    contexto += `      📝 Nota: ${ejercicio.nota}\n`;
                                 }
                             });
                         }
                         
-                        if (clase.nota) {
-                            contexto += `   \n   💭 NOTA DEL ENTRENAMIENTO: ${clase.nota}\n`;
+                        if (clase.rutina && clase.rutina.nota) {
+                            contexto += `   \n   💭 NOTA DEL ENTRENAMIENTO: ${clase.rutina.nota}\n`;
                         }
                         
                         contexto += `\n`;
@@ -4805,25 +4818,29 @@ ${contexto}`
                     const ejerciciosFrecuencia = {};
                     fechasOrdenadas.forEach(fecha => {
                         const clase = asistenciasCoach[fecha];
-                        if (clase.asistio && clase.ejercicios) {
-                            clase.ejercicios.forEach(ej => {
+                        if (clase.asistio && clase.rutina && clase.rutina.ejercicios) {
+                            clase.rutina.ejercicios.forEach(ej => {
                                 if (!ejerciciosFrecuencia[ej.nombre]) {
                                     ejerciciosFrecuencia[ej.nombre] = {
                                         count: 0,
                                         pesoMax: 0,
+                                        repsMax: 0,
+                                        seriesMax: 0,
                                         ultimaVez: fecha
                                     };
                                 }
                                 ejerciciosFrecuencia[ej.nombre].count++;
                                 ejerciciosFrecuencia[ej.nombre].ultimaVez = fecha;
                                 
-                                // Buscar el peso máximo
-                                if (ej.series) {
-                                    ej.series.forEach(serie => {
-                                        if (serie.peso && serie.peso > ejerciciosFrecuencia[ej.nombre].pesoMax) {
-                                            ejerciciosFrecuencia[ej.nombre].pesoMax = serie.peso;
-                                        }
-                                    });
+                                // Registrar peso, reps y series máximas
+                                if (ej.peso && ej.peso > ejerciciosFrecuencia[ej.nombre].pesoMax) {
+                                    ejerciciosFrecuencia[ej.nombre].pesoMax = ej.peso;
+                                }
+                                if (ej.repeticiones && ej.repeticiones > ejerciciosFrecuencia[ej.nombre].repsMax) {
+                                    ejerciciosFrecuencia[ej.nombre].repsMax = ej.repeticiones;
+                                }
+                                if (ej.series && ej.series > ejerciciosFrecuencia[ej.nombre].seriesMax) {
+                                    ejerciciosFrecuencia[ej.nombre].seriesMax = ej.series;
                                 }
                             });
                         }
@@ -4840,7 +4857,13 @@ ${contexto}`
                             contexto += `${idx + 1}. ${nombre}\n`;
                             contexto += `   - Veces realizado: ${datos.count}\n`;
                             if (datos.pesoMax > 0) {
-                                contexto += `   - Peso máximo alcanzado: ${datos.pesoMax} kg\n`;
+                                contexto += `   - Peso máximo: ${datos.pesoMax} kg\n`;
+                            }
+                            if (datos.seriesMax > 0) {
+                                contexto += `   - Series máximas: ${datos.seriesMax}\n`;
+                            }
+                            if (datos.repsMax > 0) {
+                                contexto += `   - Repeticiones máximas: ${datos.repsMax}\n`;
                             }
                             contexto += `   - Última vez: ${datos.ultimaVez}\n`;
                         });
