@@ -897,9 +897,12 @@
                     <svg xmlns="http://www.w3.org/2000/svg" class="w-7 h-7 text-white flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
                     </svg>
-                    <div>
+                    <div class="flex-1">
                         <h2 class="text-lg sm:text-xl font-bold text-white">Mi Perfil</h2>
                         <p class="text-xs sm:text-sm text-teal-100">Tus datos personales y objetivos</p>
+                        <p id="perfil-periodo-actual" class="text-xs text-teal-200 font-semibold mt-1">
+                            <!-- Se llena dinámicamente con el periodo actual -->
+                        </p>
                     </div>
                 </div>
                 <button onclick="cerrarModalPerfil()"
@@ -1020,6 +1023,38 @@
                         <p class="text-xs font-semibold text-gray-700 dark:text-gray-300 mb-1">Tu IMC:</p>
                         <p id="imc-valor" class="text-lg font-bold text-teal-600 dark:text-teal-400"></p>
                         <p id="imc-categoria" class="text-xs text-gray-600 dark:text-gray-400"></p>
+                    </div>
+                </div>
+
+                <!-- Medidas del Periodo Actual -->
+                <div class="bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/30 dark:to-indigo-900/30 border border-blue-200 dark:border-blue-700 rounded-lg p-4">
+                    <div class="flex items-center justify-between gap-2 mb-3">
+                        <div class="flex items-center gap-2">
+                            <span class="text-2xl">📊</span>
+                            <h3 class="text-sm font-bold text-gray-900 dark:text-white">Mis Registros en este Periodo</h3>
+                        </div>
+                        <button onclick="limpiarFormularioMedidas()" 
+                            class="px-2 py-1 text-xs font-semibold text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded transition-colors"
+                            title="Nuevo registro">
+                            + Nuevo
+                        </button>
+                    </div>
+                    <p class="text-xs text-gray-600 dark:text-gray-400 mb-3">
+                        Puedes registrar tus medidas varias veces durante el periodo para ver tu progresión
+                    </p>
+                    <div id="medidas-periodo-lista" class="space-y-2 max-h-60 overflow-y-auto">
+                        <!-- Se llena dinámicamente -->
+                    </div>
+                </div>
+
+                <!-- Historial de Periodos Anteriores -->
+                <div id="historial-medidas-container" class="bg-gradient-to-r from-purple-50 to-pink-50 dark:from-purple-900/30 dark:to-pink-900/30 border border-purple-200 dark:border-purple-700 rounded-lg p-4">
+                    <div class="flex items-center gap-2 mb-3">
+                        <span class="text-2xl">📈</span>
+                        <h3 class="text-sm font-bold text-gray-900 dark:text-white">Periodos Anteriores</h3>
+                    </div>
+                    <div id="historial-medidas-lista" class="space-y-2 max-h-60 overflow-y-auto">
+                        <!-- Se llena dinámicamente -->
                     </div>
                 </div>
             </div>
@@ -1816,20 +1851,76 @@
 
         const MEDIDAS_KEY = 'usuario_medidas';
 
-        function loadMedidasCorporales() {
-            const medidas = localStorage.getItem(MEDIDAS_KEY);
-            return medidas ? JSON.parse(medidas) : {
-                peso: '',
-                altura: '',
-                edad: '',
-                genero: '',
-                objetivo: '',
-                nivel: '',
-                fechaActualizacion: null
-            };
+        function loadMedidasCorporales(coachId = null, periodoId = null) {
+            // Si no se especifica, usar el coach y periodo actuales
+            const cId = coachId || currentCoachId;
+            const pId = periodoId || currentPagoId;
+            
+            if (!cId || !pId) {
+                return [];
+            }
+
+            const todasMedidas = JSON.parse(localStorage.getItem(MEDIDAS_KEY) || '{}');
+            
+            // Estructura: { coachId: { periodoId: [array de medidas] } }
+            if (todasMedidas[cId] && todasMedidas[cId][pId]) {
+                const medidas = todasMedidas[cId][pId];
+                
+                // Verificar si es el formato antiguo (objeto) y convertirlo a array
+                if (!Array.isArray(medidas)) {
+                    console.log('🔄 Migrando medidas del formato antiguo al nuevo');
+                    const medidaArray = [{
+                        id: Date.now().toString(),
+                        ...medidas
+                    }];
+                    
+                    // Guardar en el nuevo formato
+                    todasMedidas[cId][pId] = medidaArray;
+                    localStorage.setItem(MEDIDAS_KEY, JSON.stringify(todasMedidas));
+                    
+                    return medidaArray;
+                }
+                
+                return medidas;
+            }
+            
+            return [];
+        }
+        
+        function getMedidaMasReciente(coachId = null, periodoId = null) {
+            const medidas = loadMedidasCorporales(coachId, periodoId);
+            
+            if (medidas.length === 0) {
+                return {
+                    peso: '',
+                    altura: '',
+                    edad: '',
+                    genero: '',
+                    objetivo: '',
+                    nivel: '',
+                    fechaRegistro: null
+                };
+            }
+            
+            // Ordenar por fecha más reciente primero
+            const medidasOrdenadas = [...medidas].sort((a, b) => 
+                new Date(b.fechaRegistro) - new Date(a.fechaRegistro)
+            );
+            
+            return medidasOrdenadas[0];
         }
 
-        function guardarMedidasCorporales() {
+        function guardarMedidasCorporales(editandoId = null) {
+            if (!currentCoachId || !currentPagoId) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Selecciona un periodo',
+                    text: 'Debes seleccionar un coach y un periodo activo antes de guardar tus medidas',
+                    confirmButtonText: 'Entendido'
+                });
+                return;
+            }
+
             const peso = document.getElementById('medida-peso').value;
             const altura = document.getElementById('medida-altura').value;
             const edad = document.getElementById('medida-edad').value;
@@ -1847,30 +1938,166 @@
                 return;
             }
 
-            const medidas = {
+            const nuevaMedida = {
+                id: editandoId || Date.now().toString(),
                 peso: parseFloat(peso) || null,
                 altura: parseFloat(altura) || null,
                 edad: parseInt(edad) || null,
                 genero: genero || null,
                 objetivo: objetivo || null,
                 nivel: nivel || null,
-                fechaActualizacion: new Date().toISOString()
+                fechaRegistro: new Date().toISOString()
             };
 
-            localStorage.setItem(MEDIDAS_KEY, JSON.stringify(medidas));
+            // Cargar todas las medidas
+            const todasMedidas = JSON.parse(localStorage.getItem(MEDIDAS_KEY) || '{}');
+            
+            // Crear estructura si no existe
+            if (!todasMedidas[currentCoachId]) {
+                todasMedidas[currentCoachId] = {};
+            }
+            if (!todasMedidas[currentCoachId][currentPagoId]) {
+                todasMedidas[currentCoachId][currentPagoId] = [];
+            }
+            
+            // Si estamos editando, reemplazar la medida existente
+            if (editandoId) {
+                const index = todasMedidas[currentCoachId][currentPagoId].findIndex(m => m.id === editandoId);
+                if (index !== -1) {
+                    todasMedidas[currentCoachId][currentPagoId][index] = nuevaMedida;
+                }
+            } else {
+                // Agregar nueva medida al array
+                todasMedidas[currentCoachId][currentPagoId].push(nuevaMedida);
+            }
+            
+            localStorage.setItem(MEDIDAS_KEY, JSON.stringify(todasMedidas));
+
+            // Limpiar formulario
+            limpiarFormularioMedidas();
 
             // Calcular y mostrar IMC si hay peso y altura
-            if (medidas.peso && medidas.altura) {
-                calcularYMostrarIMC(medidas.peso, medidas.altura);
+            if (nuevaMedida.peso && nuevaMedida.altura) {
+                calcularYMostrarIMC(nuevaMedida.peso, nuevaMedida.altura);
             }
+
+            // Recargar lista de medidas del periodo
+            cargarMedidasDelPeriodo();
+
+            // Obtener info del periodo para mostrar
+            const data = loadData();
+            const pago = (data.pagos[currentCoachId] || []).find(p => p.id === currentPagoId);
+            const periodoTexto = pago ? `${pago.periodoInicio} - ${pago.periodoFin}` : 'este periodo';
 
             Swal.fire({
                 icon: 'success',
-                title: '¡Medidas guardadas!',
-                text: 'El Coach IA ahora conoce tu perfil completo',
+                title: editandoId ? '¡Medida actualizada!' : '¡Nueva medida registrada!',
+                html: `Tus medidas para el periodo <strong>${periodoTexto}</strong> han sido guardadas correctamente`,
                 timer: 2000,
                 showConfirmButton: false
             });
+        }
+        
+        function eliminarMedida(medidaId) {
+            Swal.fire({
+                title: '¿Eliminar medida?',
+                text: 'Esta acción no se puede deshacer',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Sí, eliminar',
+                cancelButtonText: 'Cancelar',
+                confirmButtonColor: '#dc2626'
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    const todasMedidas = JSON.parse(localStorage.getItem(MEDIDAS_KEY) || '{}');
+                    
+                    if (todasMedidas[currentCoachId] && todasMedidas[currentCoachId][currentPagoId]) {
+                        todasMedidas[currentCoachId][currentPagoId] = 
+                            todasMedidas[currentCoachId][currentPagoId].filter(m => m.id !== medidaId);
+                        
+                        localStorage.setItem(MEDIDAS_KEY, JSON.stringify(todasMedidas));
+                        cargarMedidasDelPeriodo();
+                        
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Medida eliminada',
+                            timer: 1500,
+                            showConfirmButton: false
+                        });
+                    }
+                }
+            });
+        }
+        
+        function editarMedida(medidaId) {
+            const medidas = loadMedidasCorporales();
+            const medida = medidas.find(m => m.id === medidaId);
+            
+            if (!medida) return;
+            
+            // Llenar el formulario con los datos de la medida
+            document.getElementById('medida-peso').value = medida.peso || '';
+            document.getElementById('medida-altura').value = medida.altura || '';
+            document.getElementById('medida-edad').value = medida.edad || '';
+            document.getElementById('medida-genero').value = medida.genero || '';
+            document.getElementById('medida-objetivo').value = medida.objetivo || '';
+            document.getElementById('medida-nivel').value = medida.nivel || '';
+            
+            // Cambiar el botón de guardar para indicar que estamos editando
+            const btnGuardar = document.querySelector('[onclick="guardarMedidasCorporales()"]');
+            if (btnGuardar) {
+                btnGuardar.textContent = '💾 Actualizar Medida';
+                btnGuardar.onclick = () => guardarMedidasCorporales(medidaId);
+            }
+            
+            // Scroll al formulario
+            document.getElementById('medida-peso').scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }
+        
+        function limpiarFormularioMedidas() {
+            document.getElementById('medida-peso').value = '';
+            document.getElementById('medida-altura').value = '';
+            document.getElementById('medida-edad').value = '';
+            document.getElementById('medida-genero').value = '';
+            document.getElementById('medida-objetivo').value = '';
+            document.getElementById('medida-nivel').value = '';
+            
+            // Restaurar el botón de guardar
+            const btnGuardar = document.querySelector('button[onclick*="guardarMedidasCorporales"]');
+            if (btnGuardar) {
+                btnGuardar.textContent = '💾 Guardar';
+                btnGuardar.onclick = () => guardarMedidasCorporales();
+            }
+        }
+        
+        function obtenerHistorialMedidas(coachId) {
+            if (!coachId) return [];
+            
+            const todasMedidas = JSON.parse(localStorage.getItem(MEDIDAS_KEY) || '{}');
+            const medidasCoach = todasMedidas[coachId] || {};
+            
+            // Convertir a array con información del periodo
+            const historial = [];
+            const data = loadData();
+            const pagos = data.pagos[coachId] || [];
+            
+            for (const [periodoId, medidasArray] of Object.entries(medidasCoach)) {
+                const pago = pagos.find(p => p.id === periodoId);
+                if (pago && medidasArray && medidasArray.length > 0) {
+                    historial.push({
+                        periodoId: periodoId,
+                        fechaInicio: pago.periodoInicio,
+                        fechaFin: pago.periodoFin,
+                        periodo: `${pago.periodoInicio} - ${pago.periodoFin}`,
+                        medidas: medidasArray // Array de medidas del periodo
+                    });
+                }
+            }
+            
+            // Ordenar por fecha de inicio (más reciente primero)
+            historial.sort((a, b) => new Date(b.fechaInicio) - new Date(a.fechaInicio));
+            
+            return historial;
         }
 
         function calcularYMostrarIMC(peso, altura) {
@@ -1899,22 +2126,6 @@
             document.getElementById('imc-valor').textContent = imcRedondeado;
             document.getElementById('imc-valor').className = `text-lg font-bold ${colorClass}`;
             document.getElementById('imc-categoria').textContent = categoria;
-        }
-
-        function cargarMedidasEnModal() {
-            const medidas = loadMedidasCorporales();
-            
-            if (medidas.peso) document.getElementById('medida-peso').value = medidas.peso;
-            if (medidas.altura) document.getElementById('medida-altura').value = medidas.altura;
-            if (medidas.edad) document.getElementById('medida-edad').value = medidas.edad;
-            if (medidas.genero) document.getElementById('medida-genero').value = medidas.genero;
-            if (medidas.objetivo) document.getElementById('medida-objetivo').value = medidas.objetivo;
-            if (medidas.nivel) document.getElementById('medida-nivel').value = medidas.nivel;
-
-            // Mostrar IMC si hay datos
-            if (medidas.peso && medidas.altura) {
-                calcularYMostrarIMC(medidas.peso, medidas.altura);
-            }
         }
 
         // ========================================
@@ -4729,11 +4940,183 @@
                 return;
             }
 
-            // Cargar los datos guardados en los inputs
-            cargarMedidasEnModal();
+            // Verificar que hay un periodo seleccionado
+            if (!currentCoachId || !currentPagoId) {
+                Swal.fire({
+                    icon: 'warning',
+                    title: 'Selecciona un periodo',
+                    text: 'Primero debes seleccionar un coach y un periodo para ver tu perfil',
+                    confirmButtonText: 'Entendido'
+                });
+                return;
+            }
+
+            // Mostrar el periodo actual en el header
+            const data = loadData();
+            const pago = (data.pagos[currentCoachId] || []).find(p => p.id === currentPagoId);
+            if (pago) {
+                document.getElementById('perfil-periodo-actual').textContent = 
+                    `📅 Periodo: ${pago.periodoInicio} - ${pago.periodoFin}`;
+            }
+
+            // Limpiar formulario al abrir
+            limpiarFormularioMedidas();
+            
+            // Cargar lista de medidas del periodo actual
+            cargarMedidasDelPeriodo();
+            
+            // Cargar historial de periodos anteriores
+            cargarHistorialMedidas();
             
             modal.classList.remove('hidden');
             console.log('✅ Modal de perfil abierto');
+        }
+        
+        function cargarMedidasDelPeriodo() {
+            const medidas = loadMedidasCorporales();
+            const lista = document.getElementById('medidas-periodo-lista');
+            
+            if (medidas.length === 0) {
+                lista.innerHTML = `
+                    <p class="text-xs text-gray-500 dark:text-gray-400 text-center py-4">
+                        📝 Aún no has registrado medidas en este periodo.<br>
+                        Completa el formulario arriba para empezar.
+                    </p>
+                `;
+                return;
+            }
+            
+            // Ordenar por fecha más reciente primero
+            const medidasOrdenadas = [...medidas].sort((a, b) => 
+                new Date(b.fechaRegistro) - new Date(a.fechaRegistro)
+            );
+            
+            let html = '';
+            medidasOrdenadas.forEach((m, index) => {
+                // Calcular IMC si hay datos
+                let imcTexto = '';
+                let imcColor = '';
+                if (m.peso && m.altura) {
+                    const alturaMetros = m.altura / 100;
+                    const imc = (m.peso / (alturaMetros * alturaMetros)).toFixed(1);
+                    imcTexto = `IMC: ${imc}`;
+                    
+                    if (imc < 18.5) imcColor = 'text-yellow-600 dark:text-yellow-400';
+                    else if (imc < 25) imcColor = 'text-green-600 dark:text-green-400';
+                    else if (imc < 30) imcColor = 'text-orange-600 dark:text-orange-400';
+                    else imcColor = 'text-red-600 dark:text-red-400';
+                }
+                
+                const fecha = new Date(m.fechaRegistro);
+                const fechaTexto = fecha.toLocaleDateString('es-CO', { 
+                    day: 'numeric', 
+                    month: 'short', 
+                    year: 'numeric',
+                    hour: '2-digit',
+                    minute: '2-digit'
+                });
+                
+                const esMasReciente = index === 0;
+                
+                html += `
+                    <div class="p-3 rounded-lg border ${esMasReciente ? 'bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/40 dark:to-indigo-900/40 border-blue-400 dark:border-blue-600' : 'bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700'}">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <div class="flex-1">
+                                <div class="flex items-center gap-2 mb-1">
+                                    <p class="text-xs font-bold text-gray-700 dark:text-gray-300">
+                                        📅 ${fechaTexto}
+                                    </p>
+                                    ${esMasReciente ? '<span class="px-2 py-0.5 text-[10px] font-bold bg-blue-600 text-white rounded-full">MÁS RECIENTE</span>' : ''}
+                                </div>
+                            </div>
+                            <div class="flex gap-1">
+                                <button onclick="editarMedida('${m.id}')" 
+                                    class="p-1.5 text-blue-600 dark:text-blue-400 hover:bg-blue-100 dark:hover:bg-blue-900/50 rounded transition-colors"
+                                    title="Editar">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                                    </svg>
+                                </button>
+                                <button onclick="eliminarMedida('${m.id}')" 
+                                    class="p-1.5 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 rounded transition-colors"
+                                    title="Eliminar">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                                    </svg>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-xs mb-2">
+                            ${m.peso ? `<div class="bg-white/50 dark:bg-gray-700/50 p-2 rounded"><span class="text-gray-500 dark:text-gray-400 block">Peso</span> <strong class="text-gray-900 dark:text-white">${m.peso} kg</strong></div>` : ''}
+                            ${m.altura ? `<div class="bg-white/50 dark:bg-gray-700/50 p-2 rounded"><span class="text-gray-500 dark:text-gray-400 block">Altura</span> <strong class="text-gray-900 dark:text-white">${m.altura} cm</strong></div>` : ''}
+                            ${m.edad ? `<div class="bg-white/50 dark:bg-gray-700/50 p-2 rounded"><span class="text-gray-500 dark:text-gray-400 block">Edad</span> <strong class="text-gray-900 dark:text-white">${m.edad} años</strong></div>` : ''}
+                        </div>
+                        <div class="flex flex-wrap gap-2 text-xs">
+                            ${imcTexto ? `<span class="px-2 py-1 bg-white/70 dark:bg-gray-700/70 rounded font-semibold ${imcColor}">${imcTexto}</span>` : ''}
+                            ${m.objetivo ? `<span class="px-2 py-1 bg-white/70 dark:bg-gray-700/70 rounded text-gray-700 dark:text-gray-300">🎯 ${m.objetivo.replace('-', ' ')}</span>` : ''}
+                            ${m.nivel ? `<span class="px-2 py-1 bg-white/70 dark:bg-gray-700/70 rounded text-gray-700 dark:text-gray-300">💪 ${m.nivel}</span>` : ''}
+                        </div>
+                    </div>
+                `;
+            });
+            
+            lista.innerHTML = html;
+        }
+        
+        function cargarHistorialMedidas() {
+            const historial = obtenerHistorialMedidas(currentCoachId);
+            const lista = document.getElementById('historial-medidas-lista');
+            
+            // Filtrar para no mostrar el periodo actual
+            const historiaSinActual = historial.filter(h => h.periodoId !== currentPagoId);
+            
+            if (historiaSinActual.length === 0) {
+                lista.innerHTML = `
+                    <p class="text-xs text-gray-500 dark:text-gray-400 text-center py-2">
+                        No hay registros de periodos anteriores
+                    </p>
+                `;
+                return;
+            }
+            
+            let html = '';
+            historiaSinActual.forEach((item) => {
+                // Obtener la medida más reciente de ese periodo
+                const medida = item.medidas[item.medidas.length - 1];
+                const totalRegistros = item.medidas.length;
+                
+                // Calcular IMC si hay datos
+                let imcTexto = '';
+                if (medida.peso && medida.altura) {
+                    const alturaMetros = medida.altura / 100;
+                    const imc = (medida.peso / (alturaMetros * alturaMetros)).toFixed(1);
+                    imcTexto = `IMC: ${imc}`;
+                }
+                
+                html += `
+                    <div class="p-3 rounded-lg border bg-white dark:bg-gray-800 border-purple-200 dark:border-purple-700">
+                        <div class="flex items-start justify-between gap-2 mb-2">
+                            <div class="flex-1">
+                                <p class="text-xs font-bold text-gray-700 dark:text-gray-300">
+                                    ${item.periodo}
+                                </p>
+                                <p class="text-[10px] text-purple-600 dark:text-purple-400 mt-0.5">
+                                    ${totalRegistros} registro${totalRegistros !== 1 ? 's' : ''} realizad${totalRegistros !== 1 ? 'os' : 'o'}
+                                </p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-3 gap-2 text-xs">
+                            ${medida.peso ? `<div><span class="text-gray-500 dark:text-gray-400">Peso:</span> <strong>${medida.peso} kg</strong></div>` : ''}
+                            ${medida.altura ? `<div><span class="text-gray-500 dark:text-gray-400">Altura:</span> <strong>${medida.altura} cm</strong></div>` : ''}
+                            ${medida.edad ? `<div><span class="text-gray-500 dark:text-gray-400">Edad:</span> <strong>${medida.edad} años</strong></div>` : ''}
+                        </div>
+                        ${imcTexto ? `<p class="text-xs text-gray-600 dark:text-gray-400 mt-2">${imcTexto}</p>` : ''}
+                        ${medida.objetivo ? `<p class="text-xs text-gray-600 dark:text-gray-400 mt-1">🎯 ${medida.objetivo.replace('-', ' ')}</p>` : ''}
+                    </div>
+                `;
+            });
+            
+            lista.innerHTML = html;
         }
 
         function cerrarModalPerfil() {
@@ -5045,7 +5428,10 @@ ${contexto}`
             const coaches = data.coaches || [];
             const asistencias = data.asistencias || {};
             const pagos = data.pagos || {};
-            const medidas = loadMedidasCorporales();
+            // Cargar la medida más reciente del periodo actual si hay uno seleccionado
+            const medidas = currentCoachId && currentPagoId ? 
+                getMedidaMasReciente(currentCoachId, currentPagoId) : 
+                {};
 
             let contexto = `=== INFORMACIÓN COMPLETA DEL USUARIO ===\n\n`;
             contexto += `Fecha actual: ${new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n\n`;
@@ -5363,8 +5749,8 @@ ${contexto}`
                 const coach = data.coaches.find(c => c.id === currentCoachId);
                 const asistenciasCoach = data.asistencias[currentCoachId] || {};
                 
-                // Generar contexto específico para la rutina
-                const medidas = loadMedidasCorporales();
+                // Generar contexto específico para la rutina usando la medida MÁS RECIENTE del PERIODO ACTUAL
+                const medidas = getMedidaMasReciente(currentCoachId, currentPagoId);
                 
                 // Analizar el historial para detectar patrones
                 const fechasOrdenadas = Object.keys(asistenciasCoach).sort();
