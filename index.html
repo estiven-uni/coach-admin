@@ -5803,25 +5803,82 @@ ${contexto}`
                     return;
                 }
                 
-                // Analizar el DÍA ANTERIOR ESPECÍFICO
+                // Analizar el DÍA ANTERIOR con LÓGICA DE ENTRENADOR
                 const fechaActual = new Date(currentNotaDate + 'T12:00:00');
-                const fechaAnterior = new Date(fechaActual);
-                fechaAnterior.setDate(fechaAnterior.getDate() - 1);
-                const fechaAnteriorStr = fechaAnterior.toISOString().split('T')[0];
+                const diaSemanActual = fechaActual.getDay(); // 0=Domingo, 1=Lunes, ..., 6=Sábado
                 
-                const diaAnterior = asistenciasCoach[fechaAnteriorStr];
+                // Función para obtener el día de la semana
+                const getDiaSemana = (fecha) => {
+                    const dia = fecha.getDay();
+                    return dia; // 0=Domingo, 6=Sábado
+                };
+                
+                // Buscar el último día de entrenamiento REGULAR (no fin de semana)
+                let fechaReferencia = new Date(fechaActual);
+                fechaReferencia.setDate(fechaReferencia.getDate() - 1);
+                
+                let diaReferencia = null;
+                let fechaReferenciaStr = null;
+                let esReprogramacion = false;
+                let diasBuscados = 0;
+                let maxDiasBusqueda = 7;
+                
+                // Buscar hacia atrás hasta encontrar un día de entrenamiento relevante
+                while (diasBuscados < maxDiasBusqueda) {
+                    fechaReferenciaStr = fechaReferencia.toISOString().split('T')[0];
+                    const diaSemanRef = getDiaSemana(fechaReferencia);
+                    const asistenciaRef = asistenciasCoach[fechaReferenciaStr];
+                    
+                    // Si es sábado o domingo (fin de semana)
+                    if (diaSemanRef === 0 || diaSemanRef === 6) {
+                        if (asistenciaRef && asistenciaRef.asistio) {
+                            // Si hubo asistencia en fin de semana, ES UNA REPROGRAMACIÓN
+                            esReprogramacion = true;
+                            // Seguir buscando el último día regular antes del fin de semana
+                            fechaReferencia.setDate(fechaReferencia.getDate() - 1);
+                            diasBuscados++;
+                            continue;
+                        } else {
+                            // Si NO hubo asistencia en fin de semana, seguir buscando
+                            fechaReferencia.setDate(fechaReferencia.getDate() - 1);
+                            diasBuscados++;
+                            continue;
+                        }
+                    } else {
+                        // Es un día de semana regular (lunes-viernes)
+                        if (asistenciaRef && asistenciaRef.asistio && asistenciaRef.rutina) {
+                            // Encontramos el último día de entrenamiento regular
+                            diaReferencia = asistenciaRef;
+                            break;
+                        }
+                    }
+                    
+                    fechaReferencia.setDate(fechaReferencia.getDate() - 1);
+                    diasBuscados++;
+                }
+                
+                // Variables para el análisis
                 let trenDiaAnterior = null;
                 let asistioDiaAnterior = false;
                 let notasDiaAnterior = '';
+                let explicacionReferencia = '';
                 
-                if (diaAnterior) {
-                    asistioDiaAnterior = diaAnterior.asistio;
-                    if (diaAnterior.asistio && diaAnterior.rutina && diaAnterior.rutina.tren) {
-                        trenDiaAnterior = diaAnterior.rutina.tren;
+                if (diaReferencia) {
+                    asistioDiaAnterior = diaReferencia.asistio;
+                    if (diaReferencia.rutina && diaReferencia.rutina.tren) {
+                        trenDiaAnterior = diaReferencia.rutina.tren;
                     }
-                    if (diaAnterior.notas) {
-                        notasDiaAnterior = diaAnterior.notas;
+                    if (diaReferencia.notas) {
+                        notasDiaAnterior = diaReferencia.notas;
                     }
+                    
+                    if (esReprogramacion) {
+                        explicacionReferencia = `Se detectó reprogramación en fin de semana. Usando como referencia el último entrenamiento regular del ${fechaReferenciaStr}`;
+                    } else {
+                        explicacionReferencia = `Último entrenamiento regular: ${fechaReferenciaStr}`;
+                    }
+                } else {
+                    explicacionReferencia = 'No se encontró historial de entrenamientos recientes';
                 }
                 
                 // Analizar patrones de trenes y ejercicios
@@ -5884,36 +5941,99 @@ ${contexto}`
                     });
                 });
                 
-                // Determinar qué tren toca hoy basándose en el DÍA ANTERIOR
+                // Determinar qué tren toca hoy con LÓGICA 3:2 (3 días superior, 2 días inferior)
+                // Primero: Contar cuántos entrenamientos de cada tren lleva en la SEMANA ACTUAL
+                const inicioSemana = new Date(fechaActual);
+                inicioSemana.setDate(fechaActual.getDate() - fechaActual.getDay() + 1); // Lunes de esta semana
+                const inicioSemanaStr = inicioSemana.toISOString().split('T')[0];
+                
+                let contadorSuperiorSemana = 0;
+                let contadorInferiorSemana = 0;
+                
+                // Contar entrenamientos de la semana actual
+                Object.keys(asistenciasCoach).forEach(fecha => {
+                    if (fecha >= inicioSemanaStr && fecha < currentNotaDate) {
+                        const asist = asistenciasCoach[fecha];
+                        const fechaAsist = new Date(fecha + 'T12:00:00');
+                        const diaAsist = fechaAsist.getDay();
+                        
+                        // Solo contar días laborales (lunes a viernes)
+                        if (diaAsist >= 1 && diaAsist <= 5 && asist.asistio && asist.rutina && asist.rutina.tren) {
+                            if (asist.rutina.tren === 'superior') {
+                                contadorSuperiorSemana++;
+                            } else if (asist.rutina.tren === 'inferior') {
+                                contadorInferiorSemana++;
+                            }
+                        }
+                    }
+                });
+                
                 let trenHoy = 'superior';
                 let razonTren = 'Iniciando con tren superior';
                 
+                // LÓGICA 3:2 - Patrón semanal: 3 superiores, 2 inferiores
+                const totalEntrenamientosSemana = contadorSuperiorSemana + contadorInferiorSemana;
+                
+                // Construir explicación considerando fin de semana
+                let explicacionFinSemana = '';
+                if (esReprogramacion) {
+                    explicacionFinSemana = `El fin de semana no son días laborales de entrenamiento. `;
+                }
+                
                 if (trenDiaAnterior) {
-                    // Si ayer trabajaste un tren específico, hoy toca el opuesto
-                    if (trenDiaAnterior === 'superior') {
-                        trenHoy = 'inferior';
-                        razonTren = `Ayer trabajaste tren superior, hoy corresponde tren inferior para dar descanso a los músculos y mantener el equilibrio`;
-                    } else if (trenDiaAnterior === 'inferior') {
+                    // Hay un entrenamiento de referencia
+                    const nombreDiaRef = new Date(fechaReferenciaStr + 'T12:00:00').toLocaleDateString('es-CO', { weekday: 'long' });
+                    
+                    // Decidir según el patrón 3:2 y el día de la semana
+                    if (diaSemanActual === 1) {
+                        // LUNES - Generalmente empieza con superior
                         trenHoy = 'superior';
-                        razonTren = `Ayer trabajaste tren inferior, hoy corresponde tren superior para mantener la alternancia y descanso muscular`;
+                        razonTren = `${explicacionFinSemana}Es lunes, inicio de semana laboral. El último entrenamiento fue el ${nombreDiaRef} (tren ${trenDiaAnterior}). Comenzamos con tren superior siguiendo el patrón semanal óptimo de 3 días de superior y 2 de inferior`;
+                    } else if (diaSemanActual === 2) {
+                        // MARTES
+                        if (contadorSuperiorSemana >= 1) {
+                            trenHoy = 'inferior';
+                            razonTren = `${explicacionFinSemana}Ya trabajaste tren superior el lunes. Hoy toca tren inferior para equilibrar y dar descanso a la parte superior`;
+                        } else {
+                            trenHoy = 'superior';
+                            razonTren = `${explicacionFinSemana}Continuamos construyendo con tren superior`;
+                        }
+                    } else if (diaSemanActual === 3) {
+                        // MIÉRCOLES
+                        if (contadorInferiorSemana < 1) {
+                            trenHoy = 'inferior';
+                            razonTren = `${explicacionFinSemana}Es momento de trabajar tren inferior para mantener el equilibrio. Patrón: 3 superiores, 2 inferiores por semana`;
+                        } else {
+                            trenHoy = 'superior';
+                            razonTren = `${explicacionFinSemana}Retomamos tren superior para completar el ciclo semanal`;
+                        }
+                    } else if (diaSemanActual === 4) {
+                        // JUEVES
+                        if (contadorInferiorSemana < 2) {
+                            trenHoy = 'inferior';
+                            razonTren = `${explicacionFinSemana}Segundo día de tren inferior en la semana. Importante para fortalecer piernas y glúteos`;
+                        } else {
+                            trenHoy = 'superior';
+                            razonTren = `${explicacionFinSemana}Ya completaste los 2 días de tren inferior. Continuamos con superior`;
+                        }
+                    } else if (diaSemanActual === 5) {
+                        // VIERNES
+                        if (contadorSuperiorSemana < 3) {
+                            trenHoy = 'superior';
+                            razonTren = `${explicacionFinSemana}Último día de la semana laboral. Completamos los 3 días de tren superior para cerrar el ciclo perfecto`;
+                        } else {
+                            trenHoy = 'inferior';
+                            razonTren = `${explicacionFinSemana}Último día. Reforzamos tren inferior antes del fin de semana`;
+                        }
                     }
-                } else if (!asistioDiaAnterior && ultimoTrenRegistrado) {
-                    // Si ayer no asististe, mira el último tren que sí hiciste
-                    if (ultimoTrenRegistrado === 'superior') {
-                        trenHoy = 'inferior';
-                        razonTren = `No asististe ayer, pero tu último entrenamiento fue tren superior, así que hoy toca tren inferior`;
-                    } else if (ultimoTrenRegistrado === 'inferior') {
+                } else {
+                    // No hay referencia clara, usar lógica por día de semana
+                    if (diaSemanActual === 1 || diaSemanActual === 3 || diaSemanActual === 5) {
                         trenHoy = 'superior';
-                        razonTren = `No asististe ayer, pero tu último entrenamiento fue tren inferior, así que hoy toca tren superior`;
-                    }
-                } else if (ultimoTrenRegistrado) {
-                    // Fallback al último registrado
-                    if (ultimoTrenRegistrado === 'superior') {
-                        trenHoy = 'inferior';
-                        razonTren = `Alternando con el último entrenamiento registrado (tren superior)`;
+                        razonTren = 'Iniciando ciclo con tren superior según patrón semanal 3:2';
                     } else {
-                        trenHoy = 'superior';
-                        razonTren = `Alternando con el último entrenamiento registrado (tren inferior)`;
+                        trenHoy = 'inferior';
+                        razonTren = 'Día de tren inferior para equilibrar el desarrollo muscular';
                     }
                 }
                 
@@ -5940,33 +6060,41 @@ ${contexto}`
                     contexto += `\n`;
                 }
                 
-                // Análisis del día anterior
-                contexto += `--- ANÁLISIS DEL DÍA ANTERIOR (${fechaAnteriorStr}) ---\n`;
-                if (diaAnterior) {
+                // Análisis del día de referencia (considerando reprogramaciones)
+                contexto += `--- ANÁLISIS DEL ÚLTIMO ENTRENAMIENTO DE REFERENCIA ---\n`;
+                contexto += `📍 ${explicacionReferencia}\n\n`;
+                
+                if (esReprogramacion) {
+                    contexto += `⚠️ IMPORTANTE: Se detectó que hubo reprogramación(es) en fin de semana.\n`;
+                    contexto += `Las reprogramaciones son para recuperar faltas, por lo tanto NO se consideran\n`;
+                    contexto += `como parte de la secuencia regular de entrenamiento.\n\n`;
+                }
+                
+                if (diaReferencia) {
+                    contexto += `Fecha de referencia: ${fechaReferenciaStr}\n`;
                     if (asistioDiaAnterior) {
-                        contexto += `✅ SÍ asististe al entrenamiento\n`;
+                        contexto += `✅ SÍ hubo entrenamiento\n`;
                         if (trenDiaAnterior) {
                             contexto += `Tren trabajado: ${trenDiaAnterior.toUpperCase()}\n`;
                         }
                         if (notasDiaAnterior) {
-                            contexto += `Notas del día: ${notasDiaAnterior}\n`;
-                        }
-                    } else {
-                        contexto += `❌ NO asististe al entrenamiento\n`;
-                        if (diaAnterior.notas) {
-                            contexto += `Razón: ${diaAnterior.notas}\n`;
+                            contexto += `Notas del entrenamiento: ${notasDiaAnterior}\n`;
                         }
                     }
                 } else {
-                    contexto += `Sin registro de entrenamiento programado\n`;
+                    contexto += `⚠️ No se encontró un entrenamiento de referencia reciente en los últimos 7 días.\n`;
+                    contexto += `Se procederá a generar una rutina basada en el historial general.\n`;
                 }
                 contexto += `\n`;
                 
                 // Análisis de patrones
                 contexto += `--- ANÁLISIS Y PLANIFICACIÓN ---\n`;
                 contexto += `Total entrenamientos en el periodo: ${contador}\n`;
-                contexto += `Último tren registrado: ${ultimoTrenRegistrado || 'No registrado'}\n`;
-                contexto += `🎯 TREN QUE CORRESPONDE HOY: ${trenHoy.toUpperCase()}\n`;
+                contexto += `\n--- CONTEO DE LA SEMANA ACTUAL ---\n`;
+                contexto += `Días de tren superior esta semana: ${contadorSuperiorSemana}\n`;
+                contexto += `Días de tren inferior esta semana: ${contadorInferiorSemana}\n`;
+                contexto += `Patrón semanal objetivo: 3 días superior + 2 días inferior = 5 días laborales\n`;
+                contexto += `\n🎯 TREN QUE CORRESPONDE HOY: ${trenHoy.toUpperCase()}\n`;
                 contexto += `📋 Razón: ${razonTren}\n`;
                 contexto += `\n`;
                 
@@ -6041,17 +6169,26 @@ ${contexto}`
 🎯 REGLAS FUNDAMENTALES:
 1. SOLO usa ejercicios que aparecen en el historial del atleta para el tren correspondiente
 2. RESPETA el tren que se indica (mira "TREN QUE CORRESPONDE HOY")
-3. Considera si el atleta asistió o no el día anterior
-4. Usa los pesos, series y repeticiones similares a los históricos, con pequeñas progresiones
-5. Genera entre 6-9 ejercicios variados del mismo tren
-6. En cada ejercicio, incluye notas instructivas útiles
+3. Considera la lógica de entrenamiento: si hubo reprogramaciones en fin de semana, ignóralas y basa la rutina en el último entrenamiento REGULAR
+4. Las reprogramaciones (sábados/domingos con asistencia) NO afectan la secuencia normal de entrenamiento
+5. Usa los pesos, series y repeticiones similares a los históricos, con pequeñas progresiones
+6. Genera entre 6-9 ejercicios variados del mismo tren
+7. En cada ejercicio, incluye notas instructivas útiles
+
+🏋️ LÓGICA DE ENTRENADOR:
+- Patrón semanal: 3 días de TREN SUPERIOR + 2 días de TREN INFERIOR = 5 días laborales (lunes a viernes)
+- Sábados y domingos con asistencia = REPROGRAMACIONES (recuperar faltas, NO cuentan en el patrón semanal)
+- Reprogramaciones NO afectan la secuencia regular de la semana laboral
+- El sistema ya calculó qué tren toca basándose en el conteo de la semana actual
+- Ejemplo semana típica: Lun(Superior) → Mar(Inferior) → Mié(Superior) → Jue(Inferior) → Vie(Superior)
+- Si hubo faltas, el patrón se ajusta automáticamente para mantener el equilibrio 3:2
 
 📋 FORMATO DE RESPUESTA:
 Responde ÚNICAMENTE con este JSON exacto, sin texto adicional antes o después:
 
 {
   "tren": "superior" o "inferior",
-  "resumen": "Explicación amigable de 2-3 oraciones sobre por qué elegiste esta rutina, considerando el día anterior y el objetivo del atleta",
+  "resumen": "Explicación amigable de 2-3 oraciones sobre por qué elegiste esta rutina, considerando el último entrenamiento REGULAR y el objetivo del atleta",
   "ejercicios": [
     {
       "nombre": "Nombre EXACTO del ejercicio (del historial)",
@@ -6064,22 +6201,25 @@ Responde ÚNICAMENTE con este JSON exacto, sin texto adicional antes o después:
 }
 
 ✅ INSTRUCCIONES DETALLADAS:
-1. Lee "ANÁLISIS DEL DÍA ANTERIOR" para saber si asistió y qué hizo
-2. Lee "TREN QUE CORRESPONDE HOY" - ese es el tren que debes usar
-3. Lee "Razón" para entender el contexto de la planificación
-4. Selecciona 6-9 ejercicios SOLO de la lista de ejercicios frecuentes del tren correspondiente
-5. VARÍA los ejercicios - no repitas exactamente la rutina del último entrenamiento
-6. Usa los promedios históricos como base, aplica progresión gradual (+0.5 a +2kg)
-7. En cada ejercicio, escribe una nota instructiva que incluya:
+1. Lee "ANÁLISIS DEL ÚLTIMO ENTRENAMIENTO DE REFERENCIA" para entender el contexto
+2. Lee "CONTEO DE LA SEMANA ACTUAL" para ver cuántos días de cada tren se han hecho
+3. Lee "TREN QUE CORRESPONDE HOY" - ese es el tren que DEBES usar (ya está calculado)
+4. Lee "Razón" para entender la lógica completa de la planificación
+5. Selecciona 6-9 ejercicios SOLO de la lista de ejercicios frecuentes del tren correspondiente
+6. VARÍA los ejercicios - no repitas exactamente la rutina del último entrenamiento
+7. Usa los promedios históricos como base, aplica progresión gradual (+0.5 a +2kg)
+8. En cada ejercicio, escribe una nota instructiva que incluya:
    - Cómo ejecutar el movimiento correctamente
    - Qué máquina, equipo o implemento usar (mancuernas, barra, polea, etc.)
    - Tips de postura o seguridad
    - Enfoque muscular
-8. En "resumen", explica de forma amigable por qué esta rutina:
-   - Qué tren trabajarás y por qué (basado en el día anterior)
+9. En "resumen", DEBES mencionar:
+   - Si hubo fin de semana de por medio (menciona que sábado/domingo no son días laborales)
+   - Qué se hizo el último día laboral (ejemplo: "el viernes trabajaste tren superior")
+   - El conteo actual de la semana (ejemplo: "llevas 1 día de superior esta semana")
+   - Por qué este tren hoy según el patrón 3:2
    - Cómo se alinea con el objetivo del atleta
-   - Cualquier ajuste especial que hayas considerado
-9. Sé motivador y cercano en tus textos
+10. Sé específico, motivador y profesional en tus explicaciones
 10. NO inventes ejercicios - SOLO usa los del historial
 11. RESPONDE SOLO CON JSON VÁLIDO, sin backticks de markdown ni texto extra`
                             },
