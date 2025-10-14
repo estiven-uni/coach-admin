@@ -234,15 +234,6 @@
                         </svg>
                     </button>
 
-                    <button id="btn-asistente-ia"
-                        class="hidden sm:flex items-center gap-1.5 px-3 py-2 text-white bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-500 dark:to-teal-500 rounded-lg hover:from-emerald-700 hover:to-teal-700 dark:hover:from-emerald-600 dark:hover:to-teal-600 transition-all shadow-lg hover:shadow-xl"
-                        title="Coach IA - Tu entrenador virtual">
-                        <svg class="h-5 w-5" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
-                        </svg>
-                        <span class="text-xs font-semibold hidden lg:inline">Coach IA</span>
-                    </button>
-
                     <button id="btn-configuracion"
                         class="p-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-gray-50 dark:hover:bg-gray-700 transition-colors"
                         title="Configuración">
@@ -3057,12 +3048,18 @@
             // Obtener fecha actual (solo fecha, sin hora) - usar fecha simulada si existe
             const hoy = fechaSimulada ? new Date(fechaSimulada) : new Date();
             const fechaActual = formatDate(hoy);
+            
+            // Cargar configuración para verificar modo de pruebas
+            const config = loadConfig();
+            const modoPruebas = config.modoPruebas || false;
 
             // Renderizar todos los días
             days.forEach(({ fecha: dateStr, diaSemana }) => {
-                const asist = asistencias[dateStr] || { asistio: false, reprogramacion: false, nota: '' };
+                const asist = asistencias[dateStr] || { asistio: null, reprogramacion: false, nota: '' };
                 const esLaborable = coach.diasLaborables.includes(diaSemana);
                 const esDiaActual = dateStr === fechaActual;
+                const esDiaFuturo = dateStr > fechaActual;
+                const mostrarCheckAsistencia = !esDiaFuturo || modoPruebas; // Mostrar si NO es futuro O si está en modo pruebas
 
                 // Determinar clases de borde
                 let borderClasses = '';
@@ -3099,14 +3096,14 @@
                     (asist.rutina.tren === 'superior' ? 'Tren Superior' : 'Tren Inferior') : '';
 
                 html += `
-                    <div class="${borderClasses} rounded-lg p-3 ${asist.asistio ? 'bg-green-50 dark:bg-green-900/20' : (esLaborable && dateStr <= fechaActual ? 'bg-red-50 dark:bg-red-900/10' : (esLaborable ? 'bg-white dark:bg-gray-800' : 'bg-gray-100 dark:bg-gray-900'))} ${esLaborable ? '' : 'opacity-60'} h-48 sm:h-52 md:h-56 flex flex-col overflow-hidden ${esDiaActual ? 'relative' : ''}">
+                    <div class="${borderClasses} rounded-lg p-3 ${asist.asistio === true ? 'bg-green-50 dark:bg-green-900/20' : (asist.asistio === false ? 'bg-red-50 dark:bg-red-900/10' : (esLaborable ? 'bg-white dark:bg-gray-800' : 'bg-gray-100 dark:bg-gray-900'))} ${esLaborable ? '' : 'opacity-60'} h-48 sm:h-52 md:h-56 flex flex-col overflow-hidden ${esDiaActual ? 'relative' : ''}">
                         <div class="flex justify-between items-start mb-2 flex-shrink-0">
                             <div class="flex-1 min-w-0">
                                 <div class="flex items-center gap-1.5 flex-wrap">
                                     <p class="text-base sm:text-lg font-bold ${esLaborable ? 'text-gray-700 dark:text-gray-300' : 'text-gray-400 dark:text-gray-600'}">${formatDateDisplay(dateStr).split(' ').slice(0, 2).join(' ')}</p>
                                     ${esDiaActual ? '<span class="px-2 py-1 text-xs sm:text-sm font-bold bg-blue-500 dark:bg-blue-600 text-white rounded">HOY</span>' : ''}
                                 </div>
-                                ${!esLaborable ? '<p class="text-sm sm:text-base text-gray-400 dark:text-gray-600 leading-tight">No laboral</p>' : ''}
+                                ${!esLaborable ? '<p class="text-xs sm:text-sm text-gray-500 dark:text-gray-500 leading-tight font-medium">🛌 Día de descanso</p>' : ''}
                             </div>
                             <button 
                                 onclick="abrirModalNotaDia('${dateStr}')"
@@ -3117,49 +3114,53 @@
                             </button>
                         </div>
                         ${esLaborable ? `
-                            <label class="flex items-center gap-2 cursor-pointer mb-2 flex-shrink-0 group">
+                            <button onclick="toggleAsistencia('${dateStr}')" class="flex items-center gap-2 cursor-pointer mb-2 flex-shrink-0 group">
                                 <div class="relative flex-shrink-0">
-                                    <input 
-                                        type="checkbox" 
-                                        ${asist.asistio ? 'checked' : ''}
-                                        onchange="toggleAsistencia('${dateStr}')"
-                                        class="asistencia-check sr-only"
-                                    >
                                     <div class="w-5 h-5 sm:w-6 sm:h-6 rounded border-2 flex items-center justify-center transition-all relative
-                                        ${dateStr <= fechaActual && !asist.asistio 
-                                            ? 'bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-600' 
-                                            : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'}
+                                        ${asist.asistio === true 
+                                            ? 'bg-green-500 dark:bg-green-600 border-green-500 dark:border-green-600' 
+                                            : (asist.asistio === false 
+                                                ? 'bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-600' 
+                                                : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600')}
                                         group-hover:scale-110 group-hover:shadow-sm">
                                         <!-- Check verde cuando asistió -->
-                                        <svg class="check-icon w-4 h-4 sm:w-5 sm:h-5 text-white transition-all opacity-0 scale-0 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
-                                            <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                        </svg>
-                                        <!-- X roja cuando NO asistió (día pasado) -->
-                                        ${dateStr <= fechaActual && !asist.asistio ? `
-                                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-red-500 dark:text-red-400 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
+                                        ${asist.asistio === true ? `
+                                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
+                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                            </svg>
+                                        ` : ''}
+                                        <!-- X roja cuando NO asistió -->
+                                        ${asist.asistio === false ? `
+                                            <svg class="w-4 h-4 sm:w-5 sm:h-5 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
                                                 <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                                             </svg>
                                         ` : ''}
+                                        <!-- Vacío cuando es null -->
                                     </div>
                                 </div>
                                 <span class="text-sm sm:text-base font-medium transition-colors
-                                    ${asist.asistio 
+                                    ${asist.asistio === true 
                                         ? 'text-green-700 dark:text-green-400' 
-                                        : (dateStr <= fechaActual 
+                                        : (asist.asistio === false 
                                             ? 'text-red-600 dark:text-red-400' 
                                             : 'text-gray-500 dark:text-gray-400')}">
-                                    ${asist.asistio ? 'Asistió' : (dateStr <= fechaActual ? 'No Asistió' : 'Asistió')}
+                                    ${asist.asistio === true ? 'Asistió ✓' : (asist.asistio === false ? 'No Asistió ✗' : 'Sin marcar')}
                                 </span>
-                            </label>
+                            </button>
                         ` : `
                             <button 
                                 onclick="toggleReprogramacion('${dateStr}')"
                                 class="flex flex-col gap-0.5 text-xs sm:text-sm ${asist.reprogramacion ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70' : (hayReprogramacionesDisponibles ? 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' : 'text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-50')} px-2.5 py-1.5 rounded transition-colors mb-2 flex-shrink-0"
-                                title="${asist.reprogramacion ? 'Quitar reprogramación' : (hayReprogramacionesDisponibles ? 'Marcar como reprogramación' : 'No hay reprogramaciones disponibles (no hay faltas)')}"
+                                title="${asist.reprogramacion ? 'Quitar reagendamiento' : (hayReprogramacionesDisponibles ? 'Reagendar una clase perdida en este día' : 'No hay clases pendientes por reagendar')}"
                                 ${!asist.reprogramacion && !hayReprogramacionesDisponibles ? 'disabled' : ''}
                             >
-                                <span class="font-semibold flex items-center gap-1"><span>R</span> ${asist.reprogramacion ? 'Reprogramación' : 'Reprogramar'}</span>
-                                ${asist.reprogramacion && asist.reprogramacionDe ? `<span class="text-[10px] font-normal opacity-75">Repone: ${formatDateDisplay(asist.reprogramacionDe).split(' ').slice(0, 2).join(' ')}</span>` : ''}
+                                <span class="font-semibold flex items-center gap-1">
+                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                    </svg>
+                                    ${asist.reprogramacion ? 'Clase reagendada' : 'Reagendar clase'}
+                                </span>
+                                ${asist.reprogramacion && asist.reprogramacionDe ? `<span class="text-[10px] font-normal opacity-75">📅 Recupera falta del: ${formatDateDisplay(asist.reprogramacionDe).split(' ').slice(0, 2).join(' ')}</span>` : ''}
                             </button>
                         `}
                         <div class="flex-1 overflow-hidden min-h-0">
@@ -3243,7 +3244,7 @@
                 const diasNombres = ['Dom', 'Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb'];
 
                 semana.forEach(({ fecha: dateStr, diaSemana }) => {
-                    const asist = asistencias[dateStr] || { asistio: false, reprogramacion: false, nota: '' };
+                    const asist = asistencias[dateStr] || { asistio: null, reprogramacion: false, nota: '' };
                     const esLaborable = coach.diasLaborables.includes(diaSemana);
                     const esDiaActual = dateStr === fechaActual;
 
@@ -3265,13 +3266,13 @@
                         (asist.rutina.tren === 'superior' ? 'Tren Superior' : 'Tren Inferior') : '';
 
                     html += `
-                        <div class="p-4 ${asist.asistio ? 'bg-green-50 dark:bg-green-900/20' : (esLaborable && dateStr <= fechaActual ? 'bg-red-50 dark:bg-red-900/10' : (esLaborable ? 'bg-white dark:bg-gray-800' : 'bg-gray-100 dark:bg-gray-900'))} ${esDiaActual ? 'border-l-4 border-blue-500 dark:border-blue-400' : ''}">
+                        <div class="p-4 ${asist.asistio === true ? 'bg-green-50 dark:bg-green-900/20' : (asist.asistio === false ? 'bg-red-50 dark:bg-red-900/10' : (esLaborable ? 'bg-white dark:bg-gray-800' : 'bg-gray-100 dark:bg-gray-900'))} ${esDiaActual ? 'border-l-4 border-blue-500 dark:border-blue-400' : ''}">
                             <div class="flex justify-between items-start mb-3">
                                 <div>
                                     <p class="text-sm font-semibold text-gray-500 dark:text-gray-400">${diasNombres[diaSemana]}</p>
                                     <p class="text-lg font-bold ${esLaborable ? 'text-gray-900 dark:text-white' : 'text-gray-400 dark:text-gray-600'}">${formatDateDisplay(dateStr).split(' ')[0]}</p>
                                     ${esDiaActual ? '<span class="inline-block px-2 py-0.5 text-xs font-bold bg-blue-500 dark:bg-blue-600 text-white rounded mt-1">HOY</span>' : ''}
-                                    ${!esLaborable ? '<p class="text-xs text-gray-400 dark:text-gray-600 mt-1">No laboral</p>' : ''}
+                                    ${!esLaborable ? '<p class="text-xs text-gray-500 dark:text-gray-500 mt-1 font-medium">🛌 Día de descanso</p>' : ''}
                                 </div>
                                 <button 
                                     onclick="abrirModalNotaDia('${dateStr}')"
@@ -3282,48 +3283,52 @@
                                 </button>
                             </div>
                             ${esLaborable ? `
-                                <label class="flex items-center gap-2 cursor-pointer mb-3 group">
+                                <button onclick="toggleAsistencia('${dateStr}')" class="flex items-center gap-2 cursor-pointer mb-3 group">
                                     <div class="relative flex-shrink-0">
-                                        <input 
-                                            type="checkbox" 
-                                            ${asist.asistio ? 'checked' : ''}
-                                            onchange="toggleAsistencia('${dateStr}')"
-                                            class="asistencia-check sr-only"
-                                        >
                                         <div class="w-5 h-5 rounded border-2 flex items-center justify-center transition-all relative
-                                            ${dateStr <= fechaActual && !asist.asistio 
-                                                ? 'bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-600' 
-                                                : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'}
+                                            ${asist.asistio === true 
+                                                ? 'bg-green-500 dark:bg-green-600 border-green-500 dark:border-green-600' 
+                                                : (asist.asistio === false 
+                                                    ? 'bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-600' 
+                                                    : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600')}
                                             group-hover:scale-110 group-hover:shadow-sm">
                                             <!-- Check verde cuando asistió -->
-                                            <svg class="check-icon w-4 h-4 text-white transition-all opacity-0 scale-0 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
-                                                <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                            </svg>
-                                            <!-- X roja cuando NO asistió (día pasado) -->
-                                            ${dateStr <= fechaActual && !asist.asistio ? `
-                                                <svg class="w-4 h-4 text-red-500 dark:text-red-400 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
+                                            ${asist.asistio === true ? `
+                                                <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                                </svg>
+                                            ` : ''}
+                                            <!-- X roja cuando NO asistió -->
+                                            ${asist.asistio === false ? `
+                                                <svg class="w-4 h-4 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
                                                     <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                                                 </svg>
                                             ` : ''}
                                         </div>
                                     </div>
                                     <span class="text-sm font-medium transition-colors
-                                        ${asist.asistio 
+                                        ${asist.asistio === true 
                                             ? 'text-green-700 dark:text-green-400' 
-                                            : (dateStr <= fechaActual 
+                                            : (asist.asistio === false 
                                                 ? 'text-red-600 dark:text-red-400' 
                                                 : 'text-gray-500 dark:text-gray-400')}">
-                                        ${asist.asistio ? 'Asistió' : (dateStr <= fechaActual ? 'No Asistió' : 'Asistió')}
+                                        ${asist.asistio === true ? 'Asistió ✓' : (asist.asistio === false ? 'No Asistió ✗' : 'Sin marcar')}
                                     </span>
-                                </label>
+                                </button>
                             ` : `
                                 <button 
                                     onclick="toggleReprogramacion('${dateStr}')"
                                     class="flex flex-col gap-0.5 text-sm ${asist.reprogramacion ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70' : (hayReprogramacionesDisponibles ? 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' : 'text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-50')} px-2.5 py-1.5 rounded transition-colors mb-3 w-full items-center"
+                                    title="${asist.reprogramacion ? 'Quitar reagendamiento' : (hayReprogramacionesDisponibles ? 'Reagendar una clase perdida en este día' : 'No hay clases pendientes por reagendar')}"
                                     ${!asist.reprogramacion && !hayReprogramacionesDisponibles ? 'disabled' : ''}
                                 >
-                                    <span class="font-semibold flex items-center gap-1"><span>R</span> ${asist.reprogramacion ? 'Reprogramación' : 'Reprogramar'}</span>
-                                    ${asist.reprogramacion && asist.reprogramacionDe ? `<span class="text-xs font-normal opacity-75">Repone: ${formatDateDisplay(asist.reprogramacionDe).split(' ').slice(0, 2).join(' ')}</span>` : ''}
+                                    <span class="font-semibold flex items-center gap-1">
+                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                                        </svg>
+                                        ${asist.reprogramacion ? 'Clase reagendada' : 'Reagendar clase'}
+                                    </span>
+                                    ${asist.reprogramacion && asist.reprogramacionDe ? `<span class="text-xs font-normal opacity-75">📅 Recupera falta del: ${formatDateDisplay(asist.reprogramacionDe).split(' ').slice(0, 2).join(' ')}</span>` : ''}
                                 </button>
                             `}
                             ${tieneRutina ? `
@@ -3383,7 +3388,7 @@
             let html = '<div class="grid grid-cols-1 lg:grid-cols-2 gap-3">';
 
             days.forEach(({ fecha: dateStr, diaSemana }) => {
-                const asist = asistencias[dateStr] || { asistio: false, reprogramacion: false, nota: '' };
+                const asist = asistencias[dateStr] || { asistio: null, reprogramacion: false, nota: '' };
                 const esLaborable = coach.diasLaborables.includes(diaSemana);
                 const esDiaActual = dateStr === fechaActual;
 
@@ -3405,7 +3410,7 @@
                     (asist.rutina.tren === 'superior' ? 'Tren Superior' : 'Tren Inferior') : '';
 
                 html += `
-                    <div class="border ${esDiaActual ? 'border-blue-500 dark:border-blue-400 border-2' : 'border-gray-200 dark:border-gray-700'} rounded-lg p-4 ${asist.asistio ? 'bg-green-50 dark:bg-green-900/20' : (esLaborable && dateStr <= fechaActual ? 'bg-red-50 dark:bg-red-900/10' : (esLaborable ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'))}">
+                    <div class="border ${esDiaActual ? 'border-blue-500 dark:border-blue-400 border-2' : 'border-gray-200 dark:border-gray-700'} rounded-lg p-4 ${asist.asistio === true ? 'bg-green-50 dark:bg-green-900/20' : (asist.asistio === false ? 'bg-red-50 dark:bg-red-900/10' : (esLaborable ? 'bg-white dark:bg-gray-800' : 'bg-gray-50 dark:bg-gray-900'))}">
                         <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                             <div class="flex-1">
                                 <div class="flex items-center gap-2 mb-2 flex-wrap">
@@ -3414,44 +3419,42 @@
                                         <p class="text-sm text-gray-600 dark:text-gray-400">${diasNombres[diaSemana]}</p>
                                     </div>
                                     ${esDiaActual ? '<span class="px-2 py-1 text-xs font-bold bg-blue-500 dark:bg-blue-600 text-white rounded">HOY</span>' : ''}
-                                    ${!esLaborable ? '<span class="px-2 py-1 text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded">No laboral</span>' : ''}
+                                    ${!esLaborable ? '<span class="px-2 py-1 text-xs font-medium bg-gray-200 dark:bg-gray-700 text-gray-600 dark:text-gray-300 rounded">🛌 Día de descanso</span>' : ''}
                                 </div>
                                 
                                 ${esLaborable ? `
-                                    <label class="flex items-center gap-2 cursor-pointer mb-2 group">
+                                    <button onclick="toggleAsistencia('${dateStr}')" class="flex items-center gap-2 cursor-pointer mb-2 group">
                                         <div class="relative flex-shrink-0">
-                                            <input 
-                                                type="checkbox" 
-                                                ${asist.asistio ? 'checked' : ''}
-                                                onchange="toggleAsistencia('${dateStr}')"
-                                                class="asistencia-check sr-only"
-                                            >
                                             <div class="w-5 h-5 rounded border-2 flex items-center justify-center transition-all relative
-                                                ${dateStr <= fechaActual && !asist.asistio 
-                                                    ? 'bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-600' 
-                                                    : 'bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600'}
+                                                ${asist.asistio === true 
+                                                    ? 'bg-green-500 dark:bg-green-600 border-green-500 dark:border-green-600' 
+                                                    : (asist.asistio === false 
+                                                        ? 'bg-red-50 dark:bg-red-900/20 border-red-400 dark:border-red-600' 
+                                                        : 'bg-white dark:bg-gray-700 border-gray-300 dark:border-gray-600')}
                                                 group-hover:scale-110 group-hover:shadow-sm">
                                                 <!-- Check verde cuando asistió -->
-                                                <svg class="check-icon w-4 h-4 text-white transition-all opacity-0 scale-0 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
-                                                    <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                                </svg>
-                                                <!-- X roja cuando NO asistió (día pasado) -->
-                                                ${dateStr <= fechaActual && !asist.asistio ? `
-                                                    <svg class="w-4 h-4 text-red-500 dark:text-red-400 absolute" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
+                                                ${asist.asistio === true ? `
+                                                    <svg class="w-4 h-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
+                                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                                    </svg>
+                                                ` : ''}
+                                                <!-- X roja cuando NO asistió -->
+                                                ${asist.asistio === false ? `
+                                                    <svg class="w-4 h-4 text-red-500 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" style="stroke-width: 3">
                                                         <path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12"/>
                                                     </svg>
                                                 ` : ''}
                                             </div>
                                         </div>
                                         <span class="text-sm font-medium transition-colors
-                                            ${asist.asistio 
+                                            ${asist.asistio === true 
                                                 ? 'text-green-700 dark:text-green-400' 
-                                                : (dateStr <= fechaActual 
+                                                : (asist.asistio === false 
                                                     ? 'text-red-600 dark:text-red-400' 
                                                     : 'text-gray-500 dark:text-gray-400')}">
-                                            ${asist.asistio ? 'Asistió' : (dateStr <= fechaActual ? 'No Asistió' : 'Asistió')}
+                                            ${asist.asistio === true ? 'Asistió ✓' : (asist.asistio === false ? 'No Asistió ✗' : 'Sin marcar')}
                                         </span>
-                                    </label>
+                                    </button>
                                 ` : `
                                     <button 
                                         onclick="toggleReprogramacion('${dateStr}')"
@@ -3497,10 +3500,23 @@
             }
 
             if (!data.asistencias[currentCoachId][dateStr]) {
-                data.asistencias[currentCoachId][dateStr] = { asistio: false, reprogramacion: false, rutina: null };
+                data.asistencias[currentCoachId][dateStr] = { asistio: null, reprogramacion: false, rutina: null };
             }
 
-            data.asistencias[currentCoachId][dateStr].asistio = !data.asistencias[currentCoachId][dateStr].asistio;
+            // Ciclo de 3 estados: null → true → false → null
+            const estadoActual = data.asistencias[currentCoachId][dateStr].asistio;
+            
+            if (estadoActual === null || estadoActual === undefined) {
+                // De null a asistió (true)
+                data.asistencias[currentCoachId][dateStr].asistio = true;
+            } else if (estadoActual === true) {
+                // De asistió a no asistió (false)
+                data.asistencias[currentCoachId][dateStr].asistio = false;
+            } else {
+                // De no asistió a sin marcar (null)
+                data.asistencias[currentCoachId][dateStr].asistio = null;
+            }
+            
             saveData(data);
             renderCalendarioPeriodo();
         }
@@ -6849,18 +6865,31 @@ EJEMPLO de "nota" correcta:
         });
     </script>
 
-    <!-- Botón flotante Coach IA para móvil -->
+    <!-- Botón flotante Coach IA General - Visible en todas las pantallas -->
     <button id="btn-asistente-ia-mobile"
-        class="sm:hidden fixed bottom-6 right-6 z-[90] w-16 h-16 flex items-center justify-center text-white bg-gradient-to-br from-emerald-500/90 via-teal-500/90 to-cyan-500/90 backdrop-blur-lg rounded-full shadow-2xl hover:shadow-emerald-500/50 hover:scale-110 active:scale-95 transition-all duration-300 border-2 border-white/30 animate-pulse"
-        style="box-shadow: 0 0 30px rgba(16, 185, 129, 0.6), 0 0 60px rgba(20, 184, 166, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.2);"
-        title="🏋️ Coach IA - Tu entrenador virtual">
-        <div class="relative">
-            <!-- Icono de silbato de coach -->
-            <svg class="h-8 w-8 relative z-10" fill="currentColor" viewBox="0 0 24 24">
-                <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
+        class="group fixed bottom-6 right-6 z-[90] flex flex-col items-center gap-2"
+        title="🤖 Coach IA General - Tu entrenador virtual inteligente">
+        <!-- Badge identificador -->
+        <div class="hidden sm:flex items-center gap-1.5 px-3 py-1.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white text-xs font-bold rounded-full shadow-lg opacity-0 group-hover:opacity-100 transition-opacity duration-300 whitespace-nowrap">
+            <svg class="w-3.5 h-3.5" fill="currentColor" viewBox="0 0 20 20">
+                <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z"/>
             </svg>
-            <!-- Destello animado -->
-            <div class="absolute inset-0 rounded-full bg-white opacity-0 animate-ping"></div>
+            Coach IA
+        </div>
+        
+        <!-- Botón circular principal -->
+        <div class="relative">
+            <div class="w-16 h-16 sm:w-20 sm:h-20 flex items-center justify-center text-white bg-gradient-to-br from-emerald-500 via-teal-500 to-cyan-500 rounded-full shadow-2xl hover:shadow-emerald-500/50 hover:scale-110 active:scale-95 transition-all duration-300 border-3 border-white/40"
+                style="box-shadow: 0 0 30px rgba(16, 185, 129, 0.6), 0 0 60px rgba(20, 184, 166, 0.4), inset 0 0 20px rgba(255, 255, 255, 0.2);">
+                <!-- Icono de robot/IA con cerebro -->
+                <svg class="h-9 w-9 sm:h-11 sm:w-11 relative z-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09zM18.259 8.715L18 9.75l-.259-1.035a3.375 3.375 0 00-2.455-2.456L14.25 6l1.036-.259a3.375 3.375 0 002.455-2.456L18 2.25l.259 1.035a3.375 3.375 0 002.456 2.456L21.75 6l-1.035.259a3.375 3.375 0 00-2.456 2.456zM16.894 20.567L16.5 21.75l-.394-1.183a2.25 2.25 0 00-1.423-1.423L13.5 18.75l1.183-.394a2.25 2.25 0 001.423-1.423l.394-1.183.394 1.183a2.25 2.25 0 001.423 1.423l1.183.394-1.183.394a2.25 2.25 0 00-1.423 1.423z"/>
+                </svg>
+                <!-- Destello animado -->
+                <div class="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-20 transition-opacity duration-300"></div>
+            </div>
+            <!-- Ping animado -->
+            <div class="absolute inset-0 rounded-full bg-emerald-400 opacity-75 animate-ping"></div>
         </div>
     </button>
     
@@ -6874,11 +6903,13 @@ EJEMPLO de "nota" correcta:
             }
         }
         
-        #btn-asistente-ia-mobile {
+        /* Aplicar animación de brillo al div interno del botón */
+        #btn-asistente-ia-mobile > div > div:first-child {
             animation: glow-pulse 2s ease-in-out infinite;
         }
         
-        #btn-asistente-ia-mobile:hover {
+        /* Al hacer hover, intensificar el brillo */
+        #btn-asistente-ia-mobile:hover > div > div:first-child {
             animation: none;
             box-shadow: 0 0 50px rgba(16, 185, 129, 0.9), 0 0 100px rgba(20, 184, 166, 0.7), inset 0 0 40px rgba(255, 255, 255, 0.4) !important;
         }
