@@ -211,6 +211,15 @@
                         </svg>
                     </button>
 
+                    <!-- Botón de sincronización con la nube -->
+                    <button id="btn-sync-cloud"
+                        class="p-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-gray-600 rounded-lg hover:bg-blue-50 dark:hover:bg-blue-900/30 transition-all"
+                        title="Sincronizar con la nube">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 15a4 4 0 004 4h9a5 5 0 10-.1-9.999 5.002 5.002 0 10-9.78 2.096A4.001 4.001 0 003 15z" />
+                        </svg>
+                    </button>
+
                     <button id="btn-perfil"
                         class="p-2 text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-800 border-2 border-gray-300 dark:border-teal-600 rounded-lg hover:bg-teal-50 dark:hover:bg-teal-900/30 transition-colors"
                         title="Mi Perfil">
@@ -1824,6 +1833,14 @@
         const CONFIG_KEY = 'coaches_config';
         const EJERCICIOS_KEY = 'ejercicios_biblioteca';
 
+        // ========================================
+        // CONFIGURACIÓN DE JSONBIN.IO (Sincronización en la nube)
+        // ========================================
+        const JSONBIN_MASTER_KEY = '$2a$10$4d8nGl4vV/rjeR1UUMlR7OA32Vpph.pvceoEokv3OzaIiejifVgPm';
+        const JSONBIN_ACCESS_KEY = '$2a$10$lxvV9USetswKtFK3wxaMqOTjKlNs.SiZbv3X9NZcOJWpYZQqEjG.m';
+        const JSONBIN_BIN_ID_KEY = 'jsonbin_bin_id'; // Se guardará en localStorage la primera vez
+        let isSyncing = false; // Bandera para evitar sincronización simultánea
+
         let currentCoachId = null;
         let currentPagoId = null; // ID del pago/periodo actualmente seleccionado
         let fechaSimulada = null; // Para pruebas: simular una fecha diferente
@@ -1846,6 +1863,8 @@
 
         function saveData(data) {
             localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
+            // Sincronizar con la nube automáticamente
+            sincronizarConNube();
         }
 
         function loadConfig() {
@@ -1855,10 +1874,172 @@
 
         function saveConfig(config) {
             localStorage.setItem(CONFIG_KEY, JSON.stringify(config));
+            // Sincronizar con la nube automáticamente
+            sincronizarConNube();
         }
 
         function generateId() {
             return Date.now().toString() + Math.random().toString(36).substr(2, 9);
+        }
+
+        // ========================================
+        // SINCRONIZACIÓN CON LA NUBE (JSONBIN.IO)
+        // ========================================
+
+        function mostrarIndicadorSync(estado) {
+            // Crear indicador si no existe
+            let indicador = document.getElementById('sync-indicator');
+            if (!indicador) {
+                indicador = document.createElement('div');
+                indicador.id = 'sync-indicator';
+                indicador.className = 'fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg text-sm font-medium transition-all duration-300 z-50';
+                document.body.appendChild(indicador);
+            }
+
+            // Actualizar estado visual
+            if (estado === 'syncing') {
+                indicador.innerHTML = '🔄 Sincronizando...';
+                indicador.className = 'fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg text-sm font-medium transition-all duration-300 z-50 bg-blue-500 text-white';
+                indicador.style.display = 'block';
+            } else if (estado === 'success') {
+                indicador.innerHTML = '✅ Sincronizado';
+                indicador.className = 'fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg text-sm font-medium transition-all duration-300 z-50 bg-green-500 text-white';
+                indicador.style.display = 'block';
+                setTimeout(() => {
+                    indicador.style.display = 'none';
+                }, 2000);
+            } else if (estado === 'error') {
+                indicador.innerHTML = '⚠️ Error de sincronización';
+                indicador.className = 'fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg text-sm font-medium transition-all duration-300 z-50 bg-red-500 text-white';
+                indicador.style.display = 'block';
+                setTimeout(() => {
+                    indicador.style.display = 'none';
+                }, 3000);
+            }
+        }
+
+        async function sincronizarConNube() {
+            if (isSyncing) {
+                console.log('⏳ Sincronización ya en progreso, esperando...');
+                return;
+            }
+
+            isSyncing = true;
+            mostrarIndicadorSync('syncing');
+
+            try {
+                // Recopilar todos los datos locales
+                const datosCompletos = {
+                    coaches: JSON.parse(localStorage.getItem(STORAGE_KEY) || '{"coaches":[],"asistencias":{},"pagos":{}}'),
+                    config: JSON.parse(localStorage.getItem(CONFIG_KEY) || '{"modoPruebas":false}'),
+                    medidas: JSON.parse(localStorage.getItem(MEDIDAS_KEY) || '{}'),
+                    ejercicios: JSON.parse(localStorage.getItem(EJERCICIOS_KEY) || '[]'),
+                    ultimaActualizacion: new Date().toISOString()
+                };
+
+                let binId = localStorage.getItem(JSONBIN_BIN_ID_KEY);
+
+                if (!binId) {
+                    // Crear un nuevo bin por primera vez
+                    console.log('📦 Creando nuevo bin en JSONBin.io...');
+                    const response = await fetch('https://api.jsonbin.io/v3/b', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': JSONBIN_MASTER_KEY,
+                            'X-Access-Key': JSONBIN_ACCESS_KEY,
+                            'X-Bin-Name': 'coach-admin-data'
+                        },
+                        body: JSON.stringify(datosCompletos)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Error al crear bin: ${response.status}`);
+                    }
+
+                    const data = await response.json();
+                    binId = data.metadata.id;
+                    localStorage.setItem(JSONBIN_BIN_ID_KEY, binId);
+                    console.log('✅ Bin creado exitosamente:', binId);
+                } else {
+                    // Actualizar bin existente
+                    console.log('🔄 Actualizando bin existente:', binId);
+                    const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}`, {
+                        method: 'PUT',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'X-Master-Key': JSONBIN_MASTER_KEY,
+                            'X-Access-Key': JSONBIN_ACCESS_KEY
+                        },
+                        body: JSON.stringify(datosCompletos)
+                    });
+
+                    if (!response.ok) {
+                        throw new Error(`Error al actualizar bin: ${response.status}`);
+                    }
+
+                    console.log('✅ Datos sincronizados exitosamente');
+                }
+
+                mostrarIndicadorSync('success');
+            } catch (error) {
+                console.error('❌ Error al sincronizar con la nube:', error);
+                mostrarIndicadorSync('error');
+            } finally {
+                isSyncing = false;
+            }
+        }
+
+        async function descargarDesdeNube() {
+            const binId = localStorage.getItem(JSONBIN_BIN_ID_KEY);
+            
+            if (!binId) {
+                console.log('ℹ️ No hay bin ID guardado. Primera vez usando la app.');
+                return false;
+            }
+
+            try {
+                console.log('📥 Descargando datos desde la nube...');
+                mostrarIndicadorSync('syncing');
+
+                const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
+                    method: 'GET',
+                    headers: {
+                        'X-Master-Key': JSONBIN_MASTER_KEY,
+                        'X-Access-Key': JSONBIN_ACCESS_KEY
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error al descargar: ${response.status}`);
+                }
+
+                const data = await response.json();
+                const datosNube = data.record;
+
+                // Restaurar todos los datos en localStorage
+                if (datosNube.coaches) {
+                    localStorage.setItem(STORAGE_KEY, JSON.stringify(datosNube.coaches));
+                }
+                if (datosNube.config) {
+                    localStorage.setItem(CONFIG_KEY, JSON.stringify(datosNube.config));
+                }
+                if (datosNube.medidas) {
+                    localStorage.setItem(MEDIDAS_KEY, JSON.stringify(datosNube.medidas));
+                }
+                if (datosNube.ejercicios) {
+                    localStorage.setItem(EJERCICIOS_KEY, JSON.stringify(datosNube.ejercicios));
+                }
+
+                console.log('✅ Datos descargados exitosamente desde la nube');
+                console.log('📅 Última actualización:', datosNube.ultimaActualizacion);
+                mostrarIndicadorSync('success');
+                return true;
+            } catch (error) {
+                console.error('❌ Error al descargar desde la nube:', error);
+                mostrarIndicadorSync('error');
+                return false;
+            }
         }
 
         // ========================================
@@ -1988,6 +2169,8 @@
             }
             
             localStorage.setItem(MEDIDAS_KEY, JSON.stringify(todasMedidas));
+            // Sincronizar con la nube automáticamente
+            sincronizarConNube();
 
             // Limpiar y ocultar formulario
             limpiarFormularioMedidas();
@@ -2033,6 +2216,8 @@
                             todasMedidas[currentCoachId][currentPagoId].filter(m => m.id !== medidaId);
                         
                         localStorage.setItem(MEDIDAS_KEY, JSON.stringify(todasMedidas));
+                        // Sincronizar con la nube automáticamente
+                        sincronizarConNube();
                         cargarMedidasDelPeriodo();
                         
                         Swal.fire({
@@ -2253,6 +2438,8 @@
 
         function saveEjercicios(ejercicios) {
             localStorage.setItem(EJERCICIOS_KEY, JSON.stringify(ejercicios));
+            // Sincronizar con la nube automáticamente
+            sincronizarConNube();
         }
 
         function agregarEjercicioABiblioteca() {
@@ -6974,6 +7161,22 @@ EJEMPLO de "nota" correcta:
             // Dark Mode Toggle
             document.getElementById('btn-dark-mode')?.addEventListener('click', toggleDarkMode);
 
+            // Botón de sincronización manual con la nube
+            document.getElementById('btn-sync-cloud')?.addEventListener('click', async () => {
+                const btn = document.getElementById('btn-sync-cloud');
+                const svg = btn.querySelector('svg');
+                
+                // Animar el botón durante la sincronización
+                svg.classList.add('animate-spin');
+                btn.disabled = true;
+                
+                await sincronizarConNube();
+                
+                // Remover animación
+                svg.classList.remove('animate-spin');
+                btn.disabled = false;
+            });
+
             // Toggle modo de pruebas
             document.getElementById('toggle-modo-pruebas')?.addEventListener('change', (e) => {
                 toggleModoPruebas(e.target.checked);
@@ -7083,11 +7286,19 @@ EJEMPLO de "nota" correcta:
             console.log('✅ Event listeners inicializados');
         }
 
-        document.addEventListener('DOMContentLoaded', () => {
+        document.addEventListener('DOMContentLoaded', async () => {
             console.log('🚀 DOM Cargado, inicializando aplicación...');
 
             // Inicializar event listeners
             inicializarEventListeners();
+
+            // 🔄 SINCRONIZACIÓN: Descargar datos desde la nube al iniciar
+            const descargado = await descargarDesdeNube();
+            if (descargado) {
+                console.log('📱 Datos sincronizados desde la nube al iniciar');
+            } else {
+                console.log('💾 Usando datos locales (primera vez o sin conexión)');
+            }
 
             // Actualizar visibilidad del panel de pruebas según configuración
             actualizarVisibilidadPanelPruebas();
