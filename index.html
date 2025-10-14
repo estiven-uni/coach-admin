@@ -5134,13 +5134,14 @@ INSTRUCCIONES:
                 rutinaGenerada.ejercicios.forEach((ejercicio, index) => {
                     console.log(`\n💪 Agregando ejercicio ${index + 1}:`, ejercicio);
                     agregarEjercicio();
-                    const ultimoEjercicio = document.querySelector('#lista-ejercicios .ejercicio-item:last-child');
+                    const lista = document.getElementById('lista-ejercicios');
+                    const ultimoEjercicio = lista.lastElementChild;
                     console.log('🔍 Elemento encontrado:', ultimoEjercicio);
                     
                     if (ultimoEjercicio) {
                         const nombreInput = ultimoEjercicio.querySelector('.ejercicio-nombre');
                         const seriesInput = ultimoEjercicio.querySelector('.ejercicio-series');
-                        const repsInput = ultimoEjercicio.querySelector('.ejercicio-repeticiones');
+                        const repsInput = ultimoEjercicio.querySelector('.ejercicio-reps');
                         const pesoInput = ultimoEjercicio.querySelector('.ejercicio-peso');
                         const notaInput = ultimoEjercicio.querySelector('.ejercicio-nota');
                         
