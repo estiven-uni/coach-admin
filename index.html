@@ -5346,8 +5346,29 @@ ${contexto}`
                     return;
                 }
                 
+                // Analizar el DÍA ANTERIOR ESPECÍFICO
+                const fechaActual = new Date(currentNotaDate + 'T12:00:00');
+                const fechaAnterior = new Date(fechaActual);
+                fechaAnterior.setDate(fechaAnterior.getDate() - 1);
+                const fechaAnteriorStr = fechaAnterior.toISOString().split('T')[0];
+                
+                const diaAnterior = asistenciasCoach[fechaAnteriorStr];
+                let trenDiaAnterior = null;
+                let asistioDiaAnterior = false;
+                let notasDiaAnterior = '';
+                
+                if (diaAnterior) {
+                    asistioDiaAnterior = diaAnterior.asistio;
+                    if (diaAnterior.asistio && diaAnterior.rutina && diaAnterior.rutina.tren) {
+                        trenDiaAnterior = diaAnterior.rutina.tren;
+                    }
+                    if (diaAnterior.notas) {
+                        notasDiaAnterior = diaAnterior.notas;
+                    }
+                }
+                
                 // Analizar patrones de trenes y ejercicios
-                let ultimoTren = null;
+                let ultimoTrenRegistrado = null;
                 let contador = 0;
                 const ejerciciosPorTren = {
                     superior: {},
@@ -5360,7 +5381,7 @@ ${contexto}`
                     const clase = asistenciasCoach[fecha];
                     if (clase.asistio && clase.rutina && clase.rutina.ejercicios && clase.rutina.ejercicios.length > 0) {
                         const tren = clase.rutina.tren || 'completo';
-                        ultimoTren = tren;
+                        ultimoTrenRegistrado = tren;
                         contador++;
                         
                         // Contar ejercicios por tren
@@ -5406,12 +5427,37 @@ ${contexto}`
                     });
                 });
                 
-                // Determinar qué tren toca hoy (alternando con el último)
+                // Determinar qué tren toca hoy basándose en el DÍA ANTERIOR
                 let trenHoy = 'superior';
-                if (ultimoTren === 'superior') {
-                    trenHoy = 'inferior';
-                } else if (ultimoTren === 'inferior') {
-                    trenHoy = 'superior';
+                let razonTren = 'Iniciando con tren superior';
+                
+                if (trenDiaAnterior) {
+                    // Si ayer trabajaste un tren específico, hoy toca el opuesto
+                    if (trenDiaAnterior === 'superior') {
+                        trenHoy = 'inferior';
+                        razonTren = `Ayer trabajaste tren superior, hoy corresponde tren inferior para dar descanso a los músculos y mantener el equilibrio`;
+                    } else if (trenDiaAnterior === 'inferior') {
+                        trenHoy = 'superior';
+                        razonTren = `Ayer trabajaste tren inferior, hoy corresponde tren superior para mantener la alternancia y descanso muscular`;
+                    }
+                } else if (!asistioDiaAnterior && ultimoTrenRegistrado) {
+                    // Si ayer no asististe, mira el último tren que sí hiciste
+                    if (ultimoTrenRegistrado === 'superior') {
+                        trenHoy = 'inferior';
+                        razonTren = `No asististe ayer, pero tu último entrenamiento fue tren superior, así que hoy toca tren inferior`;
+                    } else if (ultimoTrenRegistrado === 'inferior') {
+                        trenHoy = 'superior';
+                        razonTren = `No asististe ayer, pero tu último entrenamiento fue tren inferior, así que hoy toca tren superior`;
+                    }
+                } else if (ultimoTrenRegistrado) {
+                    // Fallback al último registrado
+                    if (ultimoTrenRegistrado === 'superior') {
+                        trenHoy = 'inferior';
+                        razonTren = `Alternando con el último entrenamiento registrado (tren superior)`;
+                    } else {
+                        trenHoy = 'superior';
+                        razonTren = `Alternando con el último entrenamiento registrado (tren inferior)`;
+                    }
                 }
                 
                 // Generar contexto para la IA
@@ -5437,11 +5483,34 @@ ${contexto}`
                     contexto += `\n`;
                 }
                 
+                // Análisis del día anterior
+                contexto += `--- ANÁLISIS DEL DÍA ANTERIOR (${fechaAnteriorStr}) ---\n`;
+                if (diaAnterior) {
+                    if (asistioDiaAnterior) {
+                        contexto += `✅ SÍ asististe al entrenamiento\n`;
+                        if (trenDiaAnterior) {
+                            contexto += `Tren trabajado: ${trenDiaAnterior.toUpperCase()}\n`;
+                        }
+                        if (notasDiaAnterior) {
+                            contexto += `Notas del día: ${notasDiaAnterior}\n`;
+                        }
+                    } else {
+                        contexto += `❌ NO asististe al entrenamiento\n`;
+                        if (diaAnterior.notas) {
+                            contexto += `Razón: ${diaAnterior.notas}\n`;
+                        }
+                    }
+                } else {
+                    contexto += `Sin registro de entrenamiento programado\n`;
+                }
+                contexto += `\n`;
+                
                 // Análisis de patrones
-                contexto += `--- ANÁLISIS DEL HISTORIAL ---\n`;
-                contexto += `Total entrenamientos recientes: ${contador}\n`;
-                contexto += `Último tren trabajado: ${ultimoTren || 'No registrado'}\n`;
-                contexto += `Tren que corresponde HOY: ${trenHoy}\n`;
+                contexto += `--- ANÁLISIS Y PLANIFICACIÓN ---\n`;
+                contexto += `Total entrenamientos en el periodo: ${contador}\n`;
+                contexto += `Último tren registrado: ${ultimoTrenRegistrado || 'No registrado'}\n`;
+                contexto += `🎯 TREN QUE CORRESPONDE HOY: ${trenHoy.toUpperCase()}\n`;
+                contexto += `📋 Razón: ${razonTren}\n`;
                 contexto += `\n`;
                 
                 // Ejercicios frecuentes por tren
@@ -5510,49 +5579,60 @@ ${contexto}`
                         messages: [
                             {
                                 role: 'system',
-                                content: `Eres el Coach Bairon, un entrenador personal experto. Tu trabajo es generar UNA RUTINA DE ENTRENAMIENTO personalizada basándote ESTRICTAMENTE en el historial real del atleta.
+                                content: `Eres el Coach Bairon, un entrenador personal experto, amigable y motivador. Tu trabajo es generar UNA RUTINA DE ENTRENAMIENTO personalizada basándote ESTRICTAMENTE en el historial real del atleta.
 
 🎯 REGLAS FUNDAMENTALES:
 1. SOLO usa ejercicios que aparecen en el historial del atleta para el tren correspondiente
-2. RESPETA el tren que se indica (si dice TREN INFERIOR, NO pongas ejercicios de tren superior)
-3. ALTERNA los trenes: si el último fue superior, el siguiente debe ser inferior (y viceversa)
+2. RESPETA el tren que se indica (mira "TREN QUE CORRESPONDE HOY")
+3. Considera si el atleta asistió o no el día anterior
 4. Usa los pesos, series y repeticiones similares a los históricos, con pequeñas progresiones
 5. Genera entre 6-9 ejercicios variados del mismo tren
+6. En cada ejercicio, incluye notas instructivas útiles
 
 📋 FORMATO DE RESPUESTA:
-Responde ÚNICAMENTE con este JSON exacto, sin texto adicional:
+Responde ÚNICAMENTE con este JSON exacto, sin texto adicional antes o después:
 
 {
   "tren": "superior" o "inferior",
+  "resumen": "Explicación amigable de 2-3 oraciones sobre por qué elegiste esta rutina, considerando el día anterior y el objetivo del atleta",
   "ejercicios": [
     {
       "nombre": "Nombre EXACTO del ejercicio (del historial)",
       "series": número,
       "repeticiones": número,
       "peso": número,
-      "nota": "observación opcional"
+      "nota": "Instrucción clara: cómo hacer el ejercicio, qué máquina/equipo usar, postura correcta, tips importantes"
     }
   ]
 }
 
 ✅ INSTRUCCIONES DETALLADAS:
-1. Lee el análisis del historial para saber qué tren corresponde HOY
-2. Selecciona 6-9 ejercicios SOLO de la lista de ejercicios frecuentes del tren correspondiente
-3. VARÍA los ejercicios - no repitas la misma rutina del último entrenamiento
-4. Usa los promedios históricos de series/reps/peso como base
-5. Aplica progresión gradual: +0.5 a +2kg respecto al promedio (si aplica)
-6. Considera el objetivo del atleta (perder peso, ganar masa, etc.)
-7. Ajusta intensidad según el nivel de experiencia
-8. NO inventes ejercicios - SOLO usa los del historial
-9. RESPONDE SOLO CON JSON VÁLIDO, sin markdown ni explicaciones`
+1. Lee "ANÁLISIS DEL DÍA ANTERIOR" para saber si asistió y qué hizo
+2. Lee "TREN QUE CORRESPONDE HOY" - ese es el tren que debes usar
+3. Lee "Razón" para entender el contexto de la planificación
+4. Selecciona 6-9 ejercicios SOLO de la lista de ejercicios frecuentes del tren correspondiente
+5. VARÍA los ejercicios - no repitas exactamente la rutina del último entrenamiento
+6. Usa los promedios históricos como base, aplica progresión gradual (+0.5 a +2kg)
+7. En cada ejercicio, escribe una nota instructiva que incluya:
+   - Cómo ejecutar el movimiento correctamente
+   - Qué máquina, equipo o implemento usar (mancuernas, barra, polea, etc.)
+   - Tips de postura o seguridad
+   - Enfoque muscular
+8. En "resumen", explica de forma amigable por qué esta rutina:
+   - Qué tren trabajarás y por qué (basado en el día anterior)
+   - Cómo se alinea con el objetivo del atleta
+   - Cualquier ajuste especial que hayas considerado
+9. Sé motivador y cercano en tus textos
+10. NO inventes ejercicios - SOLO usa los del historial
+11. RESPONDE SOLO CON JSON VÁLIDO, sin backticks de markdown ni texto extra`
                             },
                             {
                                 role: 'user',
-                                content: `Genera mi rutina de entrenamiento para hoy siguiendo mi historial con el Coach Bairon:\n\n${contexto}\n\n⚠️ IMPORTANTE: Solo usa ejercicios de mi historial para el tren que corresponde HOY.`
+                                content: `¡Hola Coach Bairon! Genera mi rutina de entrenamiento para HOY basándote en mi historial:\n\n${contexto}\n\n⚠️ RECUERDA: Solo usa ejercicios de mi historial para el tren que corresponde HOY (revisa la sección "TREN QUE CORRESPONDE HOY").`
                             }
                         ],
-                        temperature: 0.8,
-                        max_tokens: 2000
+                        temperature: 0.7,
+                        max_tokens: 3500
                     })
                 });
 
@@ -5626,12 +5706,48 @@ Responde ÚNICAMENTE con este JSON exacto, sin texto adicional:
                     }
                 });
                 
+                // Mostrar resumen amigable con el análisis de la IA
+                const resumenHTML = `
+                    <div class="text-left space-y-3">
+                        <div class="bg-gradient-to-r from-emerald-50 to-teal-50 dark:from-emerald-900/30 dark:to-teal-900/30 border-l-4 border-emerald-500 p-4 rounded-lg">
+                            <div class="flex items-start gap-3">
+                                <svg class="w-6 h-6 text-emerald-600 dark:text-emerald-400 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
+                                </svg>
+                                <div class="flex-1">
+                                    <h3 class="text-sm font-bold text-gray-900 dark:text-white mb-2">💬 Mensaje del Coach Bairon:</h3>
+                                    <p class="text-sm text-gray-700 dark:text-gray-300 leading-relaxed">${rutinaGenerada.resumen || 'He preparado tu rutina basándome en tu historial y objetivos.'}</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-blue-50 dark:bg-blue-900/30 p-3 rounded-lg">
+                            <p class="text-sm text-blue-900 dark:text-blue-300">
+                                <strong>📋 Tren:</strong> ${rutinaGenerada.tren === 'superior' ? 'Superior 💪' : 'Inferior 🦵'}
+                            </p>
+                            <p class="text-sm text-blue-900 dark:text-blue-300 mt-1">
+                                <strong>🏋️ Ejercicios:</strong> ${rutinaGenerada.ejercicios.length} ejercicios agregados
+                            </p>
+                        </div>
+                        
+                        <div class="bg-yellow-50 dark:bg-yellow-900/30 border border-yellow-300 dark:border-yellow-700 p-3 rounded-lg">
+                            <p class="text-xs text-yellow-800 dark:text-yellow-300">
+                                💡 <strong>Tip:</strong> Cada ejercicio tiene notas con instrucciones sobre cómo hacerlo correctamente. ¡Revísalas antes de empezar!
+                            </p>
+                        </div>
+                    </div>
+                `;
+                
                 Swal.fire({
                     icon: 'success',
-                    title: '¡Rutina generada!',
-                    text: `Se han agregado ${rutinaGenerada.ejercicios.length} ejercicios basados en tu historial`,
-                    confirmButtonText: 'Genial',
-                    timer: 3000
+                    title: '🎉 ¡Tu rutina está lista!',
+                    html: resumenHTML,
+                    confirmButtonText: '¡Vamos a entrenar! 💪',
+                    confirmButtonColor: '#10b981',
+                    width: '600px',
+                    customClass: {
+                        popup: 'text-left'
+                    }
                 });
                 
             } catch (error) {
