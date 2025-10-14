@@ -156,10 +156,168 @@
             background-color: rgb(34 197 94) !important;
             border-color: rgb(34 197 94) !important;
         }
+
+        /* ===================================== */
+        /* LOADER DE CARGA INICIAL */
+        /* ===================================== */
+        #app-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 99999;
+            transition: opacity 0.5s ease, visibility 0.5s ease;
+        }
+
+        .dark #app-loader {
+            background: linear-gradient(135deg, #1e3a8a 0%, #4c1d95 100%);
+        }
+
+        #app-loader.hidden {
+            opacity: 0;
+            visibility: hidden;
+        }
+
+        .loader-icon {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 30px;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        .loader-icon svg {
+            filter: drop-shadow(0 10px 30px rgba(0, 0, 0, 0.3));
+        }
+
+        .loader-barbell {
+            animation: lift 2s ease-in-out infinite;
+            transform-origin: center;
+        }
+
+        .loader-dots {
+            display: flex;
+            gap: 12px;
+            margin-top: 20px;
+        }
+
+        .loader-dot {
+            width: 12px;
+            height: 12px;
+            background: white;
+            border-radius: 50%;
+            animation: bounce 1.4s ease-in-out infinite;
+        }
+
+        .loader-dot:nth-child(1) {
+            animation-delay: 0s;
+        }
+
+        .loader-dot:nth-child(2) {
+            animation-delay: 0.2s;
+        }
+
+        .loader-dot:nth-child(3) {
+            animation-delay: 0.4s;
+        }
+
+        .loader-text {
+            color: white;
+            font-size: 20px;
+            font-weight: 600;
+            margin-top: 20px;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        .loader-subtext {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 14px;
+            margin-top: 8px;
+            text-shadow: 0 1px 5px rgba(0, 0, 0, 0.2);
+        }
+
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+
+        @keyframes lift {
+            0%, 100% {
+                transform: translateY(0px) rotate(0deg);
+            }
+            25% {
+                transform: translateY(-10px) rotate(-5deg);
+            }
+            75% {
+                transform: translateY(-10px) rotate(5deg);
+            }
+        }
+
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0.8);
+                opacity: 0.5;
+            }
+            40% {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
     </style>
 </head>
 
 <body class="bg-gray-50 dark:bg-gray-900 text-gray-900 dark:text-gray-100 antialiased min-h-screen flex flex-col">
+
+    <!-- Loader de Carga Inicial -->
+    <div id="app-loader">
+        <div class="loader-icon">
+            <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+                <!-- Figura humana -->
+                <g class="loader-person">
+                    <!-- Cabeza -->
+                    <circle cx="100" cy="60" r="20" fill="white"/>
+                    <!-- Cuerpo -->
+                    <rect x="90" y="80" width="20" height="40" rx="5" fill="white"/>
+                    <!-- Brazos -->
+                    <rect x="60" y="85" width="30" height="12" rx="6" fill="white"/>
+                    <rect x="110" y="85" width="30" height="12" rx="6" fill="white"/>
+                    <!-- Piernas -->
+                    <rect x="85" y="120" width="12" height="35" rx="6" fill="white"/>
+                    <rect x="103" y="120" width="12" height="35" rx="6" fill="white"/>
+                </g>
+                
+                <!-- Barra con pesas (animada) -->
+                <g class="loader-barbell">
+                    <!-- Barra -->
+                    <rect x="40" y="92" width="120" height="8" rx="4" fill="white"/>
+                    <!-- Disco izquierdo -->
+                    <circle cx="40" cy="96" r="15" fill="white"/>
+                    <circle cx="40" cy="96" r="10" fill="rgba(102, 126, 234, 0.5)"/>
+                    <!-- Disco derecho -->
+                    <circle cx="160" cy="96" r="15" fill="white"/>
+                    <circle cx="160" cy="96" r="10" fill="rgba(102, 126, 234, 0.5)"/>
+                </g>
+            </svg>
+        </div>
+        
+        <div class="loader-text">Cargando Coach Admin</div>
+        <div class="loader-subtext" id="loader-status">Sincronizando con la nube...</div>
+        
+        <div class="loader-dots">
+            <div class="loader-dot"></div>
+            <div class="loader-dot"></div>
+            <div class="loader-dot"></div>
+        </div>
+    </div>
 
     <!-- Encabezado -->
     <header class="fixed top-0 left-0 right-0 z-[100] bg-white/80 dark:bg-gray-800/80 backdrop-blur-md border-b border-gray-200 dark:border-gray-700 shadow-sm">
@@ -2048,6 +2206,13 @@
 
             try {
                 console.log('📥 Descargando datos desde la nube...');
+                
+                // Actualizar texto del loader si existe
+                const loaderStatus = document.getElementById('loader-status');
+                if (loaderStatus) {
+                    loaderStatus.textContent = 'Descargando datos...';
+                }
+                
                 mostrarIndicadorSync('syncing');
 
                 const response = await fetch(`https://api.jsonbin.io/v3/b/${binId}/latest`, {
@@ -7493,22 +7658,42 @@ EJEMPLO de "nota" correcta:
         document.addEventListener('DOMContentLoaded', async () => {
             console.log('🚀 DOM Cargado, inicializando aplicación...');
 
+            // Actualizar loader
+            const loaderStatus = document.getElementById('loader-status');
+            if (loaderStatus) {
+                loaderStatus.textContent = 'Inicializando...';
+            }
+
             // Inicializar event listeners
             inicializarEventListeners();
 
             // 🔄 SINCRONIZACIÓN: Descargar datos desde la nube al iniciar
+            if (loaderStatus) {
+                loaderStatus.textContent = 'Sincronizando con la nube...';
+            }
+            
             const descargado = await descargarDesdeNube();
             if (descargado) {
                 console.log('📱 Datos sincronizados desde la nube al iniciar');
+                if (loaderStatus) {
+                    loaderStatus.textContent = 'Datos sincronizados';
+                }
                 // Recargar la vista con los datos descargados
                 currentCoachId = null;
                 currentPagoId = null;
             } else {
                 console.log('💾 Usando datos locales (primera vez o sin conexión)');
+                if (loaderStatus) {
+                    loaderStatus.textContent = 'Cargando datos locales...';
+                }
             }
 
             // Actualizar visibilidad del panel de pruebas según configuración
             actualizarVisibilidadPanelPruebas();
+
+            if (loaderStatus) {
+                loaderStatus.textContent = 'Preparando interfaz...';
+            }
 
             mostrarVistaLista();
 
@@ -7520,6 +7705,22 @@ EJEMPLO de "nota" correcta:
             }
 
             console.log('✅ Aplicación inicializada correctamente');
+
+            // Ocultar loader con un pequeño delay para que se vea el mensaje final
+            if (loaderStatus) {
+                loaderStatus.textContent = '¡Listo!';
+            }
+            
+            setTimeout(() => {
+                const loader = document.getElementById('app-loader');
+                if (loader) {
+                    loader.classList.add('hidden');
+                    // Remover del DOM después de la animación
+                    setTimeout(() => {
+                        loader.remove();
+                    }, 500);
+                }
+            }, 300);
         });
     </script>
 
