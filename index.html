@@ -1610,6 +1610,8 @@
             <form id="form-nota-dia" class="p-3 sm:p-4 space-y-3 sm:space-y-4 overflow-y-auto flex-1">
                 <!-- Campo oculto para marcar si fue generada por IA -->
                 <input type="hidden" id="rutina-generada-por-ia" value="false">
+                <!-- Campo oculto para el enfoque muscular -->
+                <input type="hidden" id="enfoque-musculo-hidden" value="">
                 
                 <!-- Grid compacto de configuración -->
                 <!-- Lista de ejercicios -->
@@ -4709,6 +4711,7 @@
                 tipoMaquinas: document.getElementById('tipo-maquinas').checked,
                 tipoCalistenia: document.getElementById('tipo-calistenia').checked,
                 tren: tren,
+                enfoqueMusculo: document.getElementById('enfoque-musculo-hidden')?.value || null,
                 ejercicios: ejercicios,
                 nota: document.getElementById('nota-dia-texto').value.trim(),
                 generadaPorIA: document.getElementById('rutina-generada-por-ia')?.value === 'true' || false
@@ -5949,8 +5952,9 @@ ${contexto}`
                 
                 let contadorSuperiorSemana = 0;
                 let contadorInferiorSemana = 0;
+                const enfoquesUsadosSemana = [];
                 
-                // Contar entrenamientos de la semana actual
+                // Contar entrenamientos de la semana actual y enfoques usados
                 Object.keys(asistenciasCoach).forEach(fecha => {
                     if (fecha >= inicioSemanaStr && fecha < currentNotaDate) {
                         const asist = asistenciasCoach[fecha];
@@ -5961,6 +5965,10 @@ ${contexto}`
                         if (diaAsist >= 1 && diaAsist <= 5 && asist.asistio && asist.rutina && asist.rutina.tren) {
                             if (asist.rutina.tren === 'superior') {
                                 contadorSuperiorSemana++;
+                                // Guardar el enfoque muscular si existe
+                                if (asist.rutina.enfoqueMusculo) {
+                                    enfoquesUsadosSemana.push(asist.rutina.enfoqueMusculo);
+                                }
                             } else if (asist.rutina.tren === 'inferior') {
                                 contadorInferiorSemana++;
                             }
@@ -5970,9 +5978,22 @@ ${contexto}`
                 
                 let trenHoy = 'superior';
                 let razonTren = 'Iniciando con tren superior';
+                let enfoqueMusculo = '';
                 
                 // LÓGICA 3:2 - Patrón semanal: 3 superiores, 2 inferiores
                 const totalEntrenamientosSemana = contadorSuperiorSemana + contadorInferiorSemana;
+                
+                // ENFOQUES MUSCULARES PARA TREN SUPERIOR (combinaciones profesionales)
+                const enfoquesSuperior = [
+                    { id: 'pecho-triceps', nombre: 'Pecho + Tríceps', musculos: ['pecho', 'tríceps'] },
+                    { id: 'espalda-biceps', nombre: 'Espalda + Bíceps', musculos: ['espalda', 'bíceps'] },
+                    { id: 'hombros-trapecio', nombre: 'Hombros + Trapecio', musculos: ['hombros', 'trapecio'] }
+                ];
+                
+                // ENFOQUES MUSCULARES PARA TREN INFERIOR
+                const enfoquesInferior = [
+                    { id: 'piernas-completo', nombre: 'Piernas completo', musculos: ['cuádriceps', 'femoral', 'glúteos', 'pantorrillas'] }
+                ];
                 
                 // Construir explicación considerando fin de semana
                 let explicacionFinSemana = '';
@@ -5988,52 +6009,70 @@ ${contexto}`
                     if (diaSemanActual === 1) {
                         // LUNES - Generalmente empieza con superior
                         trenHoy = 'superior';
-                        razonTren = `${explicacionFinSemana}Es lunes, inicio de semana laboral. El último entrenamiento fue el ${nombreDiaRef} (tren ${trenDiaAnterior}). Comenzamos con tren superior siguiendo el patrón semanal óptimo de 3 días de superior y 2 de inferior`;
+                        // Seleccionar enfoque muscular que NO se usó esta semana
+                        const enfoqueDisponible = enfoquesSuperior.find(e => !enfoquesUsadosSemana.includes(e.id)) || enfoquesSuperior[0];
+                        enfoqueMusculo = enfoqueDisponible.id;
+                        razonTren = `${explicacionFinSemana}Es lunes, inicio de semana laboral. El último entrenamiento fue el ${nombreDiaRef} (tren ${trenDiaAnterior}). Comenzamos con tren superior enfocado en ${enfoqueDisponible.nombre}, siguiendo el patrón semanal óptimo de 3 días de superior y 2 de inferior`;
                     } else if (diaSemanActual === 2) {
                         // MARTES
                         if (contadorSuperiorSemana >= 1) {
                             trenHoy = 'inferior';
-                            razonTren = `${explicacionFinSemana}Ya trabajaste tren superior el lunes. Hoy toca tren inferior para equilibrar y dar descanso a la parte superior`;
+                            enfoqueMusculo = 'piernas-completo';
+                            razonTren = `${explicacionFinSemana}Ya trabajaste tren superior el lunes. Hoy toca tren inferior completo para equilibrar y dar descanso a la parte superior`;
                         } else {
                             trenHoy = 'superior';
-                            razonTren = `${explicacionFinSemana}Continuamos construyendo con tren superior`;
+                            const enfoqueDisponible = enfoquesSuperior.find(e => !enfoquesUsadosSemana.includes(e.id)) || enfoquesSuperior[0];
+                            enfoqueMusculo = enfoqueDisponible.id;
+                            razonTren = `${explicacionFinSemana}Continuamos construyendo con tren superior enfocado en ${enfoqueDisponible.nombre}`;
                         }
                     } else if (diaSemanActual === 3) {
                         // MIÉRCOLES
                         if (contadorInferiorSemana < 1) {
                             trenHoy = 'inferior';
-                            razonTren = `${explicacionFinSemana}Es momento de trabajar tren inferior para mantener el equilibrio. Patrón: 3 superiores, 2 inferiores por semana`;
+                            enfoqueMusculo = 'piernas-completo';
+                            razonTren = `${explicacionFinSemana}Es momento de trabajar tren inferior completo para mantener el equilibrio. Patrón: 3 superiores, 2 inferiores por semana`;
                         } else {
                             trenHoy = 'superior';
-                            razonTren = `${explicacionFinSemana}Retomamos tren superior para completar el ciclo semanal`;
+                            const enfoqueDisponible = enfoquesSuperior.find(e => !enfoquesUsadosSemana.includes(e.id)) || enfoquesSuperior[1];
+                            enfoqueMusculo = enfoqueDisponible.id;
+                            razonTren = `${explicacionFinSemana}Retomamos tren superior enfocado en ${enfoqueDisponible.nombre} para completar el ciclo semanal`;
                         }
                     } else if (diaSemanActual === 4) {
                         // JUEVES
                         if (contadorInferiorSemana < 2) {
                             trenHoy = 'inferior';
+                            enfoqueMusculo = 'piernas-completo';
                             razonTren = `${explicacionFinSemana}Segundo día de tren inferior en la semana. Importante para fortalecer piernas y glúteos`;
                         } else {
                             trenHoy = 'superior';
-                            razonTren = `${explicacionFinSemana}Ya completaste los 2 días de tren inferior. Continuamos con superior`;
+                            const enfoqueDisponible = enfoquesSuperior.find(e => !enfoquesUsadosSemana.includes(e.id)) || enfoquesSuperior[2];
+                            enfoqueMusculo = enfoqueDisponible.id;
+                            razonTren = `${explicacionFinSemana}Ya completaste los 2 días de tren inferior. Continuamos con superior enfocado en ${enfoqueDisponible.nombre}`;
                         }
                     } else if (diaSemanActual === 5) {
                         // VIERNES
                         if (contadorSuperiorSemana < 3) {
                             trenHoy = 'superior';
-                            razonTren = `${explicacionFinSemana}Último día de la semana laboral. Completamos los 3 días de tren superior para cerrar el ciclo perfecto`;
+                            const enfoqueDisponible = enfoquesSuperior.find(e => !enfoquesUsadosSemana.includes(e.id)) || enfoquesSuperior[2];
+                            enfoqueMusculo = enfoqueDisponible.id;
+                            razonTren = `${explicacionFinSemana}Último día de la semana laboral. Completamos los 3 días de tren superior con enfoque en ${enfoqueDisponible.nombre} para cerrar el ciclo perfecto`;
                         } else {
                             trenHoy = 'inferior';
-                            razonTren = `${explicacionFinSemana}Último día. Reforzamos tren inferior antes del fin de semana`;
+                            enfoqueMusculo = 'piernas-completo';
+                            razonTren = `${explicacionFinSemana}Último día. Reforzamos tren inferior completo antes del fin de semana`;
                         }
                     }
                 } else {
                     // No hay referencia clara, usar lógica por día de semana
                     if (diaSemanActual === 1 || diaSemanActual === 3 || diaSemanActual === 5) {
                         trenHoy = 'superior';
-                        razonTren = 'Iniciando ciclo con tren superior según patrón semanal 3:2';
+                        const enfoqueDisponible = enfoquesSuperior.find(e => !enfoquesUsadosSemana.includes(e.id)) || enfoquesSuperior[0];
+                        enfoqueMusculo = enfoqueDisponible.id;
+                        razonTren = `Iniciando ciclo con tren superior enfocado en ${enfoqueDisponible.nombre} según patrón semanal 3:2`;
                     } else {
                         trenHoy = 'inferior';
-                        razonTren = 'Día de tren inferior para equilibrar el desarrollo muscular';
+                        enfoqueMusculo = 'piernas-completo';
+                        razonTren = 'Día de tren inferior completo para equilibrar el desarrollo muscular';
                     }
                 }
                 
@@ -6087,14 +6126,28 @@ ${contexto}`
                 }
                 contexto += `\n`;
                 
+                // Buscar el enfoque seleccionado para obtener los músculos
+                const enfoqueSeleccionado = trenHoy === 'superior' 
+                    ? enfoquesSuperior.find(e => e.id === enfoqueMusculo)
+                    : enfoquesInferior.find(e => e.id === enfoqueMusculo);
+                
                 // Análisis de patrones
                 contexto += `--- ANÁLISIS Y PLANIFICACIÓN ---\n`;
                 contexto += `Total entrenamientos en el periodo: ${contador}\n`;
                 contexto += `\n--- CONTEO DE LA SEMANA ACTUAL ---\n`;
                 contexto += `Días de tren superior esta semana: ${contadorSuperiorSemana}\n`;
                 contexto += `Días de tren inferior esta semana: ${contadorInferiorSemana}\n`;
+                if (enfoquesUsadosSemana.length > 0) {
+                    contexto += `Enfoques musculares ya usados esta semana: ${enfoquesUsadosSemana.join(', ')}\n`;
+                }
                 contexto += `Patrón semanal objetivo: 3 días superior + 2 días inferior = 5 días laborales\n`;
                 contexto += `\n🎯 TREN QUE CORRESPONDE HOY: ${trenHoy.toUpperCase()}\n`;
+                contexto += `💪 ENFOQUE MUSCULAR ESPECÍFICO: ${enfoqueSeleccionado ? enfoqueSeleccionado.nombre : 'Completo'}\n`;
+                if (enfoqueSeleccionado) {
+                    contexto += `🎯 MÚSCULOS A TRABAJAR HOY: ${enfoqueSeleccionado.musculos.map(m => m.toUpperCase()).join(', ')}\n`;
+                    contexto += `⚠️ IMPORTANTE: SOLO incluye ejercicios que trabajen estos músculos específicos.\n`;
+                    contexto += `   NO mezcles con otros grupos musculares del tren ${trenHoy}.\n`;
+                }
                 contexto += `📋 Razón: ${razonTren}\n`;
                 contexto += `\n`;
                 
@@ -6167,13 +6220,14 @@ ${contexto}`
                                 content: `Eres el Coach Bairon, un entrenador personal experto, amigable y motivador. Tu trabajo es generar UNA RUTINA DE ENTRENAMIENTO personalizada basándote ESTRICTAMENTE en el historial real del atleta.
 
 🎯 REGLAS FUNDAMENTALES:
-1. SOLO usa ejercicios que aparecen en el historial del atleta para el tren correspondiente
-2. RESPETA el tren que se indica (mira "TREN QUE CORRESPONDE HOY")
-3. Considera la lógica de entrenamiento: si hubo reprogramaciones en fin de semana, ignóralas y basa la rutina en el último entrenamiento REGULAR
-4. Las reprogramaciones (sábados/domingos con asistencia) NO afectan la secuencia normal de entrenamiento
-5. Usa los pesos, series y repeticiones similares a los históricos, con pequeñas progresiones
-6. Genera entre 6-9 ejercicios variados del mismo tren
-7. En cada ejercicio, incluye notas instructivas útiles
+1. SOLO usa ejercicios que aparecen en el historial del atleta
+2. RESPETA el "ENFOQUE MUSCULAR ESPECÍFICO" - SOLO selecciona ejercicios de esos músculos
+3. NUNCA mezcles todos los músculos del tren en un solo día
+4. Considera la lógica de entrenamiento: si hubo reprogramaciones en fin de semana, ignóralas
+5. Las reprogramaciones (sábados/domingos con asistencia) NO afectan la secuencia normal
+6. Usa los pesos, series y repeticiones similares a los históricos, con pequeñas progresiones
+7. Genera entre 6-9 ejercicios del enfoque muscular específico
+8. En CADA ejercicio, especifica qué músculo trabaja DENTRO de la instrucción (no en nota aparte)
 
 🏋️ LÓGICA DE ENTRENADOR:
 - Patrón semanal: 3 días de TREN SUPERIOR + 2 días de TREN INFERIOR = 5 días laborales (lunes a viernes)
@@ -6188,40 +6242,45 @@ Responde ÚNICAMENTE con este JSON exacto, sin texto adicional antes o después:
 
 {
   "tren": "superior" o "inferior",
-  "resumen": "Explicación amigable de 2-3 oraciones sobre por qué elegiste esta rutina, considerando el último entrenamiento REGULAR y el objetivo del atleta",
+  "enfoqueMusculo": "El ID del enfoque (ejemplo: pecho-triceps, espalda-biceps, etc.)",
+  "resumen": "Explicación de 2-3 oraciones que DEBE incluir: 1) Mención del fin de semana si aplica, 2) Qué se hizo el último día laboral, 3) Los MÚSCULOS ESPECÍFICOS que se trabajarán hoy, 4) Por qué este enfoque según el patrón semanal",
   "ejercicios": [
     {
       "nombre": "Nombre EXACTO del ejercicio (del historial)",
       "series": número,
       "repeticiones": número,
       "peso": número,
-      "nota": "Instrucción clara: cómo hacer el ejercicio, qué máquina/equipo usar, postura correcta, tips importantes"
+      "musculo": "Músculo principal que trabaja (ejemplo: pecho, bíceps, espalda, etc.)",
+      "nota": "Instrucción técnica: PRIMERO menciona qué músculo trabaja, LUEGO cómo hacer el ejercicio, qué máquina/equipo usar, postura correcta, tips importantes"
     }
   ]
 }
 
+EJEMPLO de "nota" correcta:
+"Trabaja PECHO (pectoral mayor). Usa barra olímpica en banco plano, baja controladamente hasta el pecho y empuja explosivamente, mantén los pies firmes en el suelo"
+
 ✅ INSTRUCCIONES DETALLADAS:
 1. Lee "ANÁLISIS DEL ÚLTIMO ENTRENAMIENTO DE REFERENCIA" para entender el contexto
 2. Lee "CONTEO DE LA SEMANA ACTUAL" para ver cuántos días de cada tren se han hecho
-3. Lee "TREN QUE CORRESPONDE HOY" - ese es el tren que DEBES usar (ya está calculado)
-4. Lee "Razón" para entender la lógica completa de la planificación
-5. Selecciona 6-9 ejercicios SOLO de la lista de ejercicios frecuentes del tren correspondiente
-6. VARÍA los ejercicios - no repitas exactamente la rutina del último entrenamiento
-7. Usa los promedios históricos como base, aplica progresión gradual (+0.5 a +2kg)
-8. En cada ejercicio, escribe una nota instructiva que incluya:
-   - Cómo ejecutar el movimiento correctamente
-   - Qué máquina, equipo o implemento usar (mancuernas, barra, polea, etc.)
-   - Tips de postura o seguridad
-   - Enfoque muscular
-9. En "resumen", DEBES mencionar:
-   - Si hubo fin de semana de por medio (menciona que sábado/domingo no son días laborales)
-   - Qué se hizo el último día laboral (ejemplo: "el viernes trabajaste tren superior")
-   - El conteo actual de la semana (ejemplo: "llevas 1 día de superior esta semana")
-   - Por qué este tren hoy según el patrón 3:2
+3. Lee "ENFOQUE MUSCULAR ESPECÍFICO" - ESTE ES EL MÁS IMPORTANTE
+4. Lee "MÚSCULOS A TRABAJAR HOY" - SOLO selecciona ejercicios de estos músculos
+5. Ejemplo: Si dice "PECHO, TRÍCEPS", NO incluyas ejercicios de espalda, bíceps u hombros
+6. Selecciona 6-9 ejercicios QUE TRABAJEN ÚNICAMENTE los músculos del enfoque
+7. VARÍA los ejercicios - no repitas exactamente la rutina del último entrenamiento
+8. Usa los promedios históricos como base, aplica progresión gradual (+0.5 a +2kg)
+9. En cada ejercicio:
+   - Campo "musculo": Especifica el músculo principal (pecho, tríceps, espalda, bíceps, hombros, etc.)
+   - Campo "nota": INICIA con "Trabaja [MÚSCULO].", LUEGO la instrucción técnica completa
+10. En "resumen", DEBES mencionar:
+   - Si hubo fin de semana de por medio (sábado/domingo no son laborales)
+   - Qué se hizo el último día laboral (ejemplo: "el viernes trabajaste Pecho + Tríceps")
+   - Los MÚSCULOS ESPECÍFICOS que se trabajarán hoy (ejemplo: "Hoy toca Espalda + Bíceps")
+   - Por qué este enfoque según el patrón semanal (rotación de grupos musculares)
    - Cómo se alinea con el objetivo del atleta
-10. Sé específico, motivador y profesional en tus explicaciones
-10. NO inventes ejercicios - SOLO usa los del historial
-11. RESPONDE SOLO CON JSON VÁLIDO, sin backticks de markdown ni texto extra`
+11. Campo "enfoqueMusculo": Copia EXACTAMENTE el ID que aparece en el contexto
+12. Sé específico, motivador y profesional
+13. NO inventes ejercicios - SOLO usa los del historial
+14. RESPONDE SOLO CON JSON VÁLIDO, sin backticks de markdown ni texto extra`
                             },
                             {
                                 role: 'user',
@@ -6259,6 +6318,12 @@ Responde ÚNICAMENTE con este JSON exacto, sin texto adicional antes o después:
                 document.getElementById('rutina-generada-por-ia').value = 'true';
                 document.getElementById('badge-ia-rutina').classList.remove('hidden');
                 console.log('🤖 Rutina marcada como generada por IA');
+                
+                // Guardar el enfoque muscular
+                if (rutinaGenerada.enfoqueMusculo) {
+                    document.getElementById('enfoque-musculo-hidden').value = rutinaGenerada.enfoqueMusculo;
+                    console.log('💪 Enfoque muscular guardado:', rutinaGenerada.enfoqueMusculo);
+                }
                 
                 // Configurar tren
                 if (rutinaGenerada.tren === 'superior') {
@@ -6327,6 +6392,11 @@ Responde ÚNICAMENTE con este JSON exacto, sin texto adicional antes o después:
                             <p class="text-sm text-blue-900 dark:text-blue-300">
                                 <strong>📋 Tren:</strong> ${rutinaGenerada.tren === 'superior' ? 'Superior 💪' : 'Inferior 🦵'}
                             </p>
+                            ${rutinaGenerada.enfoqueMusculo ? `
+                            <p class="text-sm text-blue-900 dark:text-blue-300 mt-1">
+                                <strong>💪 Enfoque:</strong> ${rutinaGenerada.enfoqueMusculo.replace('-', ' + ').replace(/\b\w/g, l => l.toUpperCase())}
+                            </p>
+                            ` : ''}
                             <p class="text-sm text-blue-900 dark:text-blue-300 mt-1">
                                 <strong>🏋️ Ejercicios:</strong> ${rutinaGenerada.ejercicios.length} ejercicios agregados
                             </p>
