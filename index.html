@@ -4494,18 +4494,24 @@
         }
 
         function cargarHistorialChat() {
+            const chatContainer = document.getElementById('chat-container');
             const historial = localStorage.getItem(CHAT_HISTORY_STORAGE);
+            
+            // Guardar el mensaje de bienvenida antes de limpiar
+            const mensajeBienvenida = chatContainer.querySelector('.flex.items-start.gap-3');
+            const bienvenidaHTML = mensajeBienvenida ? mensajeBienvenida.outerHTML : '';
+            
+            // Limpiar todo el chat
+            chatContainer.innerHTML = '';
+            
+            // Restaurar mensaje de bienvenida
+            if (bienvenidaHTML) {
+                chatContainer.innerHTML = bienvenidaHTML;
+            }
+            
             if (historial) {
                 conversationHistory = JSON.parse(historial);
-                const chatContainer = document.getElementById('chat-container');
                 
-                // Limpiar el chat excepto el mensaje de bienvenida
-                const mensajeBienvenida = chatContainer.querySelector('.flex.items-start.gap-3');
-                chatContainer.innerHTML = '';
-                if (mensajeBienvenida) {
-                    chatContainer.appendChild(mensajeBienvenida);
-                }
-
                 // Renderizar historial
                 conversationHistory.forEach(msg => {
                     if (msg.role === 'user') {
