@@ -5106,14 +5106,18 @@ INSTRUCCIONES:
 
                 const resultado = await response.json();
                 let respuesta = resultado.choices[0].message.content.trim();
+                console.log('🤖 Respuesta RAW de la IA:', respuesta);
                 
                 // Limpiar la respuesta por si hay texto adicional
                 const jsonMatch = respuesta.match(/\{[\s\S]*\}/);
                 if (jsonMatch) {
                     respuesta = jsonMatch[0];
                 }
+                console.log('📝 Respuesta limpia:', respuesta);
                 
                 const rutinaGenerada = JSON.parse(respuesta);
+                console.log('✅ Rutina parseada:', rutinaGenerada);
+                console.log('📋 Ejercicios:', rutinaGenerada.ejercicios);
                 
                 // Limpiar ejercicios actuales
                 document.getElementById('lista-ejercicios').innerHTML = '';
@@ -5124,19 +5128,44 @@ INSTRUCCIONES:
                 } else if (rutinaGenerada.tren === 'inferior') {
                     document.getElementById('tren-inferior').checked = true;
                 }
+                console.log('🎯 Tren configurado:', rutinaGenerada.tren);
                 
                 // Agregar ejercicios generados
-                rutinaGenerada.ejercicios.forEach(ejercicio => {
+                rutinaGenerada.ejercicios.forEach((ejercicio, index) => {
+                    console.log(`\n💪 Agregando ejercicio ${index + 1}:`, ejercicio);
                     agregarEjercicio();
                     const ultimoEjercicio = document.querySelector('#lista-ejercicios .ejercicio-item:last-child');
+                    console.log('🔍 Elemento encontrado:', ultimoEjercicio);
+                    
                     if (ultimoEjercicio) {
-                        ultimoEjercicio.querySelector('.ejercicio-nombre').value = ejercicio.nombre;
-                        ultimoEjercicio.querySelector('.ejercicio-series').value = ejercicio.series || '';
-                        ultimoEjercicio.querySelector('.ejercicio-repeticiones').value = ejercicio.repeticiones || '';
-                        ultimoEjercicio.querySelector('.ejercicio-peso').value = ejercicio.peso || '';
-                        if (ejercicio.nota) {
-                            ultimoEjercicio.querySelector('.ejercicio-nota').value = ejercicio.nota;
-                        }
+                        const nombreInput = ultimoEjercicio.querySelector('.ejercicio-nombre');
+                        const seriesInput = ultimoEjercicio.querySelector('.ejercicio-series');
+                        const repsInput = ultimoEjercicio.querySelector('.ejercicio-repeticiones');
+                        const pesoInput = ultimoEjercicio.querySelector('.ejercicio-peso');
+                        const notaInput = ultimoEjercicio.querySelector('.ejercicio-nota');
+                        
+                        console.log('📌 Campos encontrados:', {
+                            nombre: nombreInput,
+                            series: seriesInput,
+                            reps: repsInput,
+                            peso: pesoInput,
+                            nota: notaInput
+                        });
+                        
+                        if (nombreInput) nombreInput.value = ejercicio.nombre || '';
+                        if (seriesInput) seriesInput.value = ejercicio.series || '';
+                        if (repsInput) repsInput.value = ejercicio.repeticiones || '';
+                        if (pesoInput) pesoInput.value = ejercicio.peso || '';
+                        if (notaInput && ejercicio.nota) notaInput.value = ejercicio.nota;
+                        
+                        console.log('✏️ Valores asignados:', {
+                            nombre: ejercicio.nombre,
+                            series: ejercicio.series,
+                            reps: ejercicio.repeticiones,
+                            peso: ejercicio.peso
+                        });
+                    } else {
+                        console.error('❌ No se encontró el elemento del ejercicio');
                     }
                 });
                 
