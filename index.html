@@ -6617,14 +6617,14 @@ EJEMPLO de "nota" correcta:
                 `;
                 
                 // Guardar la rutina automáticamente
-                const data = loadData();
+                const dataGuardar = loadData();
                 
-                if (!data.asistencias[currentCoachId]) {
-                    data.asistencias[currentCoachId] = {};
+                if (!dataGuardar.asistencias[currentCoachId]) {
+                    dataGuardar.asistencias[currentCoachId] = {};
                 }
                 
-                if (!data.asistencias[currentCoachId][currentNotaDate]) {
-                    data.asistencias[currentCoachId][currentNotaDate] = {
+                if (!dataGuardar.asistencias[currentCoachId][currentNotaDate]) {
+                    dataGuardar.asistencias[currentCoachId][currentNotaDate] = {
                         asistio: null,
                         reprogramacion: false,
                         rutina: null,
@@ -6633,7 +6633,7 @@ EJEMPLO de "nota" correcta:
                 }
                 
                 // Recopilar ejercicios del modal
-                const ejercicios = [];
+                const ejerciciosGuardar = [];
                 document.querySelectorAll('#lista-ejercicios > div').forEach(ejercicioDiv => {
                     const nombre = ejercicioDiv.querySelector('.ejercicio-nombre').value.trim();
                     const series = ejercicioDiv.querySelector('.ejercicio-series').value.trim();
@@ -6643,33 +6643,33 @@ EJEMPLO de "nota" correcta:
                     const nota = ejercicioDiv.querySelector('.ejercicio-nota').value.trim();
                     
                     if (nombre) {
-                        ejercicios.push({ nombre, series, repeticiones, peso, unidad, nota });
+                        ejerciciosGuardar.push({ nombre, series, repeticiones, peso, unidad, nota });
                     }
                 });
                 
                 // Obtener tren trabajado
-                let tren = null;
+                let trenGuardar = null;
                 if (document.getElementById('tren-superior').checked) {
-                    tren = 'superior';
+                    trenGuardar = 'superior';
                 } else if (document.getElementById('tren-inferior').checked) {
-                    tren = 'inferior';
+                    trenGuardar = 'inferior';
                 }
                 
                 // Crear objeto de rutina
-                const rutina = {
+                const rutinaGuardar = {
                     calentamiento: document.getElementById('calentamiento-check').checked,
                     tipoMaquinas: document.getElementById('tipo-maquinas').checked,
                     tipoCalistenia: document.getElementById('tipo-calistenia').checked,
-                    tren: tren,
+                    tren: trenGuardar,
                     enfoqueMusculo: document.getElementById('enfoque-musculo-hidden')?.value || null,
-                    ejercicios: ejercicios,
+                    ejercicios: ejerciciosGuardar,
                     nota: document.getElementById('nota-dia-texto').value.trim(),
                     generadaPorIA: true
                 };
                 
                 // Guardar rutina
-                data.asistencias[currentCoachId][currentNotaDate].rutina = rutina;
-                saveData(data);
+                dataGuardar.asistencias[currentCoachId][currentNotaDate].rutina = rutinaGuardar;
+                saveData(dataGuardar);
                 renderCalendarioPeriodo();
                 
                 // Cerrar modal de edición
