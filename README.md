@@ -70,6 +70,48 @@ npx serve
 # Luego abre: http://localhost:8000
 ```
 
+## 🧪 Datos de Prueba
+
+Para probar la aplicación con datos de ejemplo completos:
+
+### 📥 Importar Datos de Prueba
+
+1. Descarga el archivo `datos-prueba.json`
+2. Abre la aplicación
+3. Ve a **Configuración** (⚙️)
+4. Haz clic en **"Importar datos"**
+5. Selecciona el archivo `datos-prueba.json`
+6. ¡Listo! Verás 6 coaches con datos completos
+
+### 📊 ¿Qué incluyen los datos de prueba?
+
+- **6 Coaches** con perfiles diversos:
+  - María González (Tonificación, 3 días/semana)
+  - Carlos Martínez (Atleta, preparación maratón)
+  - Ana Rodríguez (Principiante, pérdida de peso)
+  - Juan Pérez (Hipertrofia, 5 días/semana)
+  - Laura Sánchez (CrossFit, nivel avanzado)
+  - Diego Torres (Plan ejecutivo, 2 días/semana)
+
+- **Pagos registrados** para cada coach
+- **Historial de asistencias** con rutinas completas
+- **Medidas corporales** con seguimiento
+- **28 ejercicios** en la biblioteca
+- **Rutinas detalladas** con:
+  - Calentamientos
+  - Ejercicios con series, reps y pesos
+  - Notas y observaciones
+  - Diferentes tipos: máquinas y calistenia
+
+### 💡 Casos de Uso de los Datos de Prueba
+
+Los datos de prueba te permiten explorar:
+- ✅ Diferentes tipos de clientes y objetivos
+- ✅ Historial de asistencias y faltas
+- ✅ Rutinas variadas (fuerza, resistencia, principiante)
+- ✅ Seguimiento de medidas corporales
+- ✅ Estados de pago (activos, vencidos)
+
 ## ⚙️ Configuración de Sincronización en la Nube
 
 ### 📋 Requisitos
@@ -305,17 +347,57 @@ Desarrollado con ❤️ para coaches y entrenadores personales.
 
 ## 🎯 Quick Start
 
+### Opción A: Empezar desde Cero
 ```bash
 # 1. Descarga el proyecto
 git clone [URL_DEL_REPO]
+cd coach-admin
 
 # 2. Abre index.html en tu navegador
 open index.html
 
-# 3. (Opcional) Configura tus API Keys de JSONBin.io
+# 3. Agrega tu primer coach manualmente
+# Haz clic en "+ Agregar Coach"
 
-# 4. ¡Empieza a gestionar tus coaches!
+# 4. (Opcional) Configura sincronización en la nube
+# Edita index.html y agrega tus API Keys de JSONBin.io
 ```
+
+### Opción B: Probar con Datos de Ejemplo (Recomendado)
+```bash
+# 1. Descarga el proyecto
+git clone [URL_DEL_REPO]
+cd coach-admin
+
+# 2. Abre index.html en tu navegador
+open index.html
+
+# 3. Importa los datos de prueba
+# - Ve a Configuración (⚙️)
+# - Haz clic en "Importar datos"
+# - Selecciona el archivo "datos-prueba.json"
+# - ¡Verás 6 coaches con datos completos!
+
+# 4. Explora todas las funcionalidades
+# - Calendario de asistencias
+# - Rutinas de ejercicios
+# - Medidas corporales
+# - Pagos y periodos
+```
+
+### 🎬 Demo Rápida (2 minutos)
+
+1. **Abre `index.html`** en tu navegador
+2. **Importa `datos-prueba.json`** desde Configuración
+3. **Explora**:
+   - Haz clic en "María González"
+   - Ve la pestaña "Calendario"
+   - Mira las rutinas del 3, 5 y 8 de enero
+   - Revisa sus medidas corporales
+4. **Prueba agregar**:
+   - Una nueva rutina en un día futuro
+   - Una medida corporal
+   - Un nuevo pago
 
 ---
 
