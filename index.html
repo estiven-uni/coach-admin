@@ -1596,43 +1596,14 @@
                         </svg>
                     </button>
                 </div>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 px-3 sm:px-5 pb-3 sm:pb-4">
-                    <button type="button" onclick="agregarEjercicio()"
-                        class="px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors flex items-center justify-center gap-1.5"
-                        title="Añadir otro ejercicio a la rutina">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
-                        </svg>
-                        <span class="hidden sm:inline">Añadir Ejercicio</span>
-                        <span class="sm:hidden">Añadir</span>
-                    </button>
-                    <button type="submit" form="form-nota-dia"
-                        class="px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-green-600 dark:bg-green-500 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center justify-center gap-1.5"
-                        title="Guardar rutina del día">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
-                        </svg>
-                        <span class="hidden sm:inline">Guardar Rutina</span>
-                        <span class="sm:hidden">Guardar</span>
-                    </button>
+                <div class="px-3 sm:px-5 pb-3 sm:pb-4">
                     <button type="button" onclick="generarRutinaConIA()"
-                        class="px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-500 dark:to-teal-500 rounded-lg hover:from-emerald-700 hover:to-teal-700 dark:hover:from-emerald-600 dark:hover:to-teal-600 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-1.5 border border-emerald-500/30"
+                        class="w-full px-3 py-2.5 text-sm font-semibold text-white bg-gradient-to-r from-emerald-600 to-teal-600 dark:from-emerald-500 dark:to-teal-500 rounded-lg hover:from-emerald-700 hover:to-teal-700 dark:hover:from-emerald-600 dark:hover:to-teal-600 transition-all shadow-lg hover:shadow-xl flex items-center justify-center gap-2 border border-emerald-500/30"
                         title="El Coach IA creará la rutina de este día automáticamente">
                         <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
                             <path d="M12,2A3,3 0 0,1 15,5V11A3,3 0 0,1 12,14A3,3 0 0,1 9,11V5A3,3 0 0,1 12,2M19,11C19,14.53 16.39,17.44 13,17.93V21H11V17.93C7.61,17.44 5,14.53 5,11H7A5,5 0 0,0 12,16A5,5 0 0,0 17,11H19Z"/>
                         </svg>
-                        <span class="hidden sm:inline">Generar con IA</span>
-                        <span class="sm:hidden">IA</span>
-                    </button>
-                    <button type="button" onclick="eliminarNotaDia()"
-                        class="px-3 py-2 text-xs sm:text-sm font-semibold text-white bg-red-600 dark:bg-red-500 rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors flex items-center justify-center gap-1.5"
-                        title="Eliminar rutina del día">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
-                        </svg>
-                        <span class="hidden sm:inline">Eliminar Rutina</span>
-                        <span class="sm:hidden">Eliminar</span>
+                        <span>Generar con IA</span>
                     </button>
                 </div>
             </div>
@@ -1711,6 +1682,39 @@
                 </div>
 
             </form>
+            <!-- Footer fijo con botones de acción -->
+            <div class="border-t border-gray-200 dark:border-gray-700 p-3 sm:p-4 flex-shrink-0 bg-gray-50 dark:bg-gray-800">
+                <div class="grid grid-cols-3 gap-2">
+                    <button type="button" onclick="agregarEjercicio()"
+                        class="px-3 py-2.5 text-sm font-semibold text-white bg-blue-600 dark:bg-blue-500 rounded-lg hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors flex items-center justify-center gap-1.5"
+                        title="Añadir otro ejercicio a la rutina">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+                        </svg>
+                        <span class="hidden sm:inline">Añadir Ejercicio</span>
+                        <span class="sm:hidden">Añadir</span>
+                    </button>
+                    <button type="submit" form="form-nota-dia"
+                        class="px-3 py-2.5 text-sm font-semibold text-white bg-green-600 dark:bg-green-500 rounded-lg hover:bg-green-700 dark:hover:bg-green-600 transition-colors flex items-center justify-center gap-1.5"
+                        title="Guardar rutina del día">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                        </svg>
+                        <span class="hidden sm:inline">Guardar Rutina</span>
+                        <span class="sm:hidden">Guardar</span>
+                    </button>
+                    <button type="button" onclick="eliminarNotaDia()"
+                        class="px-3 py-2.5 text-sm font-semibold text-white bg-red-600 dark:bg-red-500 rounded-lg hover:bg-red-700 dark:hover:bg-red-600 transition-colors flex items-center justify-center gap-1.5"
+                        title="Eliminar rutina del día">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                                d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                        </svg>
+                        <span class="hidden sm:inline">Eliminar Rutina</span>
+                        <span class="sm:hidden">Eliminar</span>
+                    </button>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -4436,18 +4440,22 @@
             if (data.asistencias[currentCoachId] && data.asistencias[currentCoachId][currentNotaDate]) {
                 data.asistencias[currentCoachId][currentNotaDate].rutina = null;
                 saveData(data);
+                
+                // Cerrar el modal inmediatamente después de eliminar
+                cerrarModalNotaDia();
+                
+                // Actualizar el calendario
                 renderCalendarioPeriodo();
+                
+                // Mostrar mensaje de éxito
+                Swal.fire({
+                    icon: 'success',
+                    title: 'Rutina eliminada',
+                    text: 'La rutina ha sido eliminada correctamente',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             }
-
-            cerrarModalNotaDia();
-
-            Swal.fire({
-                icon: 'success',
-                title: 'Rutina eliminada',
-                text: 'La rutina ha sido eliminada correctamente',
-                timer: 2000,
-                showConfirmButton: false
-            });
         }
 
         // ========================================
