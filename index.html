@@ -3618,9 +3618,9 @@
                             ` : ''}
                             <button 
                                 onclick="toggleReprogramacion('${dateStr}')"
-                                class="flex flex-col gap-0.5 text-xs sm:text-sm ${asist.reprogramacion ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70' : (hayReprogramacionesDisponibles && esDiaFuturo ? 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' : 'text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-50')} px-2.5 py-1.5 rounded transition-colors mb-2 flex-shrink-0"
-                                title="${asist.reprogramacion ? 'Quitar reagendamiento' : (esDiaFuturo ? (hayReprogramacionesDisponibles ? 'Reagendar una clase perdida en este día' : 'No hay clases pendientes por reagendar') : 'Solo se puede reagendar en días futuros')}"
-                                ${!asist.reprogramacion && (!hayReprogramacionesDisponibles || !esDiaFuturo) ? 'disabled' : ''}
+                                class="flex flex-col gap-0.5 text-xs sm:text-sm ${asist.reprogramacion ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70' : (hayReprogramacionesDisponibles && (esDiaFuturo || asist.asistio === true || !esLaborable) ? 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' : 'text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-50')} px-2.5 py-1.5 rounded transition-colors mb-2 flex-shrink-0"
+                                title="${asist.reprogramacion ? 'Quitar reagendamiento' : ((esDiaFuturo || asist.asistio === true || !esLaborable) ? (hayReprogramacionesDisponibles ? 'Reagendar una clase perdida en este día' : 'No hay clases pendientes por reagendar') : 'Solo se puede reagendar en días futuros, días donde asististe o días de descanso')}"
+                                ${!asist.reprogramacion && !hayReprogramacionesDisponibles ? 'disabled' : ''}
                             >
                                 <span class="font-semibold flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -3837,9 +3837,9 @@
                                 ` : ''}
                                 <button 
                                     onclick="toggleReprogramacion('${dateStr}')"
-                                    class="flex flex-col gap-0.5 text-sm ${asist.reprogramacion ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70' : (hayReprogramacionesDisponibles && esDiaFuturo ? 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' : 'text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-50')} px-2.5 py-1.5 rounded transition-colors mb-3 w-full items-center"
-                                    title="${asist.reprogramacion ? 'Quitar reagendamiento' : (esDiaFuturo ? (hayReprogramacionesDisponibles ? 'Reagendar una clase perdida en este día' : 'No hay clases pendientes por reagendar') : 'Solo se puede reagendar en días futuros')}"
-                                    ${!asist.reprogramacion && (!hayReprogramacionesDisponibles || !esDiaFuturo) ? 'disabled' : ''}
+                                    class="flex flex-col gap-0.5 text-sm ${asist.reprogramacion ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70' : (hayReprogramacionesDisponibles && (esDiaFuturo || asist.asistio === true || !esLaborable) ? 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' : 'text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-50')} px-2.5 py-1.5 rounded transition-colors mb-3 w-full items-center"
+                                    title="${asist.reprogramacion ? 'Quitar reagendamiento' : ((esDiaFuturo || asist.asistio === true || !esLaborable) ? (hayReprogramacionesDisponibles ? 'Reagendar una clase perdida en este día' : 'No hay clases pendientes por reagendar') : 'Solo se puede reagendar en días futuros, días donde asististe o días de descanso')}"
+                                    ${!asist.reprogramacion && !hayReprogramacionesDisponibles ? 'disabled' : ''}
                                 >
                                     <span class="font-semibold flex items-center gap-1">
                                         <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4016,9 +4016,9 @@
                                     ` : ''}
                                     <button 
                                         onclick="toggleReprogramacion('${dateStr}')"
-                                        class="inline-flex flex-col gap-0.5 text-sm ${asist.reprogramacion ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70' : (hayReprogramacionesDisponibles && esDiaFuturo ? 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' : 'text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-50')} px-3 py-1.5 rounded transition-colors mb-2 items-start"
-                                        title="${asist.reprogramacion ? 'Quitar reagendamiento' : (esDiaFuturo ? (hayReprogramacionesDisponibles ? 'Reagendar una clase perdida en este día' : 'No hay clases pendientes por reagendar') : 'Solo se puede reagendar en días futuros')}"
-                                        ${!asist.reprogramacion && (!hayReprogramacionesDisponibles || !esDiaFuturo) ? 'disabled' : ''}
+                                        class="inline-flex flex-col gap-0.5 text-sm ${asist.reprogramacion ? 'text-blue-700 dark:text-blue-300 bg-blue-100 dark:bg-blue-900/50 hover:bg-blue-200 dark:hover:bg-blue-900/70' : (hayReprogramacionesDisponibles && (esDiaFuturo || asist.asistio === true || !esLaborable) ? 'text-gray-500 dark:text-gray-400 bg-gray-100 dark:bg-gray-700 hover:bg-gray-200 dark:hover:bg-gray-600' : 'text-gray-400 dark:text-gray-600 bg-gray-50 dark:bg-gray-800 cursor-not-allowed opacity-50')} px-3 py-1.5 rounded transition-colors mb-2 items-start"
+                                        title="${asist.reprogramacion ? 'Quitar reagendamiento' : ((esDiaFuturo || asist.asistio === true || !esLaborable) ? (hayReprogramacionesDisponibles ? 'Reagendar una clase perdida en este día' : 'No hay clases pendientes por reagendar') : 'Solo se puede reagendar en días futuros, días donde asististe o días de descanso')}"
+                                        ${!asist.reprogramacion && !hayReprogramacionesDisponibles ? 'disabled' : ''}
                                     >
                                         <span class="font-semibold flex items-center gap-1">
                                             <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -4222,14 +4222,18 @@
                 }
             });
 
-            // Calcular faltas: solo días laborables PASADOS donde NO asistió
+            // Calcular faltas: solo días laborables PASADOS donde NO asistió Y que NO hayan sido repuestos
             daysLaborablesTotales.forEach(day => {
                 // Solo contar si el día ya pasó
                 if (day <= hoy) {
                     const asist = asistencias[day];
                     // Si NO asistió (y no es reprogramación)
                     if (!asist?.asistio) {
-                        faltas++;
+                        // Verificar si este día ya fue repuesto por alguna reprogramación
+                        const yaRepuesto = Object.values(asistencias).some(a => a.reprogramacionDe === day && a.asistio);
+                        if (!yaRepuesto) {
+                            faltas++;
+                        }
                     }
                 }
             });
@@ -4595,9 +4599,13 @@
                     asistidas++;
                 }
 
-                // Contar faltas: solo días pasados donde NO asistió
+                // Contar faltas: solo días pasados donde NO asistió Y que NO hayan sido repuestos
                 if (day <= hoy && !asist?.asistio) {
-                    faltas++;
+                    // Verificar si este día ya fue repuesto por alguna reprogramación
+                    const yaRepuesto = Object.values(asistencias).some(a => a.reprogramacionDe === day && a.asistio);
+                    if (!yaRepuesto) {
+                        faltas++;
+                    }
                 }
             });
 
