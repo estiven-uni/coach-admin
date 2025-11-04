@@ -1875,7 +1875,7 @@
                     <label for="nota-dia-texto"
                         class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1">Nota adicional
                         (opcional)</label>
-                    <textarea id="nota-dia-texto" rows="2" maxlength="200"
+                    <textarea id="nota-dia-texto" rows="5" maxlength="1000"
                         class="w-full px-3 py-2 text-sm border border-gray-300 dark:border-gray-600 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 dark:focus:ring-blue-400 resize-none bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100 placeholder-gray-500 dark:placeholder-gray-400"
                         placeholder="Observaciones, sensaciones, logros..."></textarea>
                 </div>
@@ -2672,7 +2672,7 @@
             const ejercicios = loadEjercicios();
 
             // Verificar si ya existe
-            if (ejercicios.some(e => e.nombre.toLowerCase() === nombre.toLowerCase())) {
+            if (ejercicios.some(e => e && e.nombre && e.nombre.toLowerCase() === nombre.toLowerCase())) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Ejercicio duplicado',
@@ -2688,7 +2688,7 @@
                 fechaCreacion: new Date().toISOString()
             });
 
-            ejercicios.sort((a, b) => a.nombre.localeCompare(b.nombre));
+            ejercicios.sort((a, b) => (a.nombre || '').localeCompare(b.nombre || ''));
             saveEjercicios(ejercicios);
 
             input.value = '';
@@ -2721,7 +2721,7 @@
             const nombreTrimmed = nuevoNombre.trim();
 
             // Verificar si ya existe otro ejercicio con ese nombre (excepto el actual)
-            if (ejercicios.some(e => e.id !== id && e.nombre.toLowerCase() === nombreTrimmed.toLowerCase())) {
+            if (ejercicios.some(e => e && e.nombre && e.id !== id && e.nombre.toLowerCase() === nombreTrimmed.toLowerCase())) {
                 Swal.fire({
                     icon: 'error',
                     title: 'Ejercicio duplicado',
@@ -2751,7 +2751,7 @@
             if (!result.isConfirmed) return;
 
             let ejercicios = loadEjercicios();
-            ejercicios = ejercicios.filter(e => e.id !== id);
+            ejercicios = ejercicios.filter(e => e && e.id !== id);
             saveEjercicios(ejercicios);
             renderBibliotecaEjercicios();
 
@@ -2771,7 +2771,7 @@
             const mensaje = document.getElementById('mensaje-sin-ejercicios-biblioteca');
 
             const ejerciciosFiltrados = ejercicios.filter(e =>
-                e.nombre.toLowerCase().includes(busqueda)
+                e && e.nombre && e.nombre.toLowerCase().includes(busqueda)
             );
 
             if (ejerciciosFiltrados.length === 0) {
@@ -2829,7 +2829,7 @@
 
             const ejercicios = loadEjercicios();
             const sugerencias = ejercicios.filter(e =>
-                e.nombre.toLowerCase().includes(valor)
+                e && e.nombre && e.nombre.toLowerCase().includes(valor)
             ).slice(0, 5);
 
             if (sugerencias.length === 0) {
@@ -4877,6 +4877,8 @@
             if (rutina.ejercicios && rutina.ejercicios.length > 0) {
                 html += '<div><h3 class="text-sm font-bold text-gray-900 dark:text-white mb-3">Ejercicios realizados</h3><div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3">';
                 rutina.ejercicios.forEach((ej, index) => {
+                    if (!ej || !ej.nombre) return;
+                    
                     html += `
                         <div class="bg-white dark:bg-gray-800 border-2 border-gray-200 dark:border-gray-700 rounded-xl p-3 hover:border-blue-300 dark:hover:border-blue-600 transition-all">
                             <div class="flex items-center gap-2 mb-3">
@@ -4987,6 +4989,7 @@
                 // Cargar ejercicios
                 if (rutina.ejercicios && rutina.ejercicios.length > 0) {
                     rutina.ejercicios.forEach(ej => {
+                        if (!ej || !ej.nombre) return;
                         agregarEjercicio(ej.nombre, ej.series, ej.repeticiones, ej.peso, ej.unidad, ej.nota);
                     });
                 } else {
@@ -6201,6 +6204,8 @@ ${contexto}`
                             contexto += `\n`;
                             
                             clase.rutina.ejercicios.forEach((ejercicio, ejIdx) => {
+                                if (!ejercicio || !ejercicio.nombre) return;
+                                
                                 contexto += `   ${ejIdx + 1}. ${ejercicio.nombre}\n`;
                                 
                                 // Los ejercicios tienen series, repeticiones y peso directamente
@@ -6232,6 +6237,8 @@ ${contexto}`
                         const clase = asistenciasCoach[fecha];
                         if (clase.asistio && clase.rutina && clase.rutina.ejercicios) {
                             clase.rutina.ejercicios.forEach(ej => {
+                                if (!ej || !ej.nombre) return;
+                                
                                 if (!ejerciciosFrecuencia[ej.nombre]) {
                                     ejerciciosFrecuencia[ej.nombre] = {
                                         count: 0,
@@ -6560,6 +6567,8 @@ ${contexto}`
                         
                         // Contar ejercicios por tren
                         clase.rutina.ejercicios.forEach((ej) => {
+                            if (!ej || !ej.nombre) return;
+                            
                             if (!ejerciciosPorTren[tren][ej.nombre]) {
                                 ejerciciosPorTren[tren][ej.nombre] = {
                                     frecuencia: 0,
@@ -6841,6 +6850,8 @@ ${contexto}`
                         contexto += `📅 ${nombreDia} - TREN ${(clase.rutina.tren || 'completo').toUpperCase()}\n`;
                         
                         clase.rutina.ejercicios.forEach((ej, idx) => {
+                            if (!ej || !ej.nombre) return;
+                            
                             contexto += `   ${idx + 1}. ${ej.nombre}`;
                             const detalles = [];
                             if (ej.series) detalles.push(`${ej.series}s`);
