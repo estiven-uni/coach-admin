@@ -1935,7 +1935,19 @@
                         <p class="text-xs sm:text-sm text-purple-100">Pregunta sobre tus entrenamientos y estadísticas</p>
                     </div>
                 </div>
-                <div class="flex items-center gap-2">
+                <div class="flex items-center gap-2 flex-wrap">
+                    <!-- Selector de coach -->
+                    <select id="coach-ia-selector" onchange="cambiarCoachIA()"
+                        class="px-3 py-1.5 text-xs sm:text-sm bg-white/10 border border-white/30 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 hover:bg-white/20 transition-colors">
+                        <option value="" class="text-gray-900">Seleccionar coach</option>
+                    </select>
+                    
+                    <!-- Selector de período -->
+                    <select id="periodo-ia-selector" onchange="cambiarPeriodoIA()"
+                        class="px-3 py-1.5 text-xs sm:text-sm bg-white/10 border border-white/30 text-white rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 hover:bg-white/20 transition-colors">
+                        <option value="todos" class="text-gray-900">Todos los períodos</option>
+                    </select>
+                    
                     <!-- Menú de opciones -->
                     <div class="relative">
                         <button onclick="toggleMenuIA()" id="btn-menu-ia"
@@ -5797,6 +5809,8 @@
         const DEEPSEEK_API_KEY_STORAGE = 'deepseek_api_key';
         const CHAT_HISTORY_STORAGE = 'chat_history';
         let conversationHistory = [];
+        let coachIASeleccionado = null; // ID del coach seleccionado para la IA
+        let periodoIASeleccionado = 'todos'; // 'todos' o un ID de pago específico
 
         function abrirModalAsistenteIA() {
             const modal = document.getElementById('modal-asistente-ia');
@@ -5804,6 +5818,10 @@
                 console.error('❌ Modal de asistente IA no encontrado');
                 return;
             }
+
+            // Cargar coaches y períodos disponibles
+            cargarCoachesParaIA();
+            cargarPeriodosParaIA();
 
             // Verificar si hay API key guardada
             const apiKey = localStorage.getItem(DEEPSEEK_API_KEY_STORAGE);
@@ -5865,6 +5883,106 @@
             const menu = document.getElementById('menu-ia-opciones');
             if (menu) {
                 menu.classList.toggle('hidden');
+            }
+        }
+
+        function cargarCoachesParaIA() {
+            const selector = document.getElementById('coach-ia-selector');
+            if (!selector) return;
+
+            const data = loadData();
+            
+            // Limpiar opciones existentes
+            selector.innerHTML = '<option value="" class="text-gray-900">Seleccionar coach</option>';
+            
+            // Agregar todos los coaches
+            data.coaches.forEach(coach => {
+                const option = document.createElement('option');
+                option.value = coach.id;
+                option.className = 'text-gray-900';
+                option.textContent = coach.nombre;
+                selector.appendChild(option);
+            });
+            
+            // Si hay un coach actual, seleccionarlo por defecto
+            if (currentCoachId) {
+                selector.value = currentCoachId;
+                coachIASeleccionado = currentCoachId;
+            }
+        }
+
+        function cambiarCoachIA() {
+            const selector = document.getElementById('coach-ia-selector');
+            if (selector) {
+                coachIASeleccionado = selector.value;
+                console.log('👤 Coach IA cambiado a:', coachIASeleccionado);
+                
+                // Recargar períodos para el coach seleccionado
+                cargarPeriodosParaIA();
+            }
+        }
+
+        function cargarPeriodosParaIA() {
+            const selector = document.getElementById('periodo-ia-selector');
+            if (!selector) return;
+
+            const data = loadData();
+            
+            // Limpiar opciones existentes
+            selector.innerHTML = '<option value="todos" class="text-gray-900">Todos los períodos</option>';
+            
+            // Si hay un coach seleccionado en la IA, cargar sus períodos
+            const coachId = coachIASeleccionado || currentCoachId;
+            
+            console.log('🔍 DEBUG cargarPeriodosParaIA:');
+            console.log('   coachId:', coachId);
+            console.log('   currentPagoId:', currentPagoId);
+            
+            if (coachId) {
+                const pagosPeriodos = data.pagos[coachId] || [];
+                console.log('   pagosPeriodos:', pagosPeriodos);
+                
+                if (pagosPeriodos.length > 0) {
+                    pagosPeriodos.forEach((pago, index) => {
+                        console.log(`   📅 Período ${index + 1}:`, pago);
+                        
+                        const option = document.createElement('option');
+                        option.value = pago.id;
+                        option.className = 'text-gray-900';
+                        
+                        // Formatear las fechas correctamente - usar periodoInicio y periodoFin
+                        const fechaInicio = pago.periodoInicio || pago.fechaInicio || 'Sin fecha';
+                        const fechaFin = pago.periodoFin || pago.fechaFin || 'Sin fecha';
+                        const nombre = pago.nombre || `Período ${index + 1}`;
+                        
+                        console.log(`      - nombre: ${nombre}`);
+                        console.log(`      - fechaInicio: ${fechaInicio}`);
+                        console.log(`      - fechaFin: ${fechaFin}`);
+                        
+                        option.textContent = `${nombre} (${fechaInicio} - ${fechaFin})`;
+                        selector.appendChild(option);
+                    });
+                    
+                    // Si hay un período actual seleccionado y es del mismo coach, marcarlo por defecto
+                    if (currentPagoId && coachId === currentCoachId) {
+                        console.log('   ✅ Seleccionando período actual:', currentPagoId);
+                        selector.value = currentPagoId;
+                        periodoIASeleccionado = currentPagoId;
+                    } else {
+                        console.log('   ℹ️ Seleccionando "Todos los períodos"');
+                        // Si no, seleccionar "Todos los períodos"
+                        selector.value = 'todos';
+                        periodoIASeleccionado = 'todos';
+                    }
+                }
+            }
+        }
+
+        function cambiarPeriodoIA() {
+            const selector = document.getElementById('periodo-ia-selector');
+            if (selector) {
+                periodoIASeleccionado = selector.value;
+                console.log('📅 Período IA cambiado a:', periodoIASeleccionado);
             }
         }
 
@@ -6010,10 +6128,10 @@
                 const mensajes = [
                     {
                         role: 'system',
-                        content: `Eres un asistente personal de entrenamiento inteligente. Tienes acceso a todo el historial de entrenamientos del usuario.
+                        content: `Eres un asistente personal de entrenamiento inteligente. Tienes acceso al historial de entrenamientos del usuario.
 
 TUS CAPACIDADES:
-1. Analizar el historial completo de entrenamientos
+1. Analizar el historial de entrenamientos
 2. Actuar como el coach del usuario cuando te lo pida
 3. Generar rutinas de entrenamiento basadas en el historial previo
 4. Responder preguntas sobre estadísticas, pagos, asistencias y progresión
@@ -6027,8 +6145,9 @@ IMPORTANTE:
 - Si preguntan algo no relacionado con entrenamientos, indica que solo ayudas con temas de fitness
 - Sé específico: incluye ejercicios, series, repeticiones y pesos cuando generes rutinas
 - Usa formato claro y organizado
+- Si hay un filtro activo por período, responde SOLO con información de ese período específico
 
-Contexto completo de datos del usuario:
+Contexto de datos del usuario:
 ${contexto}`
                     },
                     ...conversationHistory.slice(-10), // Últimos 10 mensajes de conversación
@@ -6094,13 +6213,38 @@ ${contexto}`
             const coaches = data.coaches || [];
             const asistencias = data.asistencias || {};
             const pagos = data.pagos || {};
-            // Cargar la medida más reciente del periodo actual si hay uno seleccionado
-            const medidas = currentCoachId && currentPagoId ? 
-                getMedidaMasReciente(currentCoachId, currentPagoId) : 
+            
+            // Usar el coach seleccionado en la IA, o el actual como fallback
+            const coachIdParaIA = coachIASeleccionado || currentCoachId;
+            
+            // Cargar la medida más reciente del periodo seleccionado
+            const medidas = coachIdParaIA && periodoIASeleccionado !== 'todos' ? 
+                getMedidaMasReciente(coachIdParaIA, periodoIASeleccionado) : 
                 {};
 
-            let contexto = `=== INFORMACIÓN COMPLETA DEL USUARIO ===\n\n`;
-            contexto += `Fecha actual: ${new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n\n`;
+            let contexto = `=== INFORMACIÓN DEL COACH ===\n\n`;
+            contexto += `Fecha actual: ${new Date().toLocaleDateString('es-CO', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}\n`;
+            
+            // Mostrar qué coach está seleccionado
+            if (coachIdParaIA) {
+                const coachSeleccionado = coaches.find(c => c.id === coachIdParaIA);
+                if (coachSeleccionado) {
+                    contexto += `📌 Coach analizado: ${coachSeleccionado.nombre}\n`;
+                }
+            }
+            
+            // Indicar si hay un filtro de período activo
+            if (periodoIASeleccionado !== 'todos' && coachIdParaIA) {
+                const pagosCoach = pagos[coachIdParaIA] || [];
+                const periodoSeleccionado = pagosCoach.find(p => p.id === periodoIASeleccionado);
+                if (periodoSeleccionado) {
+                    const fechaInicio = periodoSeleccionado.periodoInicio || periodoSeleccionado.fechaInicio || 'Sin fecha';
+                    const fechaFin = periodoSeleccionado.periodoFin || periodoSeleccionado.fechaFin || 'Sin fecha';
+                    const nombre = periodoSeleccionado.nombre || 'Sin nombre';
+                    contexto += `⚠️ FILTRO DE PERÍODO ACTIVO: "${nombre}" (${fechaInicio} a ${fechaFin})\n`;
+                }
+            }
+            contexto += `\n`;
             
             // Agregar perfil del usuario si existe
             if (medidas.peso || medidas.altura || medidas.edad) {
@@ -6131,13 +6275,16 @@ ${contexto}`
                 contexto += `\n`;
             }
             
-            contexto += `Total de coaches: ${coaches.length}\n\n`;
+            // Solo procesar el coach seleccionado
+            const coachesFiltrados = coachIdParaIA 
+                ? coaches.filter(c => c.id === coachIdParaIA)
+                : coaches;
 
-            coaches.forEach((coach, idx) => {
+            coachesFiltrados.forEach((coach, idx) => {
                 contexto += `${'='.repeat(60)}\n`;
                 contexto += `COACH: ${coach.nombre.toUpperCase()}\n`;
                 contexto += `${'='.repeat(60)}\n`;
-                contexto += `Estado: ${coach.activo ? '✅ Activo' : '❌ Inactivo'}\n`;
+                contexto += `Estado: ${coach.estado !== 'inactivo' ? '✅ Activo' : '❌ Inactivo'}\n`;
                 contexto += `Días de entrenamiento: ${coach.diasLaborables?.join(', ') || 'No especificado'}\n`;
 
                 // Información de pagos
@@ -6150,14 +6297,29 @@ ${contexto}`
                     
                     const ultimoPago = pagosCoach[pagosCoach.length - 1];
                     if (ultimoPago) {
-                        contexto += `Último periodo: ${ultimoPago.fechaInicio} a ${ultimoPago.fechaFin}\n`;
+                        const fechaInicio = ultimoPago.periodoInicio || ultimoPago.fechaInicio || 'Sin fecha';
+                        const fechaFin = ultimoPago.periodoFin || ultimoPago.fechaFin || 'Sin fecha';
+                        contexto += `Último periodo: ${fechaInicio} a ${fechaFin}\n`;
                         contexto += `Monto último periodo: $${ultimoPago.monto?.toLocaleString() || 0}\n`;
                     }
                 }
 
                 // Información detallada de asistencias y entrenamientos
                 const asistenciasCoach = asistencias[coach.id] || {};
-                const fechasOrdenadas = Object.keys(asistenciasCoach).sort();
+                let fechasOrdenadas = Object.keys(asistenciasCoach).sort();
+                
+                // Filtrar por período seleccionado si no es "todos"
+                if (periodoIASeleccionado !== 'todos') {
+                    const periodoSeleccionado = pagosCoach.find(p => p.id === periodoIASeleccionado);
+                    if (periodoSeleccionado) {
+                        const fechaInicio = periodoSeleccionado.periodoInicio || periodoSeleccionado.fechaInicio;
+                        const fechaFin = periodoSeleccionado.periodoFin || periodoSeleccionado.fechaFin;
+                        fechasOrdenadas = fechasOrdenadas.filter(fecha => {
+                            return fecha >= fechaInicio && fecha <= fechaFin;
+                        });
+                    }
+                }
+                
                 const totalClases = fechasOrdenadas.length;
                 const clasesAsistidas = fechasOrdenadas.filter(fecha => asistenciasCoach[fecha].asistio).length;
                 
